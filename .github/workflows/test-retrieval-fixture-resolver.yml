@@ -5,14 +5,18 @@ on:
     paths:
       - 'examples/retrieval-fixture/**'
       - 'tests/test-retrieval-fixture-resolver.sh'
+      - 'tests/test-retrieval-ab-baseline.sh'
       - 'tests/fixtures/spike-001-retrieval-gold.tsv'
+      - 'scripts/guide/capture-mode-a-baseline.sh'
       - 'scripts/resolve-agent-context.sh'
   push:
     branches: [main]
     paths:
       - 'examples/retrieval-fixture/**'
       - 'tests/test-retrieval-fixture-resolver.sh'
+      - 'tests/test-retrieval-ab-baseline.sh'
       - 'tests/fixtures/spike-001-retrieval-gold.tsv'
+      - 'scripts/guide/capture-mode-a-baseline.sh'
       - 'scripts/resolve-agent-context.sh'
 
 jobs:
@@ -23,3 +27,6 @@ jobs:
 
       - name: Run SPIKE-001 retrieval fixture resolver gold test
         run: ./tests/test-retrieval-fixture-resolver.sh
+
+      - name: Run mode (a) baseline capture smoke
+        run: ./tests/test-retrieval-ab-baseline.sh

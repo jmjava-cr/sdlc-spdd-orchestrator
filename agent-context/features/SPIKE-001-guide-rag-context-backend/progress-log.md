@@ -1,5 +1,12 @@
 # Progress Log: SPIKE-001-guide-rag-context-backend
 
+## 2026-07-05 — T05 A/B harness
+
+- Ledger stub: `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`
+- Scripts: `run-retrieval-ab-fixture.sh`, `capture-mode-a-baseline.sh`, `verify-spike-guide-setup.sh`
+- Mode (a) baseline committed: `tests/fixtures/spike-001-mode-a-baseline.tsv` (3 cases)
+- **Next:** local menke-5/menke-fixture ingest; fill ledger mode (b) rows
+
 ## 2026-07-05 — T07 retrieval fixture harness
 
 - Added `examples/retrieval-fixture/` mock project (SPIKE-FIX-001)

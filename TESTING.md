@@ -140,6 +140,22 @@ throwaway targets and asserts:
 Run locally after changing `resolve-agent-context.sh`, extension templates, or
 `start-agent-session.sh` Resolved Context integration.
 
+### Retrieval fixture harness (SPIKE-001 T07)
+
+`./tests/test-retrieval-fixture-resolver.sh` runs `resolve-agent-context.sh` against
+the controlled mock project `examples/retrieval-fixture/` and asserts 15 gold paths
+from `tests/fixtures/spike-001-retrieval-gold.tsv` (mode A markdown baseline).
+
+Run locally after changing the fixture indexes, gold file, or resolver.
+
+### Retrieval A/B baseline capture (SPIKE-001 T05)
+
+`./tests/test-retrieval-ab-baseline.sh` runs `capture-mode-a-baseline.sh` and asserts
+three fixture cases are captured to `tests/fixtures/spike-001-mode-a-baseline.tsv`.
+
+`./scripts/guide/run-retrieval-ab-fixture.sh --capture-a` prints path counts and byte
+estimates for mode (a). `--check-mcp <file>` validates mode (b) URI results.
+
 ### Whole-ecosystem grounding norm (enforced)
 
 Every supported assistant must ship an **always-on grounding file** that loads on

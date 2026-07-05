@@ -20,7 +20,7 @@
 | T02 | In Progress | DICE entity schema draft |
 | T03 | Not Started | Entity projection ingest (leg 3) |
 | T04 | In Progress | MCP sanity checks |
-| T05 | Not Started | A/B modes (a)(b)(c) + ledger stub |
+| T05 | In Progress | A/B ledger + run-retrieval-ab-fixture.sh |
 | T06 | Not Started | Go/no-go |
 | T07 | Complete | Mock fixture + resolver gold test (15 assertions) |
 | T08 | In Progress | SPDD workspace docs (this folder) |

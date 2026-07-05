@@ -106,6 +106,25 @@ and analysis files under `spdd/analysis/`.
 Record spot-check results in
 `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`.
 
+## Verify setup (T01 + T07)
+
+```bash
+./scripts/guide/verify-spike-guide-setup.sh
+./tests/test-retrieval-fixture-resolver.sh
+```
+
+## T05 A/B fixture drill
+
+```bash
+# Mode (a) resolver baseline
+./scripts/guide/run-retrieval-ab-fixture.sh --capture-a
+
+# Mode (b) after menke-fixture MCP queries — save URIs, then:
+./scripts/guide/run-retrieval-ab-fixture.sh --check-mcp path/to/mcp-results.tsv
+```
+
+Record metrics in `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`.
+
 ## What this spike does not cover
 
 - **Leg 3 (DICE domain graph)** — RAG directory ingest leaves `__Entity__` empty. Entity

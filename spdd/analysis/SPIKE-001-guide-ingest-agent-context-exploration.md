@@ -45,8 +45,32 @@ After `sdlc.sh capture` updates memory indexes:
 
 _Record friction (path resolution, ingest time, chunk quality, false positives) here._
 
+## T05 A/B protocol (fixture)
+
+```bash
+# 1. Mode (a) — auto-capture resolver metrics
+./scripts/guide/run-retrieval-ab-fixture.sh --capture-a
+
+# 2. Mode (b) — after menke-fixture ingest + MCP queries in Cursor:
+#    Save URIs to mcp-results.tsv (see tests/fixtures/spike-001-mcp-results.example.tsv)
+./scripts/guide/run-retrieval-ab-fixture.sh --check-mcp mcp-results.tsv
+
+# 3. Record path_count + context_bytes in spdd/analysis/SPIKE-001-retrieval-ab-ledger.md
+```
+
+T01 setup check: `./scripts/guide/verify-spike-guide-setup.sh`
+
 ## Next steps (if ingest succeeds)
 
 1. T02 — finalize DICE entity schema (`SPIKE-001-dice-entity-schema.md`)
 2. T03 — entity projection ingest (leg 3, `__Entity__` > 0)
 3. T05 — A/B one Work ID: resolver vs embedding-only vs hybrid
+
+## T05 fixture drill (in progress)
+
+Ledger: `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`
+
+```bash
+./scripts/guide/run-retrieval-ab-fixture.sh --capture-a
+# after MCP: --check-mcp your-mcp-results.tsv
+```

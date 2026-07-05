@@ -36,3 +36,12 @@ guide checkout, then:
 
 Spot-check queries: `tests/fixtures/spike-001-mcp-queries.tsv`. Record chunk URIs in
 `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`.
+
+## T05 A/B drill
+
+```bash
+./scripts/guide/run-retrieval-ab-fixture.sh --capture-a
+./scripts/guide/run-retrieval-ab-fixture.sh --check-mcp mcp-results.tsv  # after MCP
+```
+
+Ledger: `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`

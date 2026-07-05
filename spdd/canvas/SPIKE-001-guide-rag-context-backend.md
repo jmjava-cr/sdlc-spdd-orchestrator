@@ -226,10 +226,14 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T05 - Compare modes on one real Work ID and record on the ledger
 
-- Status: Not Started
-- Description: Run a session across (a) lexical resolver, (b) embedding-only, (c) DICE hybrid; capture rework/review-result/tokens + auditability.
-- Files: spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md
-- Validation: All modes recorded; metrics comparable
+- Status: In Progress
+- Description: Run fixture drill across (a) resolver, (b) embedding MCP; capture metrics in
+  `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`. Scripts automate mode (a) baseline and
+  validate mode (b) MCP URI results.
+- Files: `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`,
+  `scripts/guide/run-retrieval-ab-fixture.sh`, `scripts/guide/capture-mode-a-baseline.sh`,
+  `tests/fixtures/spike-001-mode-a-baseline.tsv`, `tests/fixtures/spike-001-mcp-results.example.tsv`
+- Validation: `--capture-a` prints 3 cases; `--check-mcp` passes on example results; ledger rows filled
 
 ### T06 - Write go / no-go recommendation
 

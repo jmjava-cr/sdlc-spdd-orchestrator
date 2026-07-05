@@ -143,9 +143,8 @@ ledger stub filled by human.
 Proceed on the spike branch through the SPDD operations in order:
 
 1. Complete T01 ingest + MCP spot-checks (exploration log)
-2. Scaffold T07 mock fixture + resolver gold test — **done** (`examples/retrieval-fixture/`)
-3. Run T05 A/B on fixture with ledger stub
-4. T06 go/no-go before any merge to `main`
+2. Run T05 A/B on fixture with ledger stub (mode B uses menke-fixture)
+3. T06 go/no-go before any merge to `main`
 
 **Next command:** `/sdlc-spdd-plan` is already satisfied (canvas exists). Continue with
 T01 validation locally, then `/sdlc-spdd-code` for T07 when ready.
