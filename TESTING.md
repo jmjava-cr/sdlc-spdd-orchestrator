@@ -25,6 +25,7 @@ In orchestrator repo:
 - `test-session-memory` (`.github/workflows/test-session-memory.yml`)
 - `test-index-spdd-analysis` (`.github/workflows/test-index-spdd-analysis.yml`)
 - `test-resolve-agent-context` (`.github/workflows/test-resolve-agent-context.yml`)
+- `test-retrieval-fixture-resolver` (`.github/workflows/test-retrieval-fixture-resolver.yml`) — SPIKE-001 T07 gold test
 - `validate-canvas` (`.github/workflows/validate-canvas.yml`)
 - `validate-diagrams` (`.github/workflows/validate-diagrams.yml`)
 

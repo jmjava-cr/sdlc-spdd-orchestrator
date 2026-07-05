@@ -123,7 +123,7 @@ ledger stub filled by human.
 1. **Document through SPDD flow** — requirement, canvas, this analysis, feature workspace,
    progress log. Operator runbook supplements analysis; does not replace it.
 2. **T01 menke-5 ingest** — get orchestrator memory into Guide for real Work ID spot-checks.
-3. **T07 mock fixture** — scriptable baseline before full agent session A/B.
+3. **T07 mock fixture** — **complete** (`examples/retrieval-fixture/`, 15 gold assertions).
 4. **T05 comparison** — run modes (a) and (b) on fixture first, then one real Work ID.
 5. **T06 go/no-go** — if go, open separate FEAT on a new branch; merge spike docs/analysis
    to `main` only as research notes, not production wiring.
@@ -143,7 +143,7 @@ ledger stub filled by human.
 Proceed on the spike branch through the SPDD operations in order:
 
 1. Complete T01 ingest + MCP spot-checks (exploration log)
-2. Scaffold T07 mock fixture + resolver gold test
+2. Scaffold T07 mock fixture + resolver gold test — **done** (`examples/retrieval-fixture/`)
 3. Run T05 A/B on fixture with ledger stub
 4. T06 go/no-go before any merge to `main`
 

@@ -1,0 +1,23 @@
+# Guide profile: menke-fixture — retrieval-fixture only (SPIKE-001 T07 mode B)
+#
+# Copy into guide checkout (gitignored):
+#   cp templates/guide-profiles/application-menke-fixture.yml.example \
+#      ~/github/jmjava/guide/scripts/user-config/application-menke-fixture.yml
+#
+# Use on a throwaway Neo4j store or after purge-preview on fixture paths.
+# Prerequisite: guide branch ingest-to-hub.
+
+guide:
+  reload-content-on-startup: true
+  content-chunker:
+    include-section-title-in-chunk: true
+    max-chunk-size: 4000
+    overlap-size: 200
+    embedding-batch-size: 50
+  urls: []
+  directories:
+    # Absolute path to this repo's fixture tree — adjust ORCHESTRATOR_ROOT if needed.
+    - ~/github/jmjava/sdlc-spdd-orchestrator/examples/retrieval-fixture
+  git-ingestion:
+    enabled: true
+    state-file: scripts/user-config/ingestion-git-revisions-menke-fixture.json

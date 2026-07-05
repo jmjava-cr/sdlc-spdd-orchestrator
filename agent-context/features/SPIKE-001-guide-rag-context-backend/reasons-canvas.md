@@ -22,7 +22,7 @@
 | T04 | In Progress | MCP sanity checks |
 | T05 | Not Started | A/B modes (a)(b)(c) + ledger stub |
 | T06 | Not Started | Go/no-go |
-| T07 | Not Started | Mock retrieval fixture + resolver gold test |
+| T07 | Complete | Mock fixture + resolver gold test (15 assertions) |
 | T08 | In Progress | SPDD workspace docs (this folder) |
 
 ## Sync Notes

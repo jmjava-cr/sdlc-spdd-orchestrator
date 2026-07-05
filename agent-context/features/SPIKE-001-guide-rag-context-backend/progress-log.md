@@ -1,5 +1,13 @@
 # Progress Log: SPIKE-001-guide-rag-context-backend
 
+## 2026-07-05 — T07 retrieval fixture harness
+
+- Added `examples/retrieval-fixture/` mock project (SPIKE-FIX-001)
+- Gold test: `tests/test-retrieval-fixture-resolver.sh` (15 assertions, mode A baseline)
+- CI: `.github/workflows/test-retrieval-fixture-resolver.yml`
+- menke-fixture Guide profile + `append-retrieval-fixture.sh` for mode B (local)
+- **Next:** T01 menke-5 ingest + MCP spot-checks; T05 A/B using fixture
+
 ## 2026-07-05 — Draft PR policy
 
 - PR #24 confirmed **draft**; policy: all SPIKE-001 PRs stay draft until T06 go/no-go

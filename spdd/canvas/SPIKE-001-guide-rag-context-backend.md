@@ -240,13 +240,15 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T07 - Mock retrieval fixture + resolver gold test
 
-- Status: Not Started
+- Status: Complete
 - Description: Add `examples/retrieval-fixture/` with seeded indexes, canvas, analysis, and tiny
   `src/` tree; `tests/test-retrieval-fixture-resolver.sh` diffs `resolve-agent-context.sh`
   output against gold TSV. Optional `menke-fixture` Guide profile for MCP spot-checks (local only).
 - Files: `examples/retrieval-fixture/`, `tests/test-retrieval-fixture-resolver.sh`,
-  `templates/guide-profiles/application-menke-fixture.yml.example`
-- Validation: CI passes resolver gold test; MCP spot-check doc in exploration log
+  `tests/fixtures/spike-001-retrieval-gold.tsv`, `tests/fixtures/spike-001-mcp-queries.tsv`,
+  `templates/guide-profiles/application-menke-fixture.yml.example`,
+  `scripts/guide/append-retrieval-fixture.sh`, `.github/workflows/test-retrieval-fixture-resolver.yml`
+- Validation: `./tests/test-retrieval-fixture-resolver.sh` passes (15 gold assertions); CI workflow added
 
 ### T08 - SPDD workspace documentation
 
