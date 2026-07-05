@@ -6,3 +6,4 @@
 # Override owner label: export SDLC_USER="your-name"
 # Opt out of registry writes: export SDLC_NO_TEAM_REGISTRY=1
 work_id	status	phase	operation	owner	updated	note
+SPIKE-001-guide-rag-context-backend	active	analysis	T01-T08		2026-07-05T15:10:00Z	branch:cursor/spike-guide-ingest-agent-context-17f4;pr:#24

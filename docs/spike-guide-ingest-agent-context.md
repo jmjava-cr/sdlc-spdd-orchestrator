@@ -1,5 +1,9 @@
 # SPIKE — Guide ingest for agent-context store
 
+> **Operator supplement** to the SPDD analysis artifact — not a substitute.  
+> **Canonical:** `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`  
+> **Branch:** `cursor/spike-guide-ingest-agent-context-17f4` only. Do not merge to `main` until T06 go/no-go.
+
 Exploration branch for [SPIKE-001](../spdd/canvas/SPIKE-001-guide-rag-context-backend.md)
 **T01**: ingest orchestrator `agent-context/` and `spdd/` into the existing Guide/Neo4j
 store (leg 2 — RAG chunks) so MCP search can reach Work IDs, indexes, and analysis artifacts

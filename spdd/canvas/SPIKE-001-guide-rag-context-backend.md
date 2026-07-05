@@ -4,10 +4,10 @@
 
 - Work ID: SPIKE-001-guide-rag-context-backend
 - Work Type: Spike
-- Status: Draft
+- Status: In Progress
 - Readiness: Needs Analysis
 - Created: 2026-06-19
-- Updated: 2026-07-05 (menke-5 ingest exploration branch; guide ingest-to-hub)
+- Updated: 2026-07-05 (SPDD analysis + branch policy; menke-5 scaffold on spike branch)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown harness ↔ JVM (Embabel guide) + Neo4j graph + RAG, over MCP (SSE)
@@ -16,7 +16,8 @@
 - Milestone:
 - Delivery stage: make it fast (optimization) — **spike, parked behind FEAT-004/005**
 - Time-box: 1–2 focused sessions
-- Related PR:
+- Branch: `cursor/spike-guide-ingest-agent-context-17f4` — **off `main` until T06 go/no-go**
+- Related PR: #24 (draft)
 
 ## R - Requirements
 
@@ -172,7 +173,11 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 - Confirmational research (done): `spdd/analysis/SPIKE-001-guide-rag-context-backend-research.md`
 - DICE entity schema (draft): `spdd/analysis/SPIKE-001-dice-entity-schema.md`
-- A/B findings note (pending): `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
+- Spike analysis (done): `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
+- T01 exploration log: `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`
+- A/B findings note (pending): extend analysis artifact T06 section
+- Feature workspace (done): `agent-context/features/SPIKE-001-guide-rag-context-backend/`
+- Mock fixture (pending T07): `examples/retrieval-fixture/`, `tests/test-retrieval-fixture-resolver.sh`
 
 ### Files To Modify
 
@@ -230,8 +235,27 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 - Status: Not Started
 - Description: Summarize evidence + trade-offs; if go, sketch follow-on FEAT(s) including production entity ingest + retrieval seam.
-- Files: spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md, this canvas Sync Notes
-- Validation: Clear decision with rationale
+- Files: `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md` (T06 section), this canvas Sync Notes
+- Validation: Clear decision with rationale; only then consider merging research notes to `main`
+
+### T07 - Mock retrieval fixture + resolver gold test
+
+- Status: Not Started
+- Description: Add `examples/retrieval-fixture/` with seeded indexes, canvas, analysis, and tiny
+  `src/` tree; `tests/test-retrieval-fixture-resolver.sh` diffs `resolve-agent-context.sh`
+  output against gold TSV. Optional `menke-fixture` Guide profile for MCP spot-checks (local only).
+- Files: `examples/retrieval-fixture/`, `tests/test-retrieval-fixture-resolver.sh`,
+  `templates/guide-profiles/application-menke-fixture.yml.example`
+- Validation: CI passes resolver gold test; MCP spot-check doc in exploration log
+
+### T08 - SPDD workspace documentation
+
+- Status: In Progress
+- Description: Feature workspace under `agent-context/features/SPIKE-001-guide-rag-context-backend/`;
+  analysis artifact with branch policy and experiment protocol; operator runbook links analysis.
+- Files: `agent-context/features/SPIKE-001-guide-rag-context-backend/*`,
+  `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
+- Validation: requirement → analysis → canvas → feature workspace chain complete on spike branch
 
 ## N - Norms
 
@@ -244,8 +268,11 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 ## S - Safeguards
 
 - This is exploratory: do not wire guide into the default resolver or installers under this Work ID.
+- **Stay off `main`:** all spike implementation and docs on `cursor/spike-*` branches until T06
+  go/no-go. Draft PR only; markdown-first default on `main` unchanged.
 - Keep all Neo4j/guide setup local/throwaway; no secrets committed.
-- If the spike says "go", the real integration is a separate FEAT with its own canvas.
+- Operator docs and Guide profiles are orchestrator-only — never ship to target projects.
+- If the spike says "go", the real integration is a separate FEAT with its own canvas on a new branch.
 - Posture/optimization framing stays internal; nothing ships to target projects from this spike.
 
 ## Review Checklist
@@ -272,6 +299,11 @@ architecture sound; proceed. Refinements: explicit `Spdd*` DICE entity design + 
 ingest required for leg 3 (RAG alone leaves `__Entity__` empty); auditability via legs
 1+3; embedding for discovery only. Entity schema draft:
 `spdd/analysis/SPIKE-001-dice-entity-schema.md`. A/B + go/no-go still pending.
+
+**SPDD documentation 2026-07-05:** analysis artifact + feature workspace on spike branch
+`cursor/spike-guide-ingest-agent-context-17f4` (PR #24). Branch stays off `main` until T06.
+Mock fixture (T07) planned for scriptable A/B. See
+`spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`.
 
 ## Final Status
 

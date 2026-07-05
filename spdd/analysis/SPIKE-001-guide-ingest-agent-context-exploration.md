@@ -1,8 +1,10 @@
 # SPIKE-001 — Guide ingest for agent-context (exploration log)
 
+> **SPDD flow:** requirement → `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md` →
+> canvas → this log. **Branch:** `cursor/spike-guide-ingest-agent-context-17f4` only — not `main`.
+
 Work ID: SPIKE-001-guide-rag-context-backend  
 Task: T01 — stand up guide + ingest orchestrator memory (leg 2)  
-Branch: `cursor/spike-guide-ingest-agent-context-17f4`  
 Guide branch: `jmjava/guide` → `ingest-to-hub` (git incremental + operator purge API)
 
 ## Goal
