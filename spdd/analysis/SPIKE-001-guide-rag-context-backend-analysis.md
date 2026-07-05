@@ -132,7 +132,7 @@ ledger stub filled by human.
 
 | Risk | Mitigation |
 |------|------------|
-| Spike work merges to `main` prematurely | Branch policy in canvas Safeguards + this analysis; draft PR only |
+| Spike work merges to `main` prematurely | Branch policy in canvas Safeguards; **all PRs stay draft** until T06; no merge to `main` |
 | FEAT-004 ledger not built | Stub markdown scoreboard in exploration log for T05 |
 | Guide/Neo4j not available in CI | Resolver gold-test in CI; MCP checks local-only |
 | Small-sample A/B inconclusive | Treat as directional; fixture first for recall/precision |

@@ -1,5 +1,9 @@
 # Progress Log: SPIKE-001-guide-rag-context-backend
 
+## 2026-07-05 — Draft PR policy
+
+- PR #24 confirmed **draft**; policy: all SPIKE-001 PRs stay draft until T06 go/no-go
+
 ## 2026-07-05 — SPDD documentation + branch policy
 
 - Confirmed spike stays off `main`; active branch `cursor/spike-guide-ingest-agent-context-17f4`

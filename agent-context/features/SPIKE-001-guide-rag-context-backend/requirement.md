@@ -18,8 +18,8 @@ Time-boxed feasibility spike: evaluate Embabel **guide** (RAG MCP over Neo4j) as
 
     cursor/spike-guide-ingest-agent-context-17f4
 
-Draft PR #24. Do not merge until T06 go/no-go. The markdown-first default path on
-`main` must remain unchanged during the experiment.
+Draft PR #24. **Keep PR draft** until T06 go/no-go — do not mark ready for review or merge.
+The markdown-first default path on `main` must remain unchanged during the experiment.
 
 ## Question to answer
 

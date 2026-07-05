@@ -269,7 +269,8 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 - This is exploratory: do not wire guide into the default resolver or installers under this Work ID.
 - **Stay off `main`:** all spike implementation and docs on `cursor/spike-*` branches until T06
-  go/no-go. Draft PR only; markdown-first default on `main` unchanged.
+  go/no-go. **All PRs for this Work ID must remain draft** until T06 — never mark ready for review
+  or merge to `main` during the experiment. Markdown-first default on `main` unchanged.
 - Keep all Neo4j/guide setup local/throwaway; no secrets committed.
 - Operator docs and Guide profiles are orchestrator-only — never ship to target projects.
 - If the spike says "go", the real integration is a separate FEAT with its own canvas on a new branch.
