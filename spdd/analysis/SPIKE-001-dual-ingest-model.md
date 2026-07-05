@@ -6,7 +6,7 @@ Branch pair:
 | Repo | Branch |
 |------|--------|
 | `jmjava/sdlc-spdd-orchestrator` | `cursor/spike-guide-ingest-agent-context-17f4` |
-| `jmjava/guide` | `cursor/spike-spdd-dice-projection-17f4` (base: `ingest-to-hub`) |
+| `jmjava/guide` | `cursor/spike-spdd-dice-projection-17f4` (base: `ingest-to-hub`) — **pushed** |
 
 ## Short answer: they coexist
 
