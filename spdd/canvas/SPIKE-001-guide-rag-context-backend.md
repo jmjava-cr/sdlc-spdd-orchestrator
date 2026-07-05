@@ -7,7 +7,7 @@
 - Status: Draft
 - Readiness: Needs Analysis
 - Created: 2026-06-19
-- Updated: 2026-06-19 (confirmational research via live MCP store)
+- Updated: 2026-07-05 (menke-5 ingest exploration branch; guide ingest-to-hub)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown harness ↔ JVM (Embabel guide) + Neo4j graph + RAG, over MCP (SSE)
@@ -111,8 +111,10 @@ Design verification against live guide MCP (`:21337`) + Neo4j + Embabel/DICE cor
 engineering, evals, DICE proposition pipeline. `broadenChunk` surfaces Fowler "decision
 memory" passages. Leg 3: `__Entity__` count = 0. Indexes ONLINE (underscore names).
 
-**Not yet in store (expected):** orchestrator `agent-context/` + `spdd/canvas/` — needed
-for Work-ID A/B, not for validating the design direction.
+**Not yet in store (expected until menke-5):** orchestrator `agent-context/` +
+`spdd/canvas/` — needed for Work-ID A/B. Exploration branch
+`cursor/spike-guide-ingest-agent-context-17f4` adds menke-5 profile + runbook; guide
+branch `ingest-to-hub` for git incremental ingest.
 
 ## E - Entities
 
@@ -185,10 +187,15 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 ### T01 - Stand up guide + ingest orchestrator memory (leg 2 — RAG chunks)
 
 - Status: In Progress
-- Description: Local guide instance; point `guide.directories` at orchestrator memory; append-ingest; verify store stats.
-- Files: (guide config; no orchestrator changes)
-- Validation: Ingestion summary shows orchestrator memory loaded as chunks
-- Research: menke code + menke-2 reference corpus ingested; orchestrator memory not yet
+- Description: Local guide instance on branch `ingest-to-hub`; menke-5 profile points
+  `guide.directories` at `agent-context/memory/`, `spdd/canvas/`, `spdd/analysis/`; append-ingest
+  with git incremental; verify MCP spot-checks.
+- Files: `templates/guide-profiles/application-menke-5-orchestrator-context.yml.example`,
+  `scripts/guide/append-orchestrator-context.sh`, `docs/spike-guide-ingest-agent-context.md`,
+  `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`
+- Validation: Ingestion summary shows orchestrator memory loaded as chunks; MCP returns Work ID hits
+- Research: menke code + menke-2 reference corpus ingested; menke-5 exploration scaffold on
+  `cursor/spike-guide-ingest-agent-context-17f4`
 
 ### T02 - Design SDLC-SPDD DICE entity schema (Embabel conventions)
 
