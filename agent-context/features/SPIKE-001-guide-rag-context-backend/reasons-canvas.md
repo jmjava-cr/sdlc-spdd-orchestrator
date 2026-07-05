@@ -18,7 +18,7 @@
 |----|--------|-------|
 | T01 | In Progress | menke-5 profile + append-ingest scaffold |
 | T02 | In Progress | DICE entity schema draft |
-| T03 | Not Started | Entity projection ingest (leg 3) |
+| T03 | In Progress | Guide spike branch: markdown → `__Entity__` API + `project-spdd-entities.sh` |
 | T04 | In Progress | MCP sanity checks |
 | T05 | In Progress | A/B ledger + run-retrieval-ab-fixture.sh |
 | T06 | Not Started | Go/no-go |

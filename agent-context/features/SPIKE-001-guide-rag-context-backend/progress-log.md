@@ -1,5 +1,13 @@
 # Progress Log: SPIKE-001-guide-rag-context-backend
 
+## 2026-07-05 — T03 leg 3 entity projection (guide spike branch)
+
+- Dual ingest doc: `spdd/analysis/SPIKE-001-dual-ingest-model.md`
+- Orchestrator helper: `scripts/guide/project-spdd-entities.sh`
+- Guide implementation on `cursor/spike-spdd-dice-projection-17f4` (local; push requires repo access)
+- **Not** DICE proposition pipeline — structured markdown projection via `NamedEntityDataRepository`
+- **Next:** push guide branch + local verify `__Entity__` > 0; T04 MCP entity traversal fork
+
 ## 2026-07-05 — T05 A/B harness
 
 - Ledger stub: `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`

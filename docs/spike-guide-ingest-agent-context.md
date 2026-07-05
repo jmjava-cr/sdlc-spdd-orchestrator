@@ -11,21 +11,28 @@ already indexed in markdown.
 
 This is **throwaway / local-only**. Target projects never receive Guide profiles or Neo4j data.
 
-## Guide branch
+## Guide branches (pair with this orchestrator spike)
 
-Use the **`ingest-to-hub`** branch on [jmjava/guide](https://github.com/jmjava/guide) (not
-upstream `main` alone). That branch adds:
+| Leg | Guide branch | What it adds |
+|-----|--------------|--------------|
+| **2 — RAG chunks** | `ingest-to-hub` | Git incremental ingest + operator purge API |
+| **3 — DICE projection** | `cursor/spike-spdd-dice-projection-17f4` | `POST /api/v1/data/spdd-projection/load` → `__Entity__` |
 
-- **Git incremental ingestion** — `guide.git-ingestion.enabled` re-ingests only files changed
-  since the last successful run per directory (stores HEAD in a local JSON state file).
-- **Operator purge API** — preview/delete chunks by `directory` or `uriPrefix`; reset git
-  revision state for one directory before a full re-ingest.
+For the full SPIKE-001 experiment (legs 2 + 3), use the **leg 3 spike branch** — it includes
+`ingest-to-hub` plus SPDD entity projection. **Not** the DICE proposition pipeline
+(conversation → propositions).
 
 ```bash
 cd ~/github/jmjava/guide
-git fetch origin ingest-to-hub
-git checkout ingest-to-hub
+git fetch origin cursor/spike-spdd-dice-projection-17f4
+git checkout cursor/spike-spdd-dice-projection-17f4
 ```
+
+Copy `scripts/user-config/application-menke-5-spdd-projection.yml.example` →
+`application-menke-5.yml` (enables `guide.spdd-projection.enabled: true` alongside menke-5
+directories).
+
+Leg 2 only (no entity graph): stay on `ingest-to-hub` without `spdd-projection.enabled`.
 
 MCP is bundled with Guide on the same process (`/sse` on `GUIDE_PORT`, default `1337`; this
 repo's research stack uses `21337` to avoid clashing with other local services).
@@ -106,6 +113,21 @@ and analysis files under `spdd/analysis/`.
 Record spot-check results in
 `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`.
 
+## Leg 3 — entity projection (structured markdown → `__Entity__`)
+
+After Guide runs on the leg 3 spike branch with `spdd-projection.enabled: true`:
+
+```bash
+# From orchestrator repo (defaults to repo root; pass fixture path for T07)
+./scripts/guide/project-spdd-entities.sh
+./scripts/guide/project-spdd-entities.sh examples/retrieval-fixture
+```
+
+Expect non-zero entity counts from `GET /api/v1/data/spdd-projection/stats`. Re-run after
+`sdlc.sh capture` updates `context-index.md` or canvases. Leg 2 append-ingest is independent.
+
+See `spdd/analysis/SPIKE-001-dual-ingest-model.md` and guide `docs/spdd-projection-ingest.md`.
+
 ## Verify setup (T01 + T07)
 
 ```bash
@@ -127,8 +149,9 @@ Record metrics in `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`.
 
 ## What this spike does not cover
 
-- **Leg 3 (DICE domain graph)** — RAG directory ingest leaves `__Entity__` empty. Entity
-  projection is T02/T03 in SPIKE-001 (`spdd/analysis/SPIKE-001-dice-entity-schema.md`).
+- **DICE proposition pipeline** — conversation → propositions; wrong ingest for REASONS canvases.
+  Leg 3 uses structured markdown projection instead (`SPIKE-001-dual-ingest-model.md`).
+- **MCP domain-graph traversal (leg 3 retrieval)** — T04 fork; projection load is T03.
 - **Production wiring** — no changes to `resolve-agent-context.sh` or default installers.
 - **A/B vs markdown resolver** — T05; run after ingest is stable.
 
@@ -137,5 +160,6 @@ Record metrics in `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`.
 | Doc | Role |
 |-----|------|
 | [SPIKE-001 canvas](../spdd/canvas/SPIKE-001-guide-rag-context-backend.md) | Full hybrid retrieval experiment |
+| [Dual ingest model](../spdd/analysis/SPIKE-001-dual-ingest-model.md) | Leg 2 RAG + leg 3 projection coexistence |
 | [guide-rag-research-and-dogfooding](guide-rag-research-and-dogfooding.md) | menke-1–4 operator guide |
 | [Context loading and scaling](context-loading-and-scaling.md) | Tier-1 vs on-demand markdown path (baseline) |

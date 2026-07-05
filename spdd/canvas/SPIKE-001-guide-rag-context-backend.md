@@ -211,10 +211,15 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T03 - Implement entity projection ingest (leg 3 — domain graph)
 
-- Status: Not Started
-- Description: Fork loader: parse orchestrator artifacts → populate Neo4j `__Entity__` subgraph; register `Spdd*` for DICE `entityPackages` / `SearchOperations`; optional fork MCP domain-query tool.
-- Files: (guide fork; projection script)
-- Validation: `__Entity__` count > 0; domain query by Work ID returns linked Canvas, Operations, Decision/Pitfall/Pattern
+- Status: In Progress
+- Description: Guide spike branch `cursor/spike-spdd-dice-projection-17f4` (base `ingest-to-hub`):
+  `SpddMarkdownProjectionService` parses canvas + context-index → `NamedEntityDataRepository`;
+  operator API `POST /api/v1/data/spdd-projection/load`. **Not** DICE proposition pipeline.
+  Orchestrator helper: `scripts/guide/project-spdd-entities.sh`. Dual-ingest model:
+  `spdd/analysis/SPIKE-001-dual-ingest-model.md`.
+- Files: guide `src/main/kotlin/com/embabel/guide/spdd/*`, `docs/spdd-projection-ingest.md`;
+  orchestrator `scripts/guide/project-spdd-entities.sh`
+- Validation: `__Entity__` count > 0 via `/spdd-projection/stats`; domain query by Work ID (T04 MCP fork)
 
 ### T04 - Connect Cursor to guide MCP + sanity retrieval (all legs)
 
@@ -222,7 +227,7 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 - Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via fork domain-query tool on projected entities.
 - Files: (Cursor MCP config; fork tool)
 - Validation: Relevant results for a known Work ID/area via each leg
-- Research: MCP connected; legs 1+2 verified; leg 3 blocked on T02/T03
+- Research: MCP connected; legs 1+2 verified; leg 3 projection implemented on guide spike branch (T04 MCP fork pending)
 
 ### T05 - Compare modes on one real Work ID and record on the ledger
 
@@ -309,8 +314,12 @@ ingest required for leg 3 (RAG alone leaves `__Entity__` empty); auditability vi
 
 **SPDD documentation 2026-07-05:** analysis artifact + feature workspace on spike branch
 `cursor/spike-guide-ingest-agent-context-17f4` (PR #24). Branch stays off `main` until T06.
-Mock fixture (T07) planned for scriptable A/B. See
+Mock fixture (T07) complete for scriptable A/B. See
 `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`.
+
+**Leg 3 projection 2026-07-05:** guide spike branch `cursor/spike-spdd-dice-projection-17f4`
+implements structured markdown → `__Entity__` (coexists with leg 2 RAG). Not the DICE
+proposition pipeline. Operator: `project-spdd-entities.sh` + dual-ingest doc.
 
 ## Final Status
 

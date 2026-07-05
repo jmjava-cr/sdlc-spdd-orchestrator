@@ -30,10 +30,13 @@ echo "== Guide checkout =="
 if [[ -d "${GUIDE_ROOT}" ]]; then
   ok "guide directory exists"
   branch="$(git -C "${GUIDE_ROOT}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
-  if [[ "${branch}" == "ingest-to-hub" ]]; then
-    ok "guide branch ingest-to-hub"
+  if [[ "${branch}" == "cursor/spike-spdd-dice-projection-17f4" ]]; then
+    ok "guide branch cursor/spike-spdd-dice-projection-17f4 (leg 2+3)"
+  elif [[ "${branch}" == "ingest-to-hub" ]]; then
+    ok "guide branch ingest-to-hub (leg 2 only)"
+    note "checkout cursor/spike-spdd-dice-projection-17f4 for leg 3 entity projection"
   else
-    note "guide on branch '${branch}' (ingest-to-hub recommended)"
+    note "guide on branch '${branch}' (spike-spdd-dice-projection or ingest-to-hub recommended)"
   fi
 else
   bad "guide not found at ${GUIDE_ROOT} — set GUIDE_ROOT"
@@ -61,6 +64,17 @@ echo "== Guide runtime (optional) =="
 if curl -sf --max-time 3 "http://localhost:${GUIDE_PORT}/actuator/health" >/dev/null 2>&1; then
   ok "Guide health on :${GUIDE_PORT}"
   echo "  MCP SSE: http://localhost:${GUIDE_PORT}/sse"
+  if curl -sf --max-time 3 "http://localhost:${GUIDE_PORT}/api/v1/data/spdd-projection/stats" >/dev/null 2>&1; then
+    ok "spdd-projection API (leg 3)"
+    entity_count="$(curl -s "http://localhost:${GUIDE_PORT}/api/v1/data/spdd-projection/stats" | jq -r '.totalEntities // 0' 2>/dev/null || echo 0)"
+    if [[ "${entity_count}" =~ ^[0-9]+$ ]] && (( entity_count > 0 )); then
+      ok "__Entity__ count ${entity_count}"
+    else
+      note "run ./scripts/guide/project-spdd-entities.sh after enabling spdd-projection"
+    fi
+  else
+    note "spdd-projection API missing — use guide branch cursor/spike-spdd-dice-projection-17f4"
+  fi
 else
   note "Guide not running on :${GUIDE_PORT} — start before ingest/MCP"
 fi

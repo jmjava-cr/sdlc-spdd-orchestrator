@@ -5,7 +5,8 @@
 
 Work ID: SPIKE-001-guide-rag-context-backend  
 Task: T01 — stand up guide + ingest orchestrator memory (leg 2)  
-Guide branch: `jmjava/guide` → `ingest-to-hub` (git incremental + operator purge API)
+Guide branch (leg 2): `jmjava/guide` → `ingest-to-hub`  
+Guide branch (leg 3): `jmjava/guide` → `cursor/spike-spdd-dice-projection-17f4` (includes leg 2 + projection API)
 
 ## Goal
 
@@ -15,7 +16,8 @@ into the existing menke corpus makes orchestrator Work IDs discoverable via emba
 
 ## Setup checklist
 
-- [ ] Guide on `ingest-to-hub` at `~/github/jmjava/guide`
+- [ ] Guide on `cursor/spike-spdd-dice-projection-17f4` (or `ingest-to-hub` for leg 2 only)
+- [ ] `application-menke-5.yml` with `spdd-projection.enabled: true` (see guide `application-menke-5-spdd-projection.yml.example`)
 - [ ] menke-1–4 (or needed subset) already on Neo4j port `21337`
 - [ ] `application-menke-5.yml` copied from `templates/guide-profiles/application-menke-5-orchestrator-context.yml.example`
 - [ ] `./scripts/guide/append-orchestrator-context.sh` completed (INGESTION COMPLETE banner)
@@ -28,7 +30,15 @@ into the existing menke corpus makes orchestrator Work IDs discoverable via emba
 | `SPIKE-001 guide RAG context backend` | vector | Hit on `spdd/canvas/SPIKE-001-guide-rag-context-backend.md` | | |
 | `+context-index +agent-context/memory` | text | Hit on `context-index.md` | | |
 | `FEAT-004 prompt optimization ledger` | vector | Hit on FEAT-004 canvas or analysis | | |
-| `CHORE-001 docgen initial documentation` | vector | Hit on chore canvas/analysis | | |
+| `SPIKE-FIX-001 retrieval fixture` | vector | Hit on fixture canvas | | |
+
+## Leg 3 spot-checks (after projection load)
+
+| Check | Command / API | Expected | Result | Notes |
+|-------|---------------|----------|--------|-------|
+| Projection API up | `GET /api/v1/data/spdd-projection/stats` | 200 JSON | | |
+| Entity count | stats `totalEntities` | > 0 | | |
+| Fixture subgraph | `./scripts/guide/project-spdd-entities.sh examples/retrieval-fixture` | WorkId entities | | |
 
 ## Ingestion summary
 
@@ -63,8 +73,9 @@ T01 setup check: `./scripts/guide/verify-spike-guide-setup.sh`
 ## Next steps (if ingest succeeds)
 
 1. T02 — finalize DICE entity schema (`SPIKE-001-dice-entity-schema.md`)
-2. T03 — entity projection ingest (leg 3, `__Entity__` > 0)
-3. T05 — A/B one Work ID: resolver vs embedding-only vs hybrid
+2. T03 — verify entity projection locally (`project-spdd-entities.sh`, `__Entity__` > 0)
+3. T04 — MCP entity traversal fork
+4. T05 — A/B one Work ID: resolver vs embedding-only vs hybrid
 
 ## T05 fixture drill (in progress)
 
