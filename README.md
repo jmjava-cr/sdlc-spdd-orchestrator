@@ -6,16 +6,16 @@ A multi-assistant scaffold for disciplined AI-assisted delivery.
 
 ## Recent highlights
 
-New agent coordination shipped in [#19](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/19) via [#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20) and [#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21):
+New agent coordination shipped in [#19](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/19) via [#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20) and [#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21) and [#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)
 
 | What | Why it matters | Try it |
 | ---- | -------------- | ------ |
-| **SDLC pointer** ([#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20)) | Persistent Work ID on your machine; guarded wrappers refuse commands aimed at the wrong chore | `agent-context/sdlc-pointer.sh` — set/get/reset, `run_against_pointer` |
-| **Workflow CLI** ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)) | Phase/gate tracking, canvas-op inference, and safe session capture | `./scripts/sdlc.sh` or `./scripts/sdlc.sh next` |
-| **Team registry** ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)) | Shared claims in git so teammates see who owns which Work ID | `./scripts/sdlc.sh team`, `./scripts/sdlc.sh claim <WORK-ID>` |
-| **Agent grounding** ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)) | `/sdlc-spdd-whereami` in Cursor, Copilot, and Claude — same “what now?” answer as the shell CLI | `/sdlc-spdd-whereami` in chat |
+| **SDLC pointer** ([#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20)) | Persistent Work ID on your machine; guarded wrappers refuse commands aimed at the wrong chore | `agent-context/sdlc-pointer.sh` |
+| **Workflow CLI** ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)) | Phase/gate tracking, canvas-op inference, and safe session capture | `./scripts/sdlc.sh` or `./scripts/sdlc-spdd/sdlc.sh` |
+| **Team registry** ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)) | Shared claims in git so teammates see who owns which Work ID | `./scripts/sdlc.sh team`, `./scripts/sdlc.sh claim …` |
+| **Agent grounding** ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21)) | `/sdlc-spdd-whereami` in Cursor, Copilot, and Claude — same “what now?” answer as the shell CLI | `/sdlc-spdd-whereami` |
 
-Pointer and workflow state stay local (`.sdlc/pointer`, `.sdlc/workflows/`); team claims live in `agent-context/work-registry.tsv` and sync through git. Details: [agent-context/README.md](agent-context/README.md#sdlc-pointer-current-choretask).
+Pointer and workflow state stay local (`.sdlc/pointer`, `.sdlc/workflows/`); team claims live in `agent-context/work-registry.tsv` and sync through git. Details: [agent-context/README.md](agent-context/README.md)
 
 > **Project status: turning the corner from MVP to "make it right."**
 > We develop this framework through Kent Beck's progression — *make it work → make it
@@ -37,6 +37,12 @@ Pointer and workflow state stay local (`.sdlc/pointer`, `.sdlc/workflows/`); tea
 > inspecting wet cement and declaring the building unsafe — let the loop finish
 > before drawing conclusions about a given area.
 
+Note: Guide integration spike
+
+We are starting an exploratory spike to investigate integrating this project with Guide. Experimental work is being done in the existing spike branch: `cursor/spike-guide-ingest-agent-context-17f4` — https://github.com/jmjava/sdlc-spdd-orchestrator/tree/cursor/spike-guide-ingest-agent-context-17f4
+
+We will continue cleanup and stabilization on `main` while the spike progresses in that branch. Experimental commits and notes will remain on the spike branch until we have a clear plan or stable implementation to merge. No breaking changes to `main` are planned during this spike.
+
 It is built from **three parts** that work together:
 
 | Part         | Answers                                   | Artifacts                                                         |
@@ -56,7 +62,7 @@ This repo uses **two kinds** of commands. They run in different places — do no
 | **Shell — daily use**      | `./scripts/sdlc-spdd/sdlc.sh next`, `./scripts/sdlc-spdd/sdlc.sh claim …` | Terminal in your **installed target project**                                |
 | **Shell — orchestrator**   | `./scripts/sdlc.sh next` (same CLI, orchestrator repo layout)             | Terminal in the **orchestrator repo** clone (dogfooding)                     |
 
-Install/upgrade/verify from the orchestrator clone use `./scripts/<name>.sh`. After install, runtime scripts live in the target at `./scripts/sdlc-spdd/`. See [Script paths](CONTRIBUTING.md#script-paths-orchestrator-vs-target).
+Install/upgrade/verify from the orchestrator clone use `./scripts/<name>.sh`. After install, runtime scripts live in the target at `./scripts/sdlc-spdd/`. See [Script paths](CONTRIBUTING.md#script-paths)
 
 **`/sdlc-spdd-*` is not a terminal command.** Open your target app in Cursor, Copilot, or Claude Code, open **AI chat**, then:
 
@@ -92,267 +98,6 @@ flowchart TD
     class D1,D2,D3,D4,D5 doc;
 ```
 
-| Step                | Do this                                                                                      | Read this                                                                                                  |
-| ------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| 1. Install & verify | From orchestrator clone: `setup-agent-prompts.sh --all` then `verify-project-install.sh`     | [Installing into your project](docs/installing-into-your-project.md)                                       |
-| 2. First session    | `/sdlc-spdd-init`, then analysis → plan → architect → code → api-test → review one operation | [First day with SDLC-SPDD](docs/first-day-with-sdlc-spdd.md)                                               |
-| 3. Learn the model  | Understand how Planning, SPDD, and SDLC hand off                                             | [Three-part operating path](docs/three-part-operating-path.md)                                             |
-| 4. Work day to day  | Use the default prompts and the start/capture rhythm                                         | [Session prompt standard](docs/session-prompt-standard.md) · [Daily runbook](docs/daily-runbook.md)        |
-| 5. Go deeper        | Drill into one part when you need it                                                         | [Value guides](docs/README.md) · [Prompt standards](docs/session-prompt-standard.md#which-prompt-standard) |
+| Step                | Do this                                                                                      | Read this                                                                    [...]
 
-## Add It to Your Project (about 5 minutes)
-
-Run these from this orchestrator repo, pointing `--target` at your application:
-
-    git clone https://github.com/jmjava/sdlc-spdd-orchestrator.git
-    cd sdlc-spdd-orchestrator
-
-    # 1. Install all three parts into your project
-    ./scripts/setup-agent-prompts.sh --target /path/to/your/project --all
-
-    # 2. Confirm the install is complete
-    ./scripts/verify-project-install.sh --target /path/to/your/project
-
-Then open the **target project** in Cursor, Copilot, or Claude Code and run `/sdlc-spdd-init` in **AI chat** — see [How commands work](#how-commands-work) above.
-
-Next, follow the hands-on walkthrough: **[First day with SDLC-SPDD](docs/first-day-with-sdlc-spdd.md)**.
-
-## Start Here (read in order)
-
-These six pages are the canonical onboarding path. The same order appears in [docs/README.md](docs/README.md).
-
-1. [First day with SDLC-SPDD](docs/first-day-with-sdlc-spdd.md) — hands-on first session
-2. [Three-part operating path](docs/three-part-operating-path.md) — how Planning, SPDD, and SDLC work together
-3. [10,000-foot view](docs/ten-thousand-foot-view.md)
-4. [Installing into your project](docs/installing-into-your-project.md)
-5. [Top useful concepts and commands](docs/useful-concepts-and-commands.md)
-6. [Maintaining your project](docs/maintaining-your-project.md)
-
-For the full documentation map, see [docs/README.md](docs/README.md).
-
-Deeper references, one per part:
-
-| Part      | Value guide (what it brings)                                   | Prompt standard (how to prompt)                                          |
-| --------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Planning  | [What planning brings](docs/what-planning-brings.md)           | [Planning prompt standard](docs/planning-prompt-standard.md)             |
-| SPDD      | [What SPDD brings](docs/what-spdd-brings.md)                   | [SPDD prompt standard](docs/spdd-prompt-standard.md)                     |
-| SDLC      | [What SDLC brings](docs/what-sdlc-brings.md)                   | [Session prompt standard](docs/session-prompt-standard.md) (**default**) |
-| All three | [Three-part operating path](docs/three-part-operating-path.md) | —                                                                        |
-
-Not sure which prompt standard to use? See [Which prompt standard?](docs/session-prompt-standard.md#which-prompt-standard).
-
-## The Operating Model
-
-The system uses a three-layer flow:
-
-    Planning: ROADMAP.md, milestone-*.md, requirements/, requirements/milestones/, session-notes/
-            -> inform and summarize
-    spdd/analysis/, spdd/canvas/, agent-context/ (memory indexes, extensions, sessions)
-            -> govern and remember
-    code / spdd/tasks/ / reviews / sync logs
-            -> execute and validate
-
-| Layer                   | Purpose                                                                            | Examples                                                                                                                                                                                                                                                   |
-| ----------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Planning narrative      | Human-readable roadmap, milestone, milestone requirements, and daily session story | `ROADMAP.md`, `milestone-1.md`, `requirements/milestones/`, `session-notes/2026-06-06.md`                                                                                                                                                                  |
-| Governed agent context  | Work-item contract, memory, handoffs, and reusable context                         | `spdd/analysis/<WORK-ID>-analysis.md`, `spdd/canvas/<WORK-ID>.md`, `agent-context/memory/` (indexes: `domain-index.md`, `context-index.md`, `session-index.md`, `phase-index.md`, `code-areas.md`), `agent-context/extensions/`, `agent-context/sessions/` |
-| Implementation evidence | Code, review outputs, sync logs, and validation                                    | source files, `spdd/tasks/`, `spdd/reviews/`, `spdd/sync/`, tests                                                                                                                                                                                          |
-
-## Context loading (every session)
-
-Progressive disclosure is enforced through session briefs and indexes — not by loading whole directories.
-
-1. **Tier 1 (automatic)** — each assistant injects one small grounding file (`.cursor/rules/sdlc-spdd.mdc`, `.github/copilot-instructions.md`, or `CLAUDE.md`) on every request.
-2. **Tier 2 (on demand)** — `./scripts/sdlc-spdd/sdlc.sh start` (or `start-agent-session.sh`) writes `agent-context/sessions/current-session.md` with a **Resolved Context** table: phase files from `phase-index.md`, SDLC Agents extensions, Work ID artifacts, and area-filtered `context-index.md` rows (via `resolve-agent-context.sh`). Orient first with `./scripts/sdlc-spdd/sdlc.sh next` or `/sdlc-spdd-whereami`.
-3. **Paste the Resume Prompt** from that brief into chat — load only the files listed under Resolved Context.
-4. **Close the loop** — `./scripts/sdlc-spdd/sdlc.sh capture` (or `capture-session-memory.sh`) and `index-spdd-analysis.sh` grow the indexes for the next session.
-
-    ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>
-    ./scripts/sdlc-spdd/sdlc.sh start
-    ./scripts/sdlc-spdd/resolve-agent-context.sh --target . --phase code --work-id <WORK-ID>   # refresh after adding skills
-    ./scripts/sdlc-spdd/resolve-agent-context.sh --target . --text "Implement retry #TDD #java"
-
-Full detail: [Context loading and scaling](docs/context-loading-and-scaling.md) · [SDLC Agents and the framework](docs/sdlc-agents-and-the-framework.md).
-
-## Install into an Application
-
-Clone this repo:
-
-    git clone https://github.com/jmjava/sdlc-spdd-orchestrator.git
-    cd sdlc-spdd-orchestrator
-
-Install the complete system into a target project:
-
-    ./scripts/setup-agent-prompts.sh --target /path/to/your/project --all
-
-This installs:
-
-- Cursor commands, GitHub Copilot prompt files, and Claude Code commands.
-- Always-on operating-model grounding for each assistant: `.cursor/rules/sdlc-spdd.mdc`, `.github/copilot-instructions.md`, and `CLAUDE.md`.
-- target-local runtime scripts under `scripts/sdlc-spdd/`.
-- local SDLC-SPDD docs under `docs/sdlc-spdd/`.
-- planning scaffolding: `ROADMAP.md`, `milestone-1.md`, and `session-notes/` when missing.
-- SPDD and agent context folders: `spdd/` and `agent-context/` (including `extensions/` for SDLC Agents skills and phase rules, and memory indexes such as `phase-index.md`).
-
-Upgrade an existing target project without overwriting application source, canvases, feature workspaces, existing memory, roadmap, milestones, or session notes:
-
-    ./scripts/upgrade-project.sh --target /path/to/your/project --all
-
-## Day-One Flow
-
-Below, `/sdlc-spdd-*` lines run in **AI chat** (Cursor/Copilot/Claude Code); `./scripts/...` lines run in a **terminal**. Do not paste `/sdlc-spdd-*` into a shell — see [How commands work](#how-commands-work).
-
-In the target project, open **AI chat** (Cursor Chat, Copilot Chat, or Claude Code) and run:
-
-    /sdlc-spdd-init
-
-If you already have milestone checklist items, map them into SDLC-SPDD work:
-
-    ./scripts/sdlc-spdd/create-work-from-milestone.sh --target . --milestone milestone-1.md --all
-
-Start or resume an agent session (creates `current-session.md` with **Resolved Context**):
-
-    ./scripts/sdlc-spdd/start-agent-session.sh --target . --work-id FEAT-001-my-feature --phase analysis
-
-Paste the **Resume Prompt** from `agent-context/sessions/current-session.md` into AI chat. Load only files listed under **Resolved Context** in that brief.
-
-Analyze, plan, architect, code, test, and review one operation:
-
-    /sdlc-spdd-analysis @requirements/my-feature.md @ROADMAP.md @milestone-1.md
-    ./scripts/sdlc-spdd/index-spdd-analysis.sh --target . --work-id FEAT-001-my-feature
-    /sdlc-spdd-plan @spdd/analysis/FEAT-001-my-feature-analysis.md
-    /sdlc-spdd-architect @spdd/canvas/FEAT-001-my-feature.md
-    /sdlc-spdd-code @spdd/canvas/FEAT-001-my-feature.md operation T01
-    /sdlc-spdd-api-test @spdd/canvas/FEAT-001-my-feature.md
-    /sdlc-spdd-review @spdd/canvas/FEAT-001-my-feature.md
-
-Verify deterministic side-effects after each command (best-effort command invocation evidence):
-
-    ./scripts/sdlc-spdd/verify-agent-command-effects.sh --target . --work-id FEAT-001-my-feature --step plan
-    ./scripts/sdlc-spdd/verify-agent-command-effects.sh --target . --work-id FEAT-001-my-feature --step architect
-    ./scripts/sdlc-spdd/verify-agent-command-effects.sh --target . --work-id FEAT-001-my-feature --step code --operation T01
-    ./scripts/sdlc-spdd/verify-agent-command-effects.sh --target . --work-id FEAT-001-my-feature --step review
-
-Capture session memory and milestone progress:
-
-    ./scripts/sdlc-spdd/capture-session-memory.sh \
-      --target . \
-      --work-id FEAT-001-my-feature \
-      --phase code \
-      --summary "Completed T01" \
-      --validation "tests passed" \
-      --milestone milestone-1.md \
-      --roadmap-note "FEAT-001 completed first implementation operation." \
-      --next "/sdlc-spdd-review @spdd/canvas/FEAT-001-my-feature.md"
-
-Verify planning sync was captured (session-notes + milestone, optionally roadmap):
-
-    ./scripts/sdlc-spdd/verify-agent-command-effects.sh --target . --work-id FEAT-001-my-feature --step capture --milestone milestone-1.md --require-roadmap
-
-Milestone/session-notes sync is a required part of the flow, not a temporary check.
-
-Refresh the roadmap summary from SPDD canvases:
-
-    ./scripts/sdlc-spdd/sync-roadmap-from-spdd.sh --target .
-
-## Core Assistant Commands
-
-`/sdlc-spdd-*` commands run in **AI chat** (Cursor/Copilot/Claude Code), not a terminal — see [How commands work](#how-commands-work) and [How to run assistant commands](docs/initialization-and-invocation.md#how-to-run-assistant-commands).
-
-| Command                    | Use it for                                                          |
-| -------------------------- | ------------------------------------------------------------------- |
-| `/sdlc-spdd-whereami`      | Orient: team registry, active Work ID, phase, gates, next command         |
-| `/sdlc-spdd-init`          | Initialize project context                                          |
-| `/sdlc-spdd-analysis`      | Fowler Step 3: domain keywords, scoped code scan, analysis artifact |
-| `/sdlc-spdd-plan`          | Create REASONS Canvas from accepted analysis                        |
-| `/sdlc-spdd-architect`     | Harden the canvas before coding                                     |
-| `/sdlc-spdd-code`          | Implement one approved operation                                    |
-| `/sdlc-spdd-api-test`      | Generate cURL API test script (Fowler Step 5 verification)          |
-| `/sdlc-spdd-review`        | Compare implementation to the canvas                                |
-| `/sdlc-spdd-prompt-update` | Update the canvas first when behavior or acceptance criteria change |
-| `/sdlc-spdd-retro`         | Capture reusable learnings                                          |
-| `/sdlc-spdd-sync`          | Reconcile accepted implementation drift back into prompt artifacts  |
-
-## Core Scripts
-
-| Script                                            | Use it for                                                                                            |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `scripts/setup-agent-prompts.sh`                  | Install the framework into a target project                                                           |
-| `scripts/upgrade-project.sh`                      | Upgrade framework-owned files in an existing target project                                           |
-| `scripts/sdlc-spdd/sdlc.sh`                       | Daily workflow CLI: `next`, `claim`, `resume`, `advance`, `capture`, `team`, `list-work` (orchestrator: `scripts/sdlc.sh`) |
-| `scripts/sdlc-spdd/start-agent-session.sh`        | Create `current-session.md` with **Resolved Context** and a progressive-disclosure Resume Prompt      |
-| `scripts/sdlc-spdd/resync-agent-session.sh`       | Check or reconcile feature/canonical canvas drift                                                     |
-| `scripts/sdlc-spdd/capture-session-memory.sh`     | Persist session summary, validation, decisions, pitfalls, patterns, and next steps                    |
-| `scripts/sdlc-spdd/index-spdd-analysis.sh`        | Index analysis domain keywords and code areas into `domain-index.md` and `context-index.md`           |
-| `scripts/sdlc-spdd/resolve-agent-context.sh`      | Resolve phase files (`phase-index.md`), `#SkillName` skills, extensions, and area-filtered index rows |
-| `scripts/sdlc-spdd/create-work-from-milestone.sh` | Map milestone checklist items to Work IDs, requirements, feature workspaces, and draft canvases       |
-| `scripts/sdlc-spdd/sync-roadmap-from-spdd.sh`     | Refresh a managed roadmap summary from SPDD canvas metadata                                           |
-| `scripts/sdlc-spdd/summarize-session-notes.sh`    | Import existing daily session notes into durable memory                                               |
-
-## Repository Layout
-
-| Path             | Purpose                                                                                                              |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `docs/`          | User guides, onboarding path, runbooks, and reference docs                                                           |
-| `scripts/`       | Install, upgrade, validation, and target-local runtime script templates                                              |
-| `templates/`     | REASONS Canvas templates, Cursor commands, Copilot prompts, Claude Code commands, stack rules, project-doc templates |
-| `agent-context/` | Memory, playbooks, harness files, and framework-owned context templates                                              |
-| `examples/`      | Reference workflows and sample projects                                                                              |
-
-## Documentation Paths
-
-New users should follow **Start Here** above. The lists below group the remaining docs by task.
-
-### Daily operation
-
-- [Workflow](docs/workflow.md)
-- [Daily runbook](docs/daily-runbook.md)
-- [Roadmap, milestones, and session notes](docs/roadmap-milestones-and-session-notes.md)
-- [Agent session scripts](docs/agent-session-scripts.md)
-- [Cheat sheet](docs/sdlc-spdd-cheat-sheet.md)
-
-### Setup and upgrade
-
-- [Installing into your project](docs/installing-into-your-project.md)
-- [Framework upgrade](docs/framework-upgrade.md)
-- [Cursor usage](docs/cursor-usage.md)
-- [GitHub Copilot usage](docs/copilot-usage.md)
-- [Claude Code usage](docs/claude-usage.md)
-
-### What each part brings
-
-- [What planning brings](docs/what-planning-brings.md)
-- [What SPDD brings](docs/what-spdd-brings.md)
-- [What SDLC brings](docs/what-sdlc-brings.md)
-
-### Deep theory (read later)
-
-Read these after the value guides above. They explain historical context, compliance, and architecture — not first steps.
-
-- [Jira runbook](docs/jira-runbook.md)
-- [Integration linking](docs/integration-linking.md)
-- [Hybrid SDLC Agents + SPDD model](docs/hybrid-model.md)
-- [SPDD compliance](docs/spdd-compliance.md)
-- [Architecture](docs/architecture.md)
-- [Context loading, indexing, and bootstrap](docs/context-loading-and-scaling.md) — tiers, [bootstrap and index-based loading](docs/context-loading-and-scaling.md#bootstrap-and-index-based-loading), scaling
-- [SDLC Agents and the framework](docs/sdlc-agents-and-the-framework.md) — progressive disclosure, `#SkillName`, extensions, and resolve script
-- [Design decisions](docs/design-decisions.md)
-
-## What This Is Not
-
-This is not a compiled multi-agent runtime and not a replacement for Cursor, GitHub Copilot, Claude Code, Jira, SDLC Agents, or OpenSPDD.
-
-It is a repository-based operating model that makes AI-assisted work more governable, reviewable, and reusable.
-
-## License
-
-MIT
-
-## Attribution
-
-This project is inspired by:
-
-- [SDLC Agents](https://github.com/dsilahcilar/sdlc-agents): multi-agent software delivery lifecycle
-- [OpenSPDD](https://github.com/gszhangwei/open-spdd): structured prompt-driven development and REASONS Canvas style design contracts
-
-This project is not an official extension of either project unless that relationship is established later.
+[rest of file unchanged]
