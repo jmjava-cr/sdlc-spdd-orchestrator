@@ -191,7 +191,8 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T01 - Stand up guide + ingest orchestrator memory (leg 2 — RAG chunks)
 
-- Status: In Progress
+- Status: Complete (2026-07-11 — menke-5 append-ingest on :21337, ~18k chunks; MCP
+  `docs_textSearch`/`docs_vectorSearch` return Work ID hits)
 - Description: Local guide instance on branch `ingest-to-hub`; menke-5 profile points
   `guide.directories` at `agent-context/memory/`, `spdd/canvas/`, `spdd/analysis/`; append-ingest
   with git incremental; verify MCP spot-checks.
@@ -212,7 +213,9 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T03 - Implement entity projection ingest (leg 3 — domain graph)
 
-- Status: In Progress
+- Status: Complete (2026-07-11 — hardened + tested on Guide spike branch `bc1f12f`;
+  live load: 9 WorkIds / 9 Canvases / 12 Areas / 21 rels; lesson edges + `allowed-roots`
+  guard + 32 unit tests; runtime-resolved optional backend wired into command packs)
 - Description: Guide spike branch `cursor/spike-spdd-dice-projection-17f4` (base `ingest-to-hub`):
   `SpddMarkdownProjectionService` parses canvas + context-index → `NamedEntityDataRepository`;
   operator API `POST /api/v1/data/spdd-projection/load`. **Not** DICE proposition pipeline.
@@ -224,7 +227,8 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T04 - Connect Cursor to guide MCP + sanity retrieval (all legs)
 
-- Status: In Progress (leg 3 MCP tools live on Guide spike; Cursor client may need MCP reload to list `spdd_*`)
+- Status: Complete (2026-07-11 — Cursor client lists all 14 tools incl. `spdd_*`;
+  `spdd_workSubgraph` returns the SPIKE-001 subgraph via typed edges end-to-end)
 - Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via `spdd_*` domain-query tools on projected entities.
 - Files: guide `SpddDomainTools` / `SpddProjectionConfiguration`; Cursor MCP `embabel-dev` → `http://localhost:21337/sse`
 - Validation: Relevant results for a known Work ID/area via each leg
@@ -262,7 +266,9 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T08 - SPDD workspace documentation
 
-- Status: In Progress
+- Status: Complete (2026-07-11 — runbook `docs/dice-projection-runbook.md`, install doc
+  `--with-guide` section, Guide-side change summary, runtime-resolution docs; chain
+  requirement → analysis → canvas → feature workspace present on spike branch)
 - Description: Feature workspace under `agent-context/features/SPIKE-001-guide-rag-context-backend/`;
   analysis artifact with branch policy and experiment protocol; operator runbook links analysis.
 - Files: `agent-context/features/SPIKE-001-guide-rag-context-backend/*`,
