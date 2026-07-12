@@ -204,7 +204,8 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T02 - Design SDLC-SPDD DICE entity schema (Embabel conventions)
 
-- Status: In Progress
+- Status: Complete (2026-07-11 — persist/retrieve contract formalized in schema doc; typed
+  Kotlin module deferred to post-spike hardening)
 - Description: Define `NamedEntity` types per Embabel conventions (`id`/`name`/`description`, `@Semantics` relationships, `DataDictionary.fromClasses` or `dataDictionaryFromPackages`). Review against `dice/README.md` and `embabel-agent-rag` `NamedEntity`/`NamedEntityDataRepository` APIs. Finalize draft against one real Work ID.
 - Files: `spdd/analysis/SPIKE-001-dice-entity-schema.md`
 - Validation: Convention alignment table complete; ingest mapping uses `NamedEntityDataRepository`, not proposition pipeline

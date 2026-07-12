@@ -53,7 +53,30 @@ After `sdlc.sh capture` updates memory indexes:
 
 ## Blockers / findings
 
-_Record friction (path resolution, ingest time, chunk quality, false positives) here._
+### 2026-07-11 — Guide spike branch build + runtime friction (resolved on branch)
+
+1. **`embabel-agent-rag-neo-drivine` snapshot drift.** Floating `0.1.2-SNAPSHOT` resolved to
+   build `20260428` which extends `EmbeddingAwareChunkingContentElementRepository` — a class
+   that only exists in embabel-agent `0.4.0-SNAPSHOT`. Guide pins agent `0.3.5-SNAPSHOT`, so
+   compile failed (`cannot access EmbeddingAwareChunkingContentElementRepository`). A full bump
+   to agent 0.4.0 breaks other Guide code (`InvalidApiKeyException` moved out of
+   `com.embabel.agent.spi`). **Fix:** pin `embabel-agent-rag-neo-drivine` to timestamp
+   `0.1.2-20260224.010659-19` (pre-`EmbeddingAware`).
+2. **drivine4j starter too old for chat-store.** `ChatStoreAutoConfiguration` references
+   `org.drivine.schema.SchemaCatalog`, absent in drivine4j `0.0.29` → startup
+   `ClassNotFoundException`. **Fix:** bump `drivine4j-spring-boot-starter` to `0.0.45`.
+3. **Unit test API drift.** `InMemoryNamedEntityDataRepository` no longer accepts a null
+   `NativeFinder`; mocked `EmbeddingService.embed` must return a vector (save() embeds
+   eagerly). Test updated; also asserts the new `subgraphForWorkId` read path.
+4. **Ingest JVM dies mid-run — ONNX native crash.** Repeated `append-ingest` runs terminated
+   during startup re-ingestion: exit 137 (SIGKILL) twice, then exit 134 with an hs_err file
+   showing a SIGSEGV in `libonnxruntime.so` (`hs_err_pid2780387.log`, frame
+   `libonnxruntime.so+0xbd6db3`, on the `IngestionRunner.run` stack). Root cause is the native
+   ONNX embedding runtime under sustained embedding load, not heap sizing. Practical
+   mitigation for the spike: ingestion is append-mode idempotent (merge by id), so re-running
+   the script resumes; entity projection data is unaffected (separate write path).
+5. Startup logs a transient Neo4j `AuthenticationException` (scheme 'none') from one early
+   connection before credentials apply; ingestion proceeds normally afterwards.
 
 ## T05 A/B protocol (fixture)
 
