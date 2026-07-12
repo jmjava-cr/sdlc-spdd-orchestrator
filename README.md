@@ -2,7 +2,7 @@
 
 A multi-assistant scaffold for disciplined AI-assisted delivery.
 
-## Current work
+## Work in progress
 
 **SPIKE-001 — Guide as an optional DICE context backend.** SPDD markdown
 (canvases, memory indexes) is projected into a Neo4j entity graph served by an
@@ -12,9 +12,10 @@ code area) instead of similarity alone. The backend is opt-in per install and
 resolved at **runtime** — every command still works on file-based indexes when
 Guide is absent.
 
-- **How the flow works:** [docs/guide-flow.md](docs/guide-flow.md)
+- **How the flow works:** [docs/guide-flow.md](https://github.com/jmjava/sdlc-spdd-orchestrator/blob/cursor/spike-guide-ingest-agent-context-17f4/docs/guide-flow.md) (spike branch)
 - Setup runbook: [docs/dice-projection-runbook.md](docs/dice-projection-runbook.md)
 - Spike status: [spdd/canvas/SPIKE-001-guide-rag-context-backend.md](spdd/canvas/SPIKE-001-guide-rag-context-backend.md)
+- Paired PRs: [orchestrator #24](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/24) · [guide #2](https://github.com/jmjava/guide/pull/2)
 
 **Demo videos:** [Watch three narrated intro segments on GitHub Pages](https://jmjava.github.io/sdlc-spdd-orchestrator/) — SDLC-SPDD overview, install/workflow, and Guide RAG dogfooding.
 
