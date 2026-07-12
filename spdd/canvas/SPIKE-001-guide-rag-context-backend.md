@@ -236,7 +236,11 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T05 - Compare modes on one real Work ID and record on the ledger
 
-- Status: In Progress
+- Status: Complete (2026-07-11 — mode (a) baseline + mode (b) live MCP on
+  menke-fixture corpus; mode (c) domain-graph spot-check already recorded.
+  Fixture ingest fixed: empty `content.versioned.versions` so FORCE_STARTUP_INGEST
+  does not re-embed Embabel docs; Spring `neo4j.authentication` wired so health
+  no longer connects with AuthTokens.none())
 - Description: Run fixture drill across (a) resolver, (b) embedding MCP; capture metrics in
   `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`. Scripts automate mode (a) baseline and
   validate mode (b) MCP URI results.

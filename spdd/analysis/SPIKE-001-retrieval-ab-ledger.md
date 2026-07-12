@@ -31,11 +31,11 @@ Records mode comparisons for T05. FEAT-004 will replace this with
 | date | fixture_case | mode | context_paths | context_bytes | auditability | review_result | rework | notes |
 |------|--------------|------|---------------|---------------|--------------|---------------|--------|-------|
 | 2026-07-11 | code+work-id (C01) | (a) resolver | 6 | 2579 | pass | pass | 0 | auto: `run-retrieval-ab-fixture.sh --capture-a`; every path from index row / Work ID artifact chain |
-| | code+work-id (C01) | (b) embedding | | | | | 0 | MCP on; record via `--check-mcp` |
+| 2026-07-11 | code+work-id (C01) | (b) embedding | 5 chunks | ~score≥0.2 | pass | pass | 0 | live MCP after fixture ingest: `billing retry…` hits `src/billing`; negative `payments` query does not |
 | 2026-07-11 | analysis+work-id (C02) | (a) resolver | 8 | 4026 | pass | pass | 0 | Fowler index trio + Work ID artifacts; all explainable by phase budget rows |
-| | analysis+work-id (C02) | (b) embedding | | | | | 0 | |
+| 2026-07-11 | analysis+work-id (C02) | (b) embedding | 5 chunks | ~score≥0.2 | pass | pass | 0 | `SPIKE-FIX-001 retrieval fixture` vectorSearch hits `spdd/canvas` |
 | 2026-07-11 | areas-only code (C03) | (a) resolver | 2 | 311 | pass | pass | 0 | area-scoped only; no Work ID artifacts pulled |
-| | areas-only code (C03) | (b) embedding | | | | | 0 | |
+| 2026-07-11 | areas-only code (C03) | (b) embedding | 2 chunks | BM25 | pass | pass | 0 | `+idempotency +billing` textSearch hits billing pitfalls / src/billing |
 
 ## Orchestrator Work ID rows (after fixture — optional)
 
