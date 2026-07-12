@@ -2,6 +2,15 @@
 
 A multi-assistant scaffold for disciplined AI-assisted delivery.
 
+## Work in progress
+
+**SPIKE-001 — Guide as an optional DICE context backend** (spike branch
+`cursor/spike-guide-ingest-agent-context-17f4`). Flow overview:
+
+[docs/guide-flow.md](https://github.com/jmjava/sdlc-spdd-orchestrator/blob/cursor/spike-guide-ingest-agent-context-17f4/docs/guide-flow.md)
+
+Paired PRs: [orchestrator #24](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/24) · [guide #2](https://github.com/jmjava/guide/pull/2). Experimental work stays on the spike branch until T06 go/no-go; `main` keeps shipping cleanup without merging the spike yet.
+
 **Demo videos:** [Watch three narrated intro segments on GitHub Pages](https://jmjava.github.io/sdlc-spdd-orchestrator/) — SDLC-SPDD overview, install/workflow, and Guide RAG dogfooding.
 
 ## Recent highlights
@@ -37,11 +46,8 @@ Pointer and workflow state stay local (`.sdlc/pointer`, `.sdlc/workflows/`); tea
 > inspecting wet cement and declaring the building unsafe — let the loop finish
 > before drawing conclusions about a given area.
 
-Note: Guide integration spike
-
-We are starting an exploratory spike to investigate integrating this project with Guide. Experimental work is being done in the existing spike branch: `cursor/spike-guide-ingest-agent-context-17f4` — https://github.com/jmjava/sdlc-spdd-orchestrator/tree/cursor/spike-guide-ingest-agent-context-17f4
-
-We will continue cleanup and stabilization on `main` while the spike progresses in that branch. Experimental commits and notes will remain on the spike branch until we have a clear plan or stable implementation to merge. No breaking changes to `main` are planned during this spike.
+Note: Guide integration spike details (including the flow diagram) live in the
+[Work in progress](#work-in-progress) section above and on the spike branch.
 
 It is built from **three parts** that work together:
 
