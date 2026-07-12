@@ -56,3 +56,20 @@ Fixture only — spike branch.
 ## S - Safeguards
 
 Do not merge fixture into target project installers.
+
+## Review Checklist
+
+- [x] Seeded indexes resolve deterministically via `resolve-agent-context.sh`
+- [x] Negative assertion (`src/payments`) present
+- [x] Gold test green in CI (`test-retrieval-fixture-resolver.yml`)
+
+## Sync Notes
+
+Fixture is static by design; sync is only needed if the resolver contract or
+gold TSV format changes.
+
+## Final Status
+
+- Status: Complete
+- Completed Date: 2026-07-05
+- PR: n/a (fixture committed on spike branch)
