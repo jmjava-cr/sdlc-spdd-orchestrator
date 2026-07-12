@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 usage() {
   cat <<'EOF'
-Usage: init-project.sh --target <path> [--cursor] [--copilot] [--claude] [--force] [--dry-run]
+Usage: init-project.sh --target <path> [--cursor] [--copilot] [--claude] [--with-guide] [--force] [--dry-run]
 
 Initialize a target project with SDLC-SPDD scaffold files.
 
@@ -15,6 +15,9 @@ Options:
   --cursor          Install Cursor command templates
   --copilot         Install GitHub Copilot instructions and prompt files
   --claude          Install Claude Code commands and CLAUDE.md
+  --with-guide      Opt this install into the optional Guide DICE context
+                    backend (writes agent-context/harness/guide-dice.md;
+                    backend availability is still resolved at runtime)
   --force           Overwrite existing generated files
   --dry-run         Show actions without writing files
   --help            Print this help message
@@ -25,6 +28,7 @@ TARGET=""
 INSTALL_CURSOR=0
 INSTALL_COPILOT=0
 INSTALL_CLAUDE=0
+WITH_GUIDE=0
 FORCE=0
 DRY_RUN=0
 
@@ -44,6 +48,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --claude)
       INSTALL_CLAUDE=1
+      shift
+      ;;
+    --with-guide)
+      WITH_GUIDE=1
       shift
       ;;
     --force)
@@ -215,6 +223,15 @@ copy_if_missing \
   "${REPO_ROOT}/agent-context/harness/validation-rules.md" \
   "${TARGET}/agent-context/harness/validation-rules.md"
 
+# Optional Guide DICE backend opt-in. The marker only enables runtime probing
+# (resolve-context-backend.sh); commands still fall back to file-based context
+# whenever Guide is unreachable.
+if [[ "${WITH_GUIDE}" -eq 1 ]]; then
+  copy_if_missing \
+    "${REPO_ROOT}/templates/agent-context/harness/guide-dice.md" \
+    "${TARGET}/agent-context/harness/guide-dice.md"
+fi
+
 copy_if_missing \
   "${REPO_ROOT}/agent-context/sdlc-pointer.sh" \
   "${TARGET}/agent-context/sdlc-pointer.sh"
@@ -276,6 +293,7 @@ for file in \
   capture-session-memory.sh \
   index-spdd-analysis.sh \
   resolve-agent-context.sh \
+  resolve-context-backend.sh \
   create-work-from-milestone.sh \
   sync-roadmap-from-spdd.sh \
   summarize-session-notes.sh \

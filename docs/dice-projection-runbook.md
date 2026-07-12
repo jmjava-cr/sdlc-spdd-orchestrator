@@ -153,14 +153,32 @@ legs 1–2 over the same store.
 
 ## 7. Typical flow for a new SPDD run
 
+DICE is optional per install and resolved at runtime — the slash commands
+check the backend before using any `spdd_*` tool:
+
+```bash
+./scripts/resolve-context-backend.sh --target .        # orchestrator repo
+./scripts/sdlc-spdd/resolve-context-backend.sh --target .   # installed project
+```
+
+`CONTEXT_BACKEND=files` (no `agent-context/harness/guide-dice.md` marker, or
+Guide unreachable) means the run proceeds on the file-based indexes alone.
+When it reports `guide-dice`:
+
 1. Session starts with a Work ID (or derives target areas from the analysis phase).
 2. `spdd_workSubgraph(workId)` → canvas + areas + this work's recorded lessons.
 3. `spdd_areaLessons(area)` for each target area → decisions/pitfalls/patterns from
    **all** previous Work IDs that touched the same code.
 4. `docs_vectorSearch` / `docs_textSearch` with the Work ID and area terms → supporting
    prose (session notes, retros, analysis docs).
-5. After the run, capture scripts update `context-index.md`; re-run
-   `project-spdd-entities.sh` so the new lessons become graph-queryable.
+5. After the run, capture scripts update `context-index.md`; re-project so the
+   new lessons become graph-queryable:
+
+   ```bash
+   ./scripts/resolve-context-backend.sh --target . --project --work-id <WORK-ID>
+   ```
+
+   (no-op when the backend resolves to `files`).
 
 ## Troubleshooting
 

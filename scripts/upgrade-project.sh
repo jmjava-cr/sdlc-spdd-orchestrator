@@ -450,6 +450,7 @@ for file in \
   capture-session-memory.sh \
   index-spdd-analysis.sh \
   resolve-agent-context.sh \
+  resolve-context-backend.sh \
   create-work-from-milestone.sh \
   sync-roadmap-from-spdd.sh \
   summarize-session-notes.sh \

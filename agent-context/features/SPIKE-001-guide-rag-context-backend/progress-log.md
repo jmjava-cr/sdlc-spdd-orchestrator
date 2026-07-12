@@ -1,5 +1,24 @@
 # Progress Log: SPIKE-001-guide-rag-context-backend
 
+## 2026-07-11 — Runtime-resolved optional DICE backend for the command packs
+
+- **Runtime resolution added:** new `scripts/resolve-context-backend.sh` (installed into
+  targets as `scripts/sdlc-spdd/resolve-context-backend.sh`). Two-step: opt-in marker
+  `agent-context/harness/guide-dice.md` must exist AND the Guide stats endpoint must
+  answer within 2s; otherwise reports `CONTEXT_BACKEND=files` (exit 0 — files is a valid
+  answer, never an error). `--project [--work-id]` re-posts the projection load on the
+  persist side (no-op when files).
+- **Command packs wired (18 files, 3 adapters):** analysis/architect/code/review gained a
+  "Context Backend (runtime-resolved)" section mapping `guide-dice` to the right `spdd_*`
+  tools; retro/sync gained the re-projection step. Grounding files (cursor rule, CLAUDE.md,
+  copilot-instructions) mention the optional backend. `validate-command-adapters.sh` green.
+- **Installer:** `init-project.sh --with-guide` copies the marker template
+  (`templates/agent-context/harness/guide-dice.md`); `upgrade-project.sh` syncs the new
+  script. E2E install test: 39/39 checks, all three runtime states verified
+  (live → guide-dice; unreachable → files; no marker → files).
+- Orchestrator repo itself opted in (`agent-context/harness/guide-dice.md`, endpoint :21337)
+  and `.cursor/` commands installed/refreshed from templates.
+
 ## 2026-07-11 — DICE contract formalized; guide spike branch build fixed; live run started
 
 - **Contract (persist/retrieve) formalized:** `spdd/analysis/SPIKE-001-dice-entity-schema.md`
