@@ -224,11 +224,11 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T04 - Connect Cursor to guide MCP + sanity retrieval (all legs)
 
-- Status: In Progress
-- Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via fork domain-query tool on projected entities.
-- Files: (Cursor MCP config; fork tool)
+- Status: In Progress (leg 3 MCP tools live on Guide spike; Cursor client may need MCP reload to list `spdd_*`)
+- Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via `spdd_*` domain-query tools on projected entities.
+- Files: guide `SpddDomainTools` / `SpddProjectionConfiguration`; Cursor MCP `embabel-dev` → `http://localhost:21337/sse`
 - Validation: Relevant results for a known Work ID/area via each leg
-- Research: MCP connected; legs 1+2 verified; leg 3 projection implemented on guide spike branch (T04 MCP fork pending)
+- Research: MCP connected; legs 1+2 verified; leg 3 `spdd_workSubgraph` / `spdd_projectionStats` / `spdd_findByLabel` verified via MCP JSON-RPC (2026-07-11)
 
 ### T05 - Compare modes on one real Work ID and record on the ledger
 
