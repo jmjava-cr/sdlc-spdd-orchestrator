@@ -57,6 +57,14 @@ commands=(
   whereami
 )
 
+workflow_commands=(
+  claim
+  shelf
+  advance
+  next
+  team
+)
+
 failures=0
 
 detect_roots() {
@@ -99,6 +107,21 @@ copilot_path_for() {
 claude_path_for() {
   local cmd="$1"
   echo "${CLAUDE_ROOT}/sdlc-spdd-${cmd}.md"
+}
+
+workflow_cursor_path_for() {
+  local cmd="$1"
+  echo "${CURSOR_ROOT}/sdlc-${cmd}.md"
+}
+
+workflow_copilot_path_for() {
+  local cmd="$1"
+  echo "${COPILOT_ROOT}/sdlc-${cmd}.prompt.md"
+}
+
+workflow_claude_path_for() {
+  local cmd="$1"
+  echo "${CLAUDE_ROOT}/sdlc-${cmd}.md"
 }
 
 require_file() {
@@ -144,6 +167,16 @@ echo "Mode: ${MODE}"
 if [[ "${HAS_CURSOR}" -eq 1 ]]; then echo "Cursor root: ${CURSOR_ROOT}"; fi
 if [[ "${HAS_COPILOT}" -eq 1 ]]; then echo "Copilot root: ${COPILOT_ROOT}"; fi
 if [[ "${HAS_CLAUDE}" -eq 1 ]]; then echo "Claude root: ${CLAUDE_ROOT}"; fi
+
+check_workflow_pack() {
+  local cmd="$1"
+  local path="$2"
+
+  require_contains "${path}" "## Required Behavior" "Required Behavior section"
+  require_contains "${path}" "## Output" "Output section"
+  require_contains "${path}" "Do not implement" "workflow no-code guardrail"
+  require_contains "${path}" "sdlc.sh" "workflow shell delegation"
+}
 
 check_pack() {
   # Verify required sections and the per-command guardrail in one pack file.
@@ -197,6 +230,12 @@ grounding_anchors=(
   "Initialize -> Analysis -> Plan -> Architect -> Code -> API Test -> Review -> Retro -> Sync"
   "## Operating Model"
   "## Work Rules"
+  "## Workflow Commands"
+  "/sdlc-claim"
+  "/sdlc-shelf"
+  "/sdlc-advance"
+  "/sdlc-next"
+  "/sdlc-team"
   "ROADMAP.md"
   "milestone-*.md"
   "session-notes/"
@@ -259,6 +298,34 @@ for cmd in "${commands[@]}"; do
     echo "Required Behavior step count diverges for '${cmd}': ${steps_summary}" >&2
     failures=$((failures + 1))
   fi
+done
+
+echo "Validating workflow command packs (claim/shelf/advance/next/team)..."
+for cmd in "${workflow_commands[@]}"; do
+  pack_names=()
+  pack_paths=()
+
+  if [[ "${HAS_CURSOR}" -eq 1 ]]; then
+    p="$(workflow_cursor_path_for "${cmd}")"
+    require_file "${p}" || true
+    if [[ -f "${p}" ]]; then pack_names+=("cursor"); pack_paths+=("${p}"); fi
+  fi
+  if [[ "${HAS_COPILOT}" -eq 1 ]]; then
+    p="$(workflow_copilot_path_for "${cmd}")"
+    require_file "${p}" || true
+    if [[ -f "${p}" ]]; then pack_names+=("copilot"); pack_paths+=("${p}"); fi
+  fi
+  if [[ "${HAS_CLAUDE}" -eq 1 ]]; then
+    p="$(workflow_claude_path_for "${cmd}")"
+    require_file "${p}" || true
+    if [[ -f "${p}" ]]; then pack_names+=("claude"); pack_paths+=("${p}"); fi
+  fi
+
+  (( ${#pack_paths[@]} > 0 )) || continue
+
+  for i in "${!pack_paths[@]}"; do
+    check_workflow_pack "${cmd}" "${pack_paths[$i]}"
+  done
 done
 
 echo "Validating always-on grounding files (whole-ecosystem norm)..."

@@ -3,22 +3,22 @@ name: Validate Command Adapters
 on:
   pull_request:
     paths:
-      - 'templates/cursor/sdlc-spdd-*.md'
+      - 'templates/cursor/sdlc-*.md'
       - 'templates/cursor/rules/sdlc-spdd.mdc'
-      - 'templates/copilot/prompts/sdlc-spdd-*.prompt.md'
+      - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/copilot/copilot-instructions.md'
-      - 'templates/claude/commands/sdlc-spdd-*.md'
+      - 'templates/claude/commands/sdlc-*.md'
       - 'templates/claude/CLAUDE.md'
       - 'scripts/validate-command-adapters.sh'
       - '.github/workflows/validate-command-adapters.yml'
   push:
     branches: [main]
     paths:
-      - 'templates/cursor/sdlc-spdd-*.md'
+      - 'templates/cursor/sdlc-*.md'
       - 'templates/cursor/rules/sdlc-spdd.mdc'
-      - 'templates/copilot/prompts/sdlc-spdd-*.prompt.md'
+      - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/copilot/copilot-instructions.md'
-      - 'templates/claude/commands/sdlc-spdd-*.md'
+      - 'templates/claude/commands/sdlc-*.md'
       - 'templates/claude/CLAUDE.md'
       - 'scripts/validate-command-adapters.sh'
       - '.github/workflows/validate-command-adapters.yml'
