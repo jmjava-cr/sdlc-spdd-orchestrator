@@ -7,7 +7,7 @@
 - Status: Draft
 - Readiness: Needs Analysis
 - Created: 2026-06-19
-- Updated: 2026-06-19
+- Updated: 2026-07-15
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash
@@ -51,6 +51,8 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 - Resolve during analysis: exact set of helpers and their grouping into files (one `common.sh` vs. several focused libs).
 - How installed/copied scripts in target projects resolve the lib path (relative vs. resolved).
+
+**Resolved in analysis (2026-07-15):** Focused libs under `scripts/lib/`; installed copy at `scripts/sdlc-spdd/lib/`. See `spdd/analysis/FEAT-001-shared-script-library-analysis.md`.
 
 ## E - Entities
 
@@ -113,7 +115,7 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### T01 - Inventory duplication
 
-- Status: Not Started
+- Status: Complete
 - Description: Catalog the duplicated functions and confirm behavior-identical intent; decide lib grouping + sourcing convention.
 - Files: spdd/analysis/FEAT-001-shared-script-library-analysis.md
 - Tests: Not applicable

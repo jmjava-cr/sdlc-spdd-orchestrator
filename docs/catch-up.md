@@ -19,4 +19,15 @@ git fetch origin cursor/catch-up-branch-evaluation-981e
 git checkout cursor/catch-up-branch-evaluation-981e
 ```
 
+## Integration branch (manual testing before `main`)
+
+Collect planned merges and run manual tests on **`cursor/integration-981e`**:
+
+```bash
+git fetch origin cursor/integration-981e
+git checkout cursor/integration-981e
+```
+
+See [integration-branch.md](integration-branch.md) for contents, automated gates, manual checklist, and merge procedure.
+
 After merging useful parts into `main`, delete the catch-up branch or add a new dated session note for the next evaluation.
