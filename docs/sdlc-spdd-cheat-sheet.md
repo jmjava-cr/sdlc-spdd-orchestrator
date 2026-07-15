@@ -68,7 +68,8 @@ Claim and resume:
 
     ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>
     /sdlc-claim <WORK-ID>
-    ./scripts/sdlc-spdd/sdlc.sh resume <WORK-ID> [--phase <phase>]
+    ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID> --force   # take over after coordinating
+    ./scripts/sdlc-spdd/sdlc.sh resume <WORK-ID> [--phase <phase>] [--force]
     ./scripts/sdlc-spdd/sdlc.sh start
 
 Phase transitions:
@@ -182,6 +183,7 @@ and continue to planning:
 |------|---------|
 | What now? (orientation) | `/sdlc-next`, `/sdlc-spdd-whereami`, or `./scripts/sdlc-spdd/sdlc.sh next` |
 | Claim / shelf / advance / team | `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-team` |
+| Take over a teammate claim | `/sdlc-claim <WORK-ID> --force` or `sdlc.sh claim <WORK-ID> --force` |
 | Initialize repo context | `/sdlc-spdd-init` |
 | Analyze requirement + scope code areas | `/sdlc-spdd-analysis @requirements/file.md` |
 | Turn analysis into canvas | `/sdlc-spdd-plan @spdd/analysis/WORK-ID-analysis.md` |

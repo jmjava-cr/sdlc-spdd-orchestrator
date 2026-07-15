@@ -39,7 +39,9 @@ Work moves through specialized phases instead of one undifferentiated "fix it" c
 
     Init -> Analysis -> Plan -> Architect -> Code -> API Test -> Review -> Prompt-update -> Retro -> Sync
 
-Each phase has a dedicated command. Run `/sdlc-spdd-*` in **AI chat** (Cursor/Copilot/Claude Code), not a terminal — see [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands):
+Each phase has a dedicated command. Run `/sdlc-spdd-*` in **AI chat** (Cursor/Copilot/Claude Code), not a terminal — see [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
+
+Rows for Orient / Claim below are **workflow wrappers** (`/sdlc-*`), not lifecycle phases — they manage Work ID and phase state via `sdlc.sh`.
 
 | Phase | Command |
 |-------|---------|

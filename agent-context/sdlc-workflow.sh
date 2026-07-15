@@ -540,7 +540,7 @@ SDLC workflow helper — short paths for humans and agents
   ./scripts/sdlc.sh capture --summary "..."   # guarded capture (pointer must match)
   ./scripts/sdlc.sh status --json
 
-  ./scripts/sdlc.sh resume <WORK-ID> [--phase PHASE]
+  ./scripts/sdlc.sh resume <WORK-ID> [--phase PHASE] [--force]
   ./scripts/sdlc.sh advance [--to PHASE]
   ./scripts/sdlc.sh skip <PHASE> --reason "why"
   ./scripts/sdlc.sh shelf --reason "why"
@@ -548,11 +548,12 @@ SDLC workflow helper — short paths for humans and agents
   ./scripts/sdlc.sh list-shelved
   ./scripts/sdlc.sh team              # team registry + your pointer
   ./scripts/sdlc.sh list-work         # all Work IDs in the repo
-  ./scripts/sdlc.sh claim <WORK-ID> [--branch NAME] [--pr #N] [--jira KEY]
+  ./scripts/sdlc.sh claim <WORK-ID> [--force] [--branch NAME] [--pr #N] [--jira KEY]
   ./scripts/sdlc.sh release --reason "why"
   ./scripts/sdlc.sh sync-team          # mark done from canvas Final Status
 
-In chat: /sdlc-spdd-whereami
+In chat: /sdlc-next or /sdlc-spdd-whereami
+Workflow chat: /sdlc-claim, /sdlc-shelf, /sdlc-advance, /sdlc-next, /sdlc-team
 
 Team sharing: commit agent-context/work-registry.tsv after claim/release/shelf.
 Set SDLC_USER to override the owner name. SDLC_NO_TEAM_REGISTRY=1 opts out.

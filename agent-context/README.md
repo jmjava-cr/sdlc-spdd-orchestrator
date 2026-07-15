@@ -153,13 +153,16 @@ teammates see who is on which Work ID, phase, and operation.
 ./scripts/sdlc.sh team                   # team registry + your pointer
 ./scripts/sdlc.sh claim FEAT-001-alpha   # resume + register as active owner
 ./scripts/sdlc.sh release --reason "handoff to QA"
-./scripts/sdlc.sh resume OTHER-ID --force   # take over if teammate left stale claim
+# Take over a teammate's active claim (after coordinating with them):
+./scripts/sdlc.sh claim OTHER-ID --force
+./scripts/sdlc.sh resume OTHER-ID --force   # equivalent takeover via resume
 ```
 
 Set `SDLC_USER="Jane"` to label registry rows. Set `SDLC_NO_TEAM_REGISTRY=1` to opt out.
 
 **Stale claims:** active rows older than `SDLC_TEAM_STALE_DAYS` (default 7) show `[STALE>Nd]` in
-`team` / `list-work`. Stale claims warn but do not block; non-stale claims block until `--force`.
+`team` / `list-work`. Stale claims warn but do not block; non-stale claims block until
+`claim --force` or `resume --force`.
 
 **Done status:** canvases with `## Final Status` → `Status: Complete` are marked `done` when you run
 `team`, `list-work`, or `sync-team`.

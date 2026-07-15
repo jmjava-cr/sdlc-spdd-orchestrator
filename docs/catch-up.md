@@ -66,12 +66,12 @@ For the full remote branch table and `gh` cleanup commands, see [session-notes/2
 
 ## Open issues (at integration time)
 
-| Issue | Action when #27 merges |
-|-------|------------------------|
-| [#23](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/23) | Close — workflow commands on integration |
-| [#7](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/7) | Close — parity already on `main` |
-| [#28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) | Close — integration merged |
-| [#22](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/22), [#18](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/18) | Stay open — not on integration |
+| Issue | Action |
+|-------|--------|
+| [#23](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/23) | **Close when #27 merges** — workflow commands on integration |
+| [#7](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/7) | **Close anytime** — parity already on `main` (not blocked on #27) |
+| [#28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) | **Close when #27 merges** — integration merged |
+| [#22](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/22), [#18](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/18) | **Stay open** — not on integration |
 
 Commands: [issues/INTEGRATION-MERGE-28.md](../issues/INTEGRATION-MERGE-28.md)
 

@@ -156,6 +156,7 @@ Shared coordination via git. Who owns which Work ID, phase, branch, PR, and Jira
     ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>    # commit agent-context/work-registry.tsv
     /sdlc-team
     /sdlc-claim <WORK-ID>
+    /sdlc-claim <WORK-ID> --force    # take over after coordinating with the current owner
 
 File: `agent-context/work-registry.tsv`.
 

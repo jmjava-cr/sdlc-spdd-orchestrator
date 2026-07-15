@@ -273,5 +273,7 @@ Script sequence: [Morning or Start-of-Session Check](#morning-or-start-of-sessio
 | See all Work IDs | `./scripts/sdlc-spdd/sdlc.sh list-work` | — |
 | Team who-is-on-what | `./scripts/sdlc-spdd/sdlc.sh team` | `/sdlc-team` |
 | Claim for team | `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` → commit `work-registry.tsv` | `/sdlc-claim <WORK-ID>` |
+| Take over claim | `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID> --force` | `/sdlc-claim <WORK-ID> --force` |
 
 Local state (gitignored): `.sdlc/pointer`, `.sdlc/workflows/`. Shared via git: `agent-context/work-registry.tsv`.
+Non-stale foreign claims block until you coordinate and re-run with `--force`.
