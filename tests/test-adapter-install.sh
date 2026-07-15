@@ -86,6 +86,7 @@ expect_fail() {
 }
 
 commands=(init analysis plan architect code api-test review prompt-update retro sync whereami)
+workflow_commands=(claim shelf advance next team)
 
 assert_cursor_pack() {
   local t="$1"
@@ -93,6 +94,10 @@ assert_cursor_pack() {
   for c in "${commands[@]}"; do
     assert_file "${t}/.cursor/commands/sdlc-spdd-${c}.md"
     assert_same "${t}/.cursor/commands/sdlc-spdd-${c}.md" "${CURSOR_TPL}/sdlc-spdd-${c}.md"
+  done
+  for c in "${workflow_commands[@]}"; do
+    assert_file "${t}/.cursor/commands/sdlc-${c}.md"
+    assert_same "${t}/.cursor/commands/sdlc-${c}.md" "${CURSOR_TPL}/sdlc-${c}.md"
   done
   # Always-on operating-model rule (whole-ecosystem grounding).
   assert_file "${t}/.cursor/rules/sdlc-spdd.mdc"
@@ -107,6 +112,10 @@ assert_copilot_pack() {
     assert_file "${t}/.github/prompts/sdlc-spdd-${c}.prompt.md"
     assert_same "${t}/.github/prompts/sdlc-spdd-${c}.prompt.md" "${COPILOT_TPL}/prompts/sdlc-spdd-${c}.prompt.md"
   done
+  for c in "${workflow_commands[@]}"; do
+    assert_file "${t}/.github/prompts/sdlc-${c}.prompt.md"
+    assert_same "${t}/.github/prompts/sdlc-${c}.prompt.md" "${COPILOT_TPL}/prompts/sdlc-${c}.prompt.md"
+  done
 }
 
 assert_claude_pack() {
@@ -118,6 +127,10 @@ assert_claude_pack() {
     assert_file "${t}/.claude/commands/sdlc-spdd-${c}.md"
     assert_same "${t}/.claude/commands/sdlc-spdd-${c}.md" "${CLAUDE_TPL}/commands/sdlc-spdd-${c}.md"
   done
+  for c in "${workflow_commands[@]}"; do
+    assert_file "${t}/.claude/commands/sdlc-${c}.md"
+    assert_same "${t}/.claude/commands/sdlc-${c}.md" "${CLAUDE_TPL}/commands/sdlc-${c}.md"
+  done
 }
 
 assert_claude_grounded() {
@@ -128,6 +141,7 @@ assert_claude_grounded() {
   assert_contains "${t}/CLAUDE.md" "session-notes/" "Claude Planning grounding"
   assert_contains "${t}/CLAUDE.md" "spdd/analysis/" "Claude SPDD analysis grounding"
   assert_contains "${t}/CLAUDE.md" "/sdlc-spdd-analysis" "Claude analysis command"
+  assert_contains "${t}/CLAUDE.md" "/sdlc-claim" "Claude workflow claim command"
   assert_contains "${t}/CLAUDE.md" "agent-context/sessions/" "Claude SDLC session grounding"
   assert_contains "${t}/CLAUDE.md" "agent-context/memory/" "Claude SDLC memory grounding"
   assert_count "${t}/CLAUDE.md" "BEGIN SDLC-SPDD MANAGED CLAUDE GROUNDING" 1 "Claude managed grounding begin markers"
