@@ -8,7 +8,7 @@ Collect planned merges off `main`, run automated gates and a manual checklist, t
 | **Tracking issue** | [#28 — Merge integration branch to main](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) |
 | **Status** | FEAT-001–003 complete — ready for manual sign-off |
 | **Created** | 2026-07-15 |
-| **Base** | `origin/main` @ `3b519cb` |
+| **Base** | `origin/main` @ `3b519cb` (verified 2026-07-15 — `main` has not moved) |
 
 ---
 

@@ -926,7 +926,10 @@ sdlc_workflow_resume() {
   fi
 
   if declare -F sdlc_team_check_claim >/dev/null 2>&1; then
-    sdlc_team_check_claim "${work_id}" "${force_claim}" || return $?
+    # Skip when claim already checked (avoids duplicate "Taking over…" on claim --force)
+    if [[ "${_SDLC_TEAM_CLAIM_CHECKED:-0}" != "1" ]]; then
+      sdlc_team_check_claim "${work_id}" "${force_claim}" || return $?
+    fi
   fi
 
   local current

@@ -268,11 +268,17 @@ if SDLC_USER="bob" SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" claim "${wo
 else
   ok "claim without --force refuses foreign owner"
 fi
-if SDLC_USER="bob" SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" claim "${work_id}" --force >/dev/null; then
+if SDLC_USER="bob" SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" claim "${work_id}" --force >"${T}/claim-force.out" 2>"${T}/claim-force.err"; then
   if grep -q $'FEAT-009b-force\tactive\t.*\tbob\t' "${T}/agent-context/work-registry.tsv"; then
     ok "claim --force takes over via sdlc.sh wrapper"
   else
     bad "claim --force succeeded but owner not bob"
+  fi
+  takeover_count="$(grep -c 'Taking over' "${T}/claim-force.err" || true)"
+  if [[ "${takeover_count}" -eq 1 ]]; then
+    ok "claim --force prints Taking over once"
+  else
+    bad "claim --force Taking over count=${takeover_count} (want 1)"
   fi
 else
   bad "claim --force should succeed"
