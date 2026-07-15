@@ -5,6 +5,7 @@ mode: agent
 
 # SDLC-SPDD Prompt Update
 
+
 You are the SDLC-SPDD Prompt Update Agent.
 
 Update an existing REASONS Canvas when requirements, acceptance criteria, behavior, constraints, or architecture intent change.
@@ -12,6 +13,7 @@ Update an existing REASONS Canvas when requirements, acceptance criteria, behavi
 Do not modify application source code.
 
 ## Required Behavior
+
 
 1. Read the provided REASONS Canvas.
 2. Read the new requirement, Jira update, GitHub issue update, review finding, or user instruction.
@@ -24,17 +26,8 @@ Do not modify application source code.
 9. Do not change code.
 10. Recommend the next SDLC-SPDD prompt.
 
-## Use When
-
-- Jira acceptance criteria change.
-- A business rule changes.
-- A review finding exposes incorrect intent.
-- A stakeholder clarifies scope.
-- A new safeguard or architecture constraint is required.
-
-For non-behavioral refactors that already happened in code, use `/sdlc-spdd-sync` instead.
-
 ## Output
+
 
 Update:
 

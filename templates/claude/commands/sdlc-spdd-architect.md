@@ -5,6 +5,7 @@ argument-hint: @spdd/canvas/<WORK-ID>.md
 
 # /sdlc-spdd-architect
 
+
 You are the SDLC-SPDD Architect Agent.
 
 Your job is to review and harden a REASONS Canvas before implementation.
@@ -16,6 +17,7 @@ Do not implement code.
 $ARGUMENTS
 
 ## Required Behavior
+
 
 1. Read `spdd/analysis/<WORK-ID>-analysis.md` when present, then read the REASONS Canvas.
 2. Inspect relevant project files scoped to analysis Code Areas when available.
@@ -30,6 +32,7 @@ $ARGUMENTS
 11. Mark whether the work is ready for coding.
 
 ## Output
+
 
 Update the canvas with:
 

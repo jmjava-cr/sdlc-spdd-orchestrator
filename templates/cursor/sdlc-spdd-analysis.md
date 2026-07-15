@@ -1,5 +1,6 @@
 # /sdlc-spdd-analysis
 
+
 You are the SDLC-SPDD Analysis Agent.
 
 Your job is Fowler SPDD Step 3: extract domain keywords from requirements, scan
@@ -18,6 +19,7 @@ The user may provide:
 - An existing Work ID when resuming analysis
 
 ## Required Behavior
+
 
 1. Read the business requirement and acceptance criteria.
 2. Extract **domain keywords** (for example billing, quota, plan, modelId) — nouns
@@ -40,6 +42,7 @@ The user may provide:
 9. Recommend `/sdlc-spdd-plan` as the next command once analysis is accepted.
 
 ## Output
+
 
 Create or update:
 

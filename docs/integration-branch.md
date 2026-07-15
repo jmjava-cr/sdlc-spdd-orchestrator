@@ -24,18 +24,11 @@
 
 | Work ID | Operation | Artifact |
 |---------|-----------|----------|
-| FEAT-001-shared-script-library | T01 inventory | `spdd/analysis/FEAT-001-shared-script-library-analysis.md` |
-| FEAT-001-shared-script-library | T02 lib helpers | `scripts/lib/*.sh` installed to `scripts/sdlc-spdd/lib/` |
-| FEAT-001-shared-script-library | T03 clusters A–F | Lib migration across capture, session, work-id, install, remaining runtime scripts |
+| FEAT-001-shared-script-library | T01–T04 complete | `scripts/lib/`, `scripts/verify-script-lib-duplicates.sh` |
+| FEAT-002-command-spec-generation | T01–T05 complete | `spec/commands/`, `scripts/generate-command-adapters.sh`, CI staleness |
+| FEAT-003-extension-hook-manifest | T01–T04 complete | `agent-context/extensions/manifest.md`, resolver + tests |
 
----
-
-## Fetch locally
-
-```bash
-git fetch origin cursor/integration-981e
-git checkout cursor/integration-981e
-```
+**Remaining milestone-1 item:** readability pass (item #4) — not started on integration.
 
 ---
 
@@ -43,10 +36,13 @@ git checkout cursor/integration-981e
 
 ```bash
 ./scripts/validate-command-adapters.sh
+./scripts/generate-command-adapters.sh --check
+./scripts/verify-script-lib-duplicates.sh
 ./tests/test-adapter-install.sh
 ./tests/test-scripts-lib.sh
 ./tests/test-index-spdd-analysis.sh
 ./tests/test-resolve-agent-context.sh
+./tests/test-extension-manifest.sh
 ./tests/test-sdlc-workflow.sh
 ./tests/test-sdlc-pointer.sh
 ./scripts/check-posture-boundary.sh
@@ -135,9 +131,11 @@ git push origin main
 
 Then close:
 
-- PR #25 and #26 (superseded by integration merge, or merge individually first)
-- Issue #23 (workflow commands)
-- Issue #7 (instruction parity — already on main)
+- Issue **#23** (workflow commands — on integration)
+- Issue **#7** (instruction parity — already on `main`)
+- Draft PRs **#25** and **#26** (superseded by #27)
+
+See `issues/INTEGRATION-MERGE-28.md` for the full close list and commands.
 
 Delete feature branches after merge:
 
@@ -153,13 +151,21 @@ git push origin --delete cursor/catch-up-branch-evaluation-981e
 
 Per [milestone-1.md](../milestone-1.md) make-it-right order:
 
-1. **FEAT-001 T01** — duplication inventory (analysis artifact on this branch)
-2. **FEAT-001 T02** — create `scripts/lib/*.sh` helpers
-3. **FEAT-001 T03** — refactor consumers cluster by cluster
-4. **FEAT-002** — command spec generation (after FEAT-001)
-5. **FEAT-003** — extension/hook manifest
+1. ~~**FEAT-001** — shared `scripts/lib/`~~ (complete on integration)
+2. ~~**FEAT-002** — command spec generation~~ (complete on integration)
+3. ~~**FEAT-003** — extension/hook manifest~~ (complete on integration)
+4. **Readability pass** — consistent structure, naming, and examples
 
 See [docs/catch-up.md](catch-up.md) for full branch/issue inventory.
+
+---
+
+## Fetch locally
+
+```bash
+git fetch origin cursor/integration-981e
+git checkout cursor/integration-981e
+```
 
 ---
 

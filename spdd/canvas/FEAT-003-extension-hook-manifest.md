@@ -31,11 +31,11 @@ and target projects can plug in without reverse-engineering `resolve-agent-conte
 
 ### Acceptance Criteria
 
-- [ ] A manifest declares extension points: phase extensions, skills, hooks (path, phase/trigger, description).
-- [ ] `resolve-agent-context.sh` reads the manifest and resolves the same set of files it does today (no behavior change).
-- [ ] When no manifest exists, current convention-based resolution still works (backward compatible).
-- [ ] An example extension exercises the manifest end to end.
-- [ ] The manifest format is documented for contributors.
+- [x] A manifest declares extension points: phase extensions, skills, hooks (path, phase/trigger, description).
+- [x] `resolve-agent-context.sh` reads the manifest and resolves the same set of files it does today (no behavior change).
+- [x] When no manifest exists, current convention-based resolution still works (backward compatible).
+- [x] An example extension exercises the manifest end to end.
+- [x] The manifest format is documented for contributors.
 
 ### Non-Goals
 
@@ -111,7 +111,7 @@ and target projects can plug in without reverse-engineering `resolve-agent-conte
 
 ### T01 - Inventory current extension resolution
 
-- Status: Not Started
+- Status: Complete
 - Description: Document how phases/skills/hooks are discovered today.
 - Files: spdd/analysis/FEAT-003-extension-hook-manifest-analysis.md
 - Tests: Not applicable
@@ -119,7 +119,7 @@ and target projects can plug in without reverse-engineering `resolve-agent-conte
 
 ### T02 - Define the manifest format
 
-- Status: Not Started
+- Status: Complete
 - Description: Specify the manifest declaring phase extensions, skills, and hook points.
 - Files: agent-context/extensions/manifest.md
 - Tests: Not applicable
@@ -127,7 +127,7 @@ and target projects can plug in without reverse-engineering `resolve-agent-conte
 
 ### T03 - Read the manifest in resolve-agent-context.sh
 
-- Status: Not Started
+- Status: Complete
 - Description: Resolve from manifest with convention fallback; assert identical results to today.
 - Files: scripts/resolve-agent-context.sh
 - Tests: resolution parity test (manifest vs. convention)
@@ -135,9 +135,9 @@ and target projects can plug in without reverse-engineering `resolve-agent-conte
 
 ### T04 - Example extension + docs
 
-- Status: Not Started
+- Status: Complete
 - Description: Add a worked example and contributor documentation.
-- Files: agent-context/extensions/*, docs/*
+- Files: agent-context/extensions/*, templates/agent-context/extensions/*
 - Tests: example resolves via manifest
 - Validation: doc consistency
 

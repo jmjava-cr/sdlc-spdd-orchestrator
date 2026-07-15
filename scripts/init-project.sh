@@ -198,6 +198,14 @@ copy_if_missing \
   "${REPO_ROOT}/templates/agent-context/extensions/README.md" \
   "${TARGET}/agent-context/extensions/README.md"
 
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/extensions/manifest.md" \
+  "${TARGET}/agent-context/extensions/manifest.md"
+
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/extensions/_all-agents/example-manifest-extension.md" \
+  "${TARGET}/agent-context/extensions/_all-agents/example-manifest-extension.md"
+
 for file in "${REPO_ROOT}"/templates/agent-context/extensions/skills/*.md; do
   [[ -f "${file}" ]] || continue
   copy_if_missing \

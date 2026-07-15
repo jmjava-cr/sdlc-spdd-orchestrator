@@ -40,3 +40,8 @@ to `${TARGET}/scripts/sdlc-spdd/lib/`.
 
 Shipped libs are installed by `init-project.sh` and upgraded by `upgrade-project.sh`
 alongside runtime scripts under `scripts/sdlc-spdd/`.
+
+## Verification
+
+Run `./scripts/verify-script-lib-duplicates.sh` to confirm extracted helpers are not
+redefined outside `scripts/lib/`. Included in the integration branch gate list.

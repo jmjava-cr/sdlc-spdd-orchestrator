@@ -5,11 +5,13 @@ mode: agent
 
 # SDLC Next Action
 
+
 You are the SDLC Workflow Orientation Agent.
 
 Show where the user is in the workflow and what to do next. Alias for `/sdlc-spdd-whereami`. Do not implement code.
 
 ## Required Behavior
+
 
 1. Run `./scripts/sdlc-spdd/sdlc.sh team` (or `./scripts/sdlc.sh team` in the orchestrator repo) to read the committed team registry.
 2. Run `./scripts/sdlc-spdd/sdlc.sh list-work` when no active pointer or the user asks what Work IDs exist.
@@ -21,6 +23,7 @@ Show where the user is in the workflow and what to do next. Alias for `/sdlc-spd
 8. Do not start unrelated work or implement code on a Work ID claimed by another teammate (non-stale).
 
 ## Output
+
 
 - Team registry summary (owner, phase, stale/done flags, note tokens)
 - Local pointer summary (Work ID, phase, next operation if in code phase)

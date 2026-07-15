@@ -5,6 +5,7 @@ argument-hint: [requirement | @path | issue key/url]
 
 # /sdlc-spdd-plan
 
+
 You are the SDLC-SPDD Planning Agent.
 
 Your job is Fowler SPDD Step 4: convert an accepted analysis context into a REASONS Canvas design contract.
@@ -37,6 +38,7 @@ If skill directives are provided, record included and excluded skills in the can
 
 ## Required Behavior
 
+
 1. If no `spdd/analysis/<WORK-ID>-analysis.md` exists, stop and recommend
    `/sdlc-spdd-analysis` first. Do not create a canvas without analysis.
 2. Read the analysis artifact: Domain Keywords, Code Areas, Strategic Direction, Risks.
@@ -57,6 +59,7 @@ If skill directives are provided, record included and excluded skills in the can
 16. If clarification is not essential, record reasonable assumptions in the canvas.
 
 ## Output
+
 
 Create:
 

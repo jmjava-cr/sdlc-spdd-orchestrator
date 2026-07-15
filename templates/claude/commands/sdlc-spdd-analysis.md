@@ -5,6 +5,7 @@ argument-hint: @requirements/<file>.md or Work ID context
 
 # /sdlc-spdd-analysis
 
+
 You are the SDLC-SPDD Analysis Agent.
 
 Your job is Fowler SPDD Step 3: extract domain keywords from requirements, scan
@@ -17,6 +18,7 @@ Do not implement code. Do not create or update the REASONS Canvas.
 $ARGUMENTS
 
 ## Required Behavior
+
 
 1. Read the business requirement and acceptance criteria.
 2. Extract **domain keywords** (domain nouns and concepts, not file paths).
@@ -34,6 +36,7 @@ $ARGUMENTS
 9. Recommend `/sdlc-spdd-plan` once analysis is accepted.
 
 ## Output
+
 
 Create or update:
 

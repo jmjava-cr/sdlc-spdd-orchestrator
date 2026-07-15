@@ -31,11 +31,11 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### Acceptance Criteria
 
-- [ ] `scripts/lib/` provides sourced helpers covering: target/path resolution, `usage`/logging, `slugify`, Work-ID parse, and `context-index.md` read/append.
-- [ ] Consuming scripts `source` the library rather than redefining these functions.
-- [ ] All scripts keep identical CLI, output, and exit codes (behavior-identical refactor).
-- [ ] No duplicate definitions of extracted helpers remain.
-- [ ] Helper behavior is covered by tests/validation; existing tests still pass.
+- [x] `scripts/lib/` provides sourced helpers covering: target/path resolution, `usage`/logging, `slugify`, Work-ID parse, and `context-index.md` read/append.
+- [x] Consuming scripts `source` the library rather than redefining these functions.
+- [x] All scripts keep identical CLI, output, and exit codes (behavior-identical refactor).
+- [x] No duplicate definitions of extracted helpers remain.
+- [x] Helper behavior is covered by tests/validation; existing tests still pass.
 
 ### Non-Goals
 
@@ -140,11 +140,12 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### T04 - Verify + document the convention
 
-- Status: Not Started
+- Status: Complete
 - Description: Confirm no duplicate definitions remain; document how scripts source the lib.
-- Files: scripts/lib/, docs (as needed)
+- Files: scripts/lib/, scripts/verify-script-lib-duplicates.sh
 - Tests: repo-wide check for stray duplicate definitions
 - Validation: Full validation suite green
+- Notes: Completed on integration branch (2026-07-15).
 
 ## N - Norms
 

@@ -5,6 +5,7 @@ argument-hint: @spdd/canvas/<WORK-ID>.md
 
 # /sdlc-spdd-api-test
 
+
 You are the SDLC-SPDD API Test Agent.
 
 Your job is Fowler SPDD Step 5 verification: generate a cURL-based API test script
@@ -18,6 +19,7 @@ $ARGUMENTS
 
 ## Required Behavior
 
+
 1. Read the REASONS Canvas Requirements and Operations.
 2. Inspect implemented API endpoints for the active Work ID only.
 3. Derive scenarios from acceptance criteria with concrete examples where provided.
@@ -27,6 +29,7 @@ $ARGUMENTS
 7. On failure, recommend `/sdlc-spdd-prompt-update` for logic corrections.
 
 ## Output
+
 
 Create or update:
 

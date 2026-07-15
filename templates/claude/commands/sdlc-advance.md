@@ -5,6 +5,7 @@ argument-hint: [--to PHASE]
 
 # /sdlc-advance
 
+
 You are the SDLC Workflow Advance Agent.
 
 Your job is to move the active Work ID to the next lifecycle phase (or a user-specified forward phase).
@@ -12,6 +13,7 @@ Your job is to move the active Work ID to the next lifecycle phase (or a user-sp
 Do not implement application code.
 
 ## Required Behavior
+
 
 1. If no active pointer, suggest `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` or `resume <WORK-ID>` (orchestrator: `./scripts/sdlc.sh …`).
 2. Run `./scripts/sdlc-spdd/sdlc.sh next` (or `./scripts/sdlc.sh next`) first so the user sees open gates before advancing.
@@ -21,6 +23,7 @@ Do not implement application code.
 6. Do not modify application source code.
 
 ## Output
+
 
 - Previous and new phase
 - Open gates that were passed or still pending

@@ -219,6 +219,91 @@ phase_agent_dir() {
   esac
 }
 
+extension_manifest_path() {
+  printf '%s' "${TARGET}/agent-context/extensions/manifest.md"
+}
+
+manifest_phase_table_usable() {
+  local manifest="$1"
+  [[ -f "${manifest}" ]] || return 1
+  grep -q '^## Phase extensions' "${manifest}" || return 1
+  grep -q '^| Folder | Phases |' "${manifest}" || return 1
+  return 0
+}
+
+manifest_phase_matches() {
+  local phases_col="$1"
+  local phase="$2"
+  phases_col="${phases_col#"${phases_col%%[![:space:]]*}"}"
+  phases_col="${phases_col%"${phases_col##*[![:space:]]}"}"
+  [[ "${phases_col}" == "*" ]] && return 0
+  local part
+  IFS=',' read -ra parts <<< "${phases_col}"
+  for part in "${parts[@]}"; do
+    part="${part#"${part%%[![:space:]]*}"}"
+    part="${part%"${part##*[![:space:]]}"}"
+    [[ "${part}" == "${phase}" ]] && return 0
+  done
+  return 1
+}
+
+collect_manifest_phase_extensions() {
+  local phase="$1"
+  local manifest
+  manifest="$(extension_manifest_path)"
+  manifest_phase_table_usable "${manifest}" || return 1
+
+  declare -A folders=()
+  local row folder phases_col
+  local collected=0
+  while IFS= read -r row; do
+    [[ -z "${row}" ]] || continue
+    folder="$(printf '%s' "${row}" | awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2); gsub(/`/, "", $2); print $2}')"
+    phases_col="$(printf '%s' "${row}" | awk -F'|' '{gsub(/^[[:space:]]+|[[:space:]]+$/, "", $3); print $3}')"
+    [[ -z "${folder}" || "${folder}" == "Folder" ]] && continue
+    manifest_phase_matches "${phases_col}" "${phase}" || continue
+    folders["${folder}"]=1
+  done < <(
+    awk '
+      /^## Phase extensions/ { in_section = 1; next }
+      in_section && /^## / { exit }
+      in_section && /^\| / && $0 !~ /^\|[- ]+\|/ && $0 !~ /^\| Folder \|/ { print }
+    ' "${manifest}"
+  )
+
+  if ((${#folders[@]} == 0)); then
+    return 1
+  fi
+
+  local -a ordered=()
+  if [[ -n "${folders[_all-agents]:-}" ]]; then
+    ordered+=("_all-agents")
+  fi
+  local name
+  for name in "${!folders[@]}"; do
+    [[ "${name}" == "_all-agents" ]] && continue
+    ordered+=("${name}")
+  done
+  IFS=$'\n' ordered_sorted=($(printf '%s\n' "${ordered[@]}" | sort))
+  unset IFS
+
+  for name in "${ordered_sorted[@]}"; do
+    collect_extension_md "${ext_base}/${name}"
+    collected=1
+  done
+  (( collected == 1 ))
+}
+
+collect_convention_phase_extensions() {
+  local phase="$1"
+  collect_extension_md "${ext_base}/_all-agents"
+  local agent_dir
+  agent_dir="$(phase_agent_dir "${phase}")"
+  if [[ -n "${agent_dir}" ]]; then
+    collect_extension_md "${ext_base}/${agent_dir}"
+  fi
+}
+
 rel_path() {
   local abs="$1"
   if [[ "${abs}" == "${TARGET}/"* ]]; then
@@ -449,10 +534,8 @@ fi
 
 ext_base="${TARGET}/agent-context/extensions"
 if [[ -n "${PHASE}" ]]; then
-  collect_extension_md "${ext_base}/_all-agents"
-  agent_dir="$(phase_agent_dir "${PHASE}")"
-  if [[ -n "${agent_dir}" ]]; then
-    collect_extension_md "${ext_base}/${agent_dir}"
+  if ! collect_manifest_phase_extensions "${PHASE}"; then
+    collect_convention_phase_extensions "${PHASE}"
   fi
   load_phase_index_paths "${PHASE}" "${area_scoped}"
 fi

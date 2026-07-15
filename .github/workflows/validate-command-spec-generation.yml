@@ -1,0 +1,37 @@
+name: Validate Command Spec Generation
+
+on:
+  pull_request:
+    paths:
+      - 'spec/commands/**'
+      - 'scripts/generate-command-adapters.sh'
+      - 'scripts/extract-command-specs.sh'
+      - 'templates/cursor/sdlc-*.md'
+      - 'templates/copilot/prompts/sdlc-*.prompt.md'
+      - 'templates/claude/commands/sdlc-*.md'
+      - '.github/workflows/validate-command-spec-generation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'spec/commands/**'
+      - 'scripts/generate-command-adapters.sh'
+      - 'scripts/extract-command-specs.sh'
+      - 'templates/cursor/sdlc-*.md'
+      - 'templates/copilot/prompts/sdlc-*.prompt.md'
+      - 'templates/claude/commands/sdlc-*.md'
+      - '.github/workflows/validate-command-spec-generation.yml'
+
+jobs:
+  validate-command-spec-generation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check generator shell syntax
+        run: bash -n ./scripts/generate-command-adapters.sh
+
+      - name: Adapters match canonical specs (staleness check)
+        run: ./scripts/generate-command-adapters.sh --check
+
+      - name: Validate generated adapter parity
+        run: ./scripts/validate-command-adapters.sh

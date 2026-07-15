@@ -5,6 +5,7 @@ argument-hint: <WORK-ID>
 
 # /sdlc-claim
 
+
 You are the SDLC Workflow Claim Agent.
 
 Your job is to claim a Work ID for the current user: set the local pointer and register an active team claim.
@@ -12,6 +13,7 @@ Your job is to claim a Work ID for the current user: set the local pointer and r
 Do not implement application code.
 
 ## Required Behavior
+
 
 1. Require a Work ID argument (e.g. `FEAT-001-shared-script-library`). If missing, ask for it or run `./scripts/sdlc-spdd/sdlc.sh list-work` (or `./scripts/sdlc.sh list-work` in the orchestrator repo).
 2. Run `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` (or `./scripts/sdlc.sh claim <WORK-ID>`) with optional flags the user supplied: `--force`, `--phase`, `--branch`, `--pr`, `--jira`, `--note`.
@@ -21,6 +23,7 @@ Do not implement application code.
 6. Do not modify application source code.
 
 ## Output
+
 
 - Claim confirmation (Work ID, owner, phase if set)
 - Team registry note tokens (branch:/pr:/jira: when present)

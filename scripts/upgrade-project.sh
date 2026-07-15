@@ -378,6 +378,14 @@ create_missing_memory_file \
   "${REPO_ROOT}/templates/agent-context/extensions/README.md" \
   "${TARGET}/agent-context/extensions/README.md"
 
+create_missing_memory_file \
+  "${REPO_ROOT}/templates/agent-context/extensions/manifest.md" \
+  "${TARGET}/agent-context/extensions/manifest.md"
+
+create_missing_memory_file \
+  "${REPO_ROOT}/templates/agent-context/extensions/_all-agents/example-manifest-extension.md" \
+  "${TARGET}/agent-context/extensions/_all-agents/example-manifest-extension.md"
+
 for file in "${REPO_ROOT}"/templates/agent-context/extensions/skills/*.md; do
   [[ -f "${file}" ]] || continue
   create_missing_memory_file \
