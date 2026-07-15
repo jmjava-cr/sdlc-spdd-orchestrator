@@ -99,6 +99,9 @@ assert_cursor_pack() {
     assert_file "${t}/.cursor/commands/sdlc-${c}.md"
     assert_same "${t}/.cursor/commands/sdlc-${c}.md" "${CURSOR_TPL}/sdlc-${c}.md"
   done
+  assert_dir "${t}/scripts/sdlc-spdd/lib"
+  assert_file "${t}/scripts/sdlc-spdd/lib/areas.sh"
+  assert_same "${t}/scripts/sdlc-spdd/lib/areas.sh" "${REPO_ROOT}/scripts/lib/areas.sh"
   # Always-on operating-model rule (whole-ecosystem grounding).
   assert_file "${t}/.cursor/rules/sdlc-spdd.mdc"
   assert_same "${t}/.cursor/rules/sdlc-spdd.mdc" "${CURSOR_TPL}/rules/sdlc-spdd.mdc"

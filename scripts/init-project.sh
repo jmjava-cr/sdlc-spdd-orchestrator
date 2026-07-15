@@ -146,7 +146,8 @@ for dir in \
   agent-context/sessions \
   agent-context/harness \
   docs/sdlc-spdd \
-  scripts/sdlc-spdd; do
+  scripts/sdlc-spdd \
+  scripts/sdlc-spdd/lib; do
   ensure_dir "${TARGET}/${dir}"
   ensure_gitkeep "${TARGET}/${dir}"
 done
@@ -291,6 +292,14 @@ for file in \
   if [[ "${DRY_RUN}" -eq 0 && -f "${TARGET}/scripts/sdlc-spdd/${file}" ]]; then
     chmod +x "${TARGET}/scripts/sdlc-spdd/${file}"
   fi
+done
+
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/paths.sh"
+for lib in "${SDLC_SHIPPED_LIB_FILES[@]}"; do
+  copy_if_missing \
+    "${REPO_ROOT}/scripts/lib/${lib}" \
+    "${TARGET}/scripts/sdlc-spdd/lib/${lib}"
 done
 
 if [[ "${INSTALL_CURSOR}" -eq 1 ]]; then

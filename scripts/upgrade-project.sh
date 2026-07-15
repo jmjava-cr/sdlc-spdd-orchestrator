@@ -312,7 +312,8 @@ for dir in \
   agent-context/sessions \
   agent-context/harness \
   docs/sdlc-spdd \
-  scripts/sdlc-spdd; do
+  scripts/sdlc-spdd \
+  scripts/sdlc-spdd/lib; do
   ensure_gitkeep "${TARGET}/${dir}"
 done
 
@@ -462,6 +463,14 @@ for file in \
   copy_executable_framework_file \
     "${REPO_ROOT}/scripts/${file}" \
     "${TARGET}/scripts/sdlc-spdd/${file}"
+done
+
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/paths.sh"
+for lib in "${SDLC_SHIPPED_LIB_FILES[@]}"; do
+  copy_framework_file \
+    "${REPO_ROOT}/scripts/lib/${lib}" \
+    "${TARGET}/scripts/sdlc-spdd/lib/${lib}"
 done
 
 if [[ "${UPGRADE_CURSOR}" -eq 1 ]]; then

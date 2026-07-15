@@ -173,7 +173,10 @@ run_part "Runtime scripts and docs" \
   Runtime "verify command effects script" "scripts/sdlc-spdd/verify-agent-command-effects.sh" executable \
   Runtime "validate canvas script" "scripts/sdlc-spdd/validate-reasons-canvas.sh" executable \
   Runtime "verify install script" "scripts/sdlc-spdd/verify-project-install.sh" executable \
-  Runtime "workflow helper script" "scripts/sdlc-spdd/sdlc.sh" executable
+  Runtime "workflow helper script" "scripts/sdlc-spdd/sdlc.sh" executable \
+  Runtime "shared script lib dir" "scripts/sdlc-spdd/lib" dir \
+  Runtime "areas helper lib" "scripts/sdlc-spdd/lib/areas.sh" file \
+  Runtime "common helper lib" "scripts/sdlc-spdd/lib/common.sh" file
 
 if [[ "${REQUIRE_CURSOR}" -eq 1 && "${REQUIRE_COPILOT}" -eq 1 ]]; then
   run_part "Adapter parity workflow" \

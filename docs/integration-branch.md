@@ -24,6 +24,8 @@
 | Work ID | Operation | Artifact |
 |---------|-----------|----------|
 | FEAT-001-shared-script-library | T01 inventory | `spdd/analysis/FEAT-001-shared-script-library-analysis.md` |
+| FEAT-001-shared-script-library | T02 lib helpers | `scripts/lib/*.sh` installed to `scripts/sdlc-spdd/lib/` |
+| FEAT-001-shared-script-library | T03 cluster A | `resolve-agent-context.sh`, `index-spdd-analysis.sh` → `areas.sh` |
 
 ---
 
@@ -41,6 +43,9 @@ git checkout cursor/integration-981e
 ```bash
 ./scripts/validate-command-adapters.sh
 ./tests/test-adapter-install.sh
+./tests/test-scripts-lib.sh
+./tests/test-index-spdd-analysis.sh
+./tests/test-resolve-agent-context.sh
 ./tests/test-sdlc-workflow.sh
 ./tests/test-sdlc-pointer.sh
 ./scripts/check-posture-boundary.sh
