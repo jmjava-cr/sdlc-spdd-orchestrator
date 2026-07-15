@@ -1,33 +1,84 @@
 # Catch-up guide
 
-Use this when returning after time away or when reconciling remote branches offline.
+Use this when returning after time away or reconciling remote branches offline.
 
-**Latest evaluation:** [session-notes/2026-07-15-catch-up-branch-evaluation.md](../session-notes/2026-07-15-catch-up-branch-evaluation.md)
-
-That note covers:
-
-- Which remote branches are stale vs active
-- Open PRs (#24 spike, #25 workflow commands) and merge policy
-- Open issues and what to close
-- Milestone 1 (make it right) next work — FEAT-001 analysis
-- Copy-paste commands for branch cleanup and refreshing the inventory
-
-To fetch the catch-up branch locally:
-
-```bash
-git fetch origin cursor/catch-up-branch-evaluation-981e
-git checkout cursor/catch-up-branch-evaluation-981e
-```
-
-## Integration branch (manual testing before `main`)
-
-Collect planned merges and run manual tests on **`cursor/integration-981e`**:
+**Current path:** land work through the **integration branch** — do not merge draft PRs #25/#26 directly.
 
 ```bash
 git fetch origin cursor/integration-981e
 git checkout cursor/integration-981e
 ```
 
-See [integration-branch.md](integration-branch.md) for contents, automated gates, manual checklist, and merge procedure.
+Full gates, manual checklist, and merge procedure: [integration-branch.md](integration-branch.md)  
+Tracking: [PR #27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27) · [Issue #28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28)
 
-After merging useful parts into `main`, delete the catch-up branch or add a new dated session note for the next evaluation.
+---
+
+## What changed since the branch evaluation (2026-07-15)
+
+The [2026-07-15 catch-up session note](../session-notes/2026-07-15-catch-up-branch-evaluation.md) recommended merging PR #25 next and starting FEAT-001 analysis. **That advice is superseded:**
+
+| Then (evaluation note) | Now (integration tip) |
+|------------------------|-------------------------|
+| Merge PR #25 workflow commands | Absorbed into integration — merge via PR #27 |
+| Start FEAT-001 T01 inventory | FEAT-001 T01–T04 **complete** on integration |
+| FEAT-002 / FEAT-003 not started | **Complete** on integration |
+| Catch-up branch as doc source | Catch-up docs merged into integration |
+
+---
+
+## Integration branch contents (summary)
+
+| Area | Status |
+|------|--------|
+| Workflow commands (`/sdlc-claim`, etc.) | On integration |
+| Catch-up docs | On integration |
+| FEAT-001 `scripts/lib/` | Complete |
+| FEAT-002 command spec generation | Complete |
+| FEAT-003 extension manifest | Complete |
+| Readability pass (milestone-1 #4) | Not started |
+| SPIKE-001 / PR #24 | **Excluded** — parked until T06 go/no-go |
+
+---
+
+## Branch inventory (quick reference)
+
+**Active — use integration:**
+
+- `cursor/integration-981e` — all planned merges + maintainability refactors
+
+**Superseded — delete after PR #27 merges:**
+
+- `cursor/workflow-agent-commands-981e` (was PR #25)
+- `cursor/catch-up-branch-evaluation-981e` (was PR #26)
+
+**Parked — do not merge into integration:**
+
+- `cursor/spike-guide-ingest-agent-context-17f4` (PR #24, SPIKE-001)
+
+**Stale — safe to delete** (content already on `main`; see evaluation note for full table):
+
+- `cursor/sdlc-pointer-guarded-run-1978`, `cursor/add-usage-runbook-ba69`, and other `merged=yes` remotes listed in the session note
+
+For the full remote branch table and `gh` cleanup commands, see [session-notes/2026-07-15-catch-up-branch-evaluation.md](../session-notes/2026-07-15-catch-up-branch-evaluation.md).
+
+---
+
+## Open issues (at integration time)
+
+| Issue | Action when #27 merges |
+|-------|------------------------|
+| [#23](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/23) | Close — workflow commands on integration |
+| [#7](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/7) | Close — parity already on `main` |
+| [#28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) | Close — integration merged |
+| [#22](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/22), [#18](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/18) | Stay open — not on integration |
+
+Commands: [issues/INTEGRATION-MERGE-28.md](../issues/INTEGRATION-MERGE-28.md)
+
+---
+
+## After integration merges to `main`
+
+1. Delete superseded remote branches (commands in [integration-branch.md](integration-branch.md)).
+2. Add a new dated session note if branch inventory drifts again.
+3. Continue milestone-1 with the **readability pass** or start deferred optimization work (FEAT-004+) per [milestone-1.md](../milestone-1.md).

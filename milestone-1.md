@@ -28,10 +28,9 @@ Make it fast (do last, deferred):
    parked until the refactors above land. (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`.)
 6. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
 
-Work IDs are numbered in execution order. All five now have a requirement stub and a
-REASONS Canvas. FEAT-004 (deferred) is at Ready For Coding; the make-it-right
-canvases (FEAT-001→003) and FEAT-005 are drafts that each need an analysis pass
-(`/sdlc-spdd-analysis` → `/sdlc-spdd-plan` → `/sdlc-spdd-architect`) before coding.
+Work IDs are numbered in execution order. FEAT-001–003 are complete on the
+integration branch; FEAT-004 (deferred) is at Ready For Coding; FEAT-005 remains
+draft until make-it-fast work begins.
 
 ## Constraint
 

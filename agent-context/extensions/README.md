@@ -18,7 +18,9 @@ folder layout below is used automatically.
 ## Layout
 
     agent-context/extensions/
+    ├── manifest.md         Declares phase folders, skills, and hooks
     ├── _all-agents/        Rules for every phase (security policy, team norms)
+    │   └── example-manifest-extension.md   Sample extension (replace in real projects)
     ├── initializer-agent/  /sdlc-spdd-init
     ├── planning-agent/     analysis, plan, prompt-update
     ├── architect-agent/    /sdlc-spdd-architect

@@ -1,5 +1,10 @@
 # Catch-up: unmerged branches and what to do next
 
+> **Superseded (2026-07-15):** Prefer [docs/catch-up.md](../docs/catch-up.md) and
+> integration PR [#27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27).
+> Do not merge PR #25/#26 separately — workflow commands and FEAT-001–003 are on
+> `cursor/integration-981e`. Keep this note for the historical remote-branch table.
+
 **Date:** 2026-07-15  
 **Author:** Cloud agent session (branch evaluation)  
 **Purpose:** Offline reference for reconciling remote branches, open PRs, and roadmap priorities.  

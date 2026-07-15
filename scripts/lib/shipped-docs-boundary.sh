@@ -7,7 +7,9 @@ is_orchestrator_only_doc() {
   local base
   base="$(basename "$1")"
   case "${base}" in
-    README.md | guide-rag-research-and-dogfooding.md)
+    README.md | guide-rag-research-and-dogfooding.md | \
+    integration-branch.md | catch-up.md | \
+    contributing-command-specs.md | contributing-extensions.md)
       return 0
       ;;
     *)
