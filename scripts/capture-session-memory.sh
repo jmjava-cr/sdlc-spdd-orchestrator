@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/areas.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/context-index.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/milestone.sh"
+
 usage() {
   cat <<'EOF'
 Usage: capture-session-memory.sh --work-id <WORK-ID> --summary <text> [options]
@@ -176,10 +186,10 @@ if [[ -z "${SUMMARY}" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
-timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-safe_timestamp="$(date -u +"%Y%m%dT%H%M%SZ")"
-session_day="$(date -u +"%Y-%m-%d")"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
+timestamp="$(sdlc_timestamp_iso)"
+safe_timestamp="$(sdlc_timestamp_file)"
+session_day="$(sdlc_timestamp_day)"
 
 memory_dir="${TARGET}/agent-context/memory"
 feature_dir="${TARGET}/agent-context/features/${WORK_ID}"
@@ -205,38 +215,7 @@ current_session="${session_dir}/current-session.md"
 daily_session_note="${session_notes_dir}/${session_day}.md"
 roadmap_file="${TARGET}/ROADMAP.md"
 
-resolve_milestone() {
-  local candidate="${1:-}"
-  if [[ -n "${candidate}" ]]; then
-    if [[ "${candidate}" != *.md ]]; then
-      candidate="${candidate}.md"
-    fi
-    if [[ -f "${TARGET}/${candidate}" ]]; then
-      echo "${TARGET}/${candidate}"
-      return 0
-    fi
-    if [[ -f "${candidate}" ]]; then
-      echo "${candidate}"
-      return 0
-    fi
-    echo ""
-    return 1
-  fi
-
-  shopt -s nullglob
-  local milestone_files=("${TARGET}"/milestone-*.md)
-  shopt -u nullglob
-  for file in "${milestone_files[@]}"; do
-    if grep -q "${WORK_ID}" "${file}" 2>/dev/null; then
-      echo "${file}"
-      return 0
-    fi
-  done
-  echo ""
-  return 1
-}
-
-milestone_file="$(resolve_milestone "${MILESTONE}" || true)"
+milestone_file="$(resolve_milestone "${TARGET}" "${WORK_ID}" "${MILESTONE}" absolute || true)"
 milestone_rel=""
 if [[ -n "${milestone_file}" ]]; then
   milestone_rel="${milestone_file#${TARGET}/}"
@@ -244,33 +223,6 @@ if [[ -n "${milestone_file}" ]]; then
     MILESTONE="${milestone_rel}"
   fi
 fi
-
-ensure_file() {
-  local path="$1"
-  local title="$2"
-  if [[ ! -f "${path}" ]]; then
-    if [[ "${DRY_RUN}" -eq 1 ]]; then
-      echo "[dry-run] would create ${path}"
-    else
-      mkdir -p "$(dirname "${path}")"
-      printf '# %s\n\n' "${title}" > "${path}"
-    fi
-  fi
-}
-
-oneline() {
-  # Collapse newlines/whitespace, drop table-breaking pipes, and truncate so the
-  # index stays compact and scannable.
-  local text="$1"
-  local max="${2:-100}"
-  text="$(printf '%s' "${text}" | tr '\n|' ' /' | tr -s ' ')"
-  text="${text# }"
-  text="${text% }"
-  if (( ${#text} > max )); then
-    text="${text:0:max}..."
-  fi
-  printf '%s' "${text}"
-}
 
 prepend_session_index_row() {
   # Maintain a newest-first index so agents can search history progressively
@@ -340,36 +292,6 @@ rotate_session_history() {
   mv "${tmp}" "${file}"
 }
 
-prepend_context_index_rows() {
-  # Reverse index: code area -> any indexed context (sessions, decisions,
-  # pitfalls, patterns). Newest rows first.
-  local new_rows="$1"
-  local header
-  header="$(cat <<'CTX'
-# Context Index
-
-Maps code areas to indexed project context. Filter by Area to find prior sessions,
-analysis artifacts, architecture decisions, known pitfalls, and reusable patterns
-for the code you are about to touch — across any Work ID or date. Newest first.
-Kinds: analysis, session, decision, pitfall, pattern.
-
-| Area | Kind | Work ID | Phase | Timestamp | Source | Entry |
-|------|------|---------|-------|-----------|--------|-------|
-CTX
-)"
-  local existing_rows=""
-  if [[ -f "${code_area_index}" ]]; then
-    existing_rows="$(awk '/^\| / && $0 !~ /^\| Area/' "${code_area_index}")"
-  fi
-  {
-    printf '%s\n' "${header}"
-    printf '%s\n' "${new_rows}"
-    if [[ -n "${existing_rows}" ]]; then
-      printf '%s\n' "${existing_rows}"
-    fi
-  } > "${code_area_index}"
-}
-
 append_context_index_for_areas() {
   local kind="$1"
   local source="$2"
@@ -382,7 +304,7 @@ append_context_index_for_areas() {
   done
   rows="${rows%$'\n'}"
   [[ -z "${rows}" ]] && return 0
-  prepend_context_index_rows "${rows}"
+  prepend_context_index_rows "${code_area_index}" "${rows}"
 }
 
 # Code areas come from parsing session notes, not from manual --areas by default.
@@ -395,18 +317,6 @@ append_context_index_for_areas() {
 #   5. Optional --areas override/supplement.
 #   6. Append new categories to the registry.
 known_areas_registry="${memory_dir}/code-areas.md"
-
-normalize_area() {
-  # Lowercase, trim surrounding whitespace, collapse repeated slashes, and strip a
-  # trailing slash so equivalent spellings of the same area match.
-  local a="$1"
-  a="$(printf '%s' "${a}" | tr '[:upper:]' '[:lower:]')"
-  a="${a#"${a%%[![:space:]]*}"}"
-  a="${a%"${a##*[![:space:]]}"}"
-  a="$(printf '%s' "${a}" | tr -s '/')"
-  a="${a%/}"
-  printf '%s' "${a}"
-}
 
 normalize_content_for_match() {
   local c="$1"
@@ -640,14 +550,14 @@ done
 areas_display="${areas_display%, }"
 [[ -z "${areas_display}" ]] && areas_display="none"
 
-ensure_file "${session_history}" "Session History"
-ensure_file "${project_memory}" "Project Memory"
-ensure_file "${architecture_decisions}" "Architecture Decisions"
-ensure_file "${known_pitfalls}" "Known Pitfalls"
-ensure_file "${reusable_patterns}" "Reusable Patterns"
-ensure_file "${progress_log}" "Progress Log: ${WORK_ID}"
+sdlc_ensure_file "${session_history}" "Session History" "${DRY_RUN}"
+sdlc_ensure_file "${project_memory}" "Project Memory" "${DRY_RUN}"
+sdlc_ensure_file "${architecture_decisions}" "Architecture Decisions" "${DRY_RUN}"
+sdlc_ensure_file "${known_pitfalls}" "Known Pitfalls" "${DRY_RUN}"
+sdlc_ensure_file "${reusable_patterns}" "Reusable Patterns" "${DRY_RUN}"
+sdlc_ensure_file "${progress_log}" "Progress Log: ${WORK_ID}" "${DRY_RUN}"
 if [[ "${WRITE_SESSION_NOTE}" -eq 1 ]]; then
-  ensure_file "${daily_session_note}" "Session Notes: ${session_day}"
+  sdlc_ensure_file "${daily_session_note}" "Session Notes: ${session_day}" "${DRY_RUN}"
 fi
 
 entry="$(cat <<EOF
@@ -681,7 +591,7 @@ printf '%s\n' "${entry}" >> "${progress_log}"
 } > "${session_entry_file}"
 
 # Newest-first session index row, retrievable by Work ID or Area.
-index_row="| ${timestamp} | ${WORK_ID} | ${PHASE} | $(oneline "${areas_display}" 80) | $(oneline "${SUMMARY}") | sessions/$(basename "${session_entry_file}") |"
+index_row="| ${timestamp} | ${WORK_ID} | ${PHASE} | $(sdlc_oneline "${areas_display}" 80) | $(sdlc_oneline "${SUMMARY}") | sessions/$(basename "${session_entry_file}") |"
 prepend_session_index_row "${index_row}"
 
 # Context index: one row per area for each artifact type touched this session.
@@ -766,7 +676,7 @@ if [[ -n "${PATTERNS}" ]]; then
 fi
 
 if [[ -n "${milestone_file}" ]]; then
-  ensure_file "${milestone_file}" "$(basename "${milestone_file}" .md)"
+  sdlc_ensure_file "${milestone_file}" "$(basename "${milestone_file}" .md)" "${DRY_RUN}"
   {
     echo
     echo "### ${timestamp} - ${WORK_ID} - ${PHASE}"
@@ -778,7 +688,7 @@ if [[ -n "${milestone_file}" ]]; then
 fi
 
 if [[ -n "${ROADMAP_NOTE}" ]]; then
-  ensure_file "${roadmap_file}" "Roadmap"
+  sdlc_ensure_file "${roadmap_file}" "Roadmap" "${DRY_RUN}"
   {
     echo
     echo "### ${timestamp} - ${WORK_ID} - ${PHASE}"

@@ -3,6 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/framework-install.sh"
 
 usage() {
   cat <<'EOF'
@@ -113,12 +115,7 @@ CLAUDE_BEGIN="<!-- BEGIN SDLC-SPDD MANAGED CLAUDE GROUNDING -->"
 CLAUDE_END="<!-- END SDLC-SPDD MANAGED CLAUDE GROUNDING -->"
 
 ensure_dir() {
-  local dir="$1"
-  if [[ "${DRY_RUN}" -eq 1 ]]; then
-    echo "[dry-run] would mkdir -p ${dir}"
-  else
-    mkdir -p "${dir}"
-  fi
+  framework_ensure_dir "$1" "${DRY_RUN}"
 }
 
 ensure_gitkeep() {

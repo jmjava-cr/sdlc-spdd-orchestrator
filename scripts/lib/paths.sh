@@ -14,6 +14,7 @@ SDLC_SHIPPED_LIB_FILES=(
 # Orchestrator-only libs (never installed into targets).
 SDLC_ORCHESTRATOR_ONLY_LIB_FILES=(
   shipped-docs-boundary.sh
+  framework-install.sh
 )
 
 # Source a lib file from ${caller_dir}/lib/<name>.sh; fail loud if missing.

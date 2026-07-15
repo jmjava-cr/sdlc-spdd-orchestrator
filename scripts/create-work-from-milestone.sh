@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/work-id.sh"
+
 usage() {
   cat <<'EOF'
 Usage: create-work-from-milestone.sh --milestone <file> (--all|--item <text>) [options]
@@ -101,7 +107,7 @@ case "${TYPE}" in
     ;;
 esac
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 if [[ "${MILESTONE}" != /* ]]; then
   MILESTONE="${TARGET}/${MILESTONE}"
 fi
@@ -112,27 +118,6 @@ fi
 
 milestone_rel="${MILESTONE#${TARGET}/}"
 roadmap_rel="${ROADMAP#${TARGET}/}"
-
-slugify() {
-  echo "$1" | tr '[:upper:]' '[:lower:]' | tr ' _/' '---' | sed 's/[^a-z0-9-]//g; s/--*/-/g; s/^-//; s/-$//'
-}
-
-next_number() {
-  local max=0
-  local path id num
-  shopt -s nullglob
-  for path in "${TARGET}/agent-context/features/${PREFIX}-"* "${TARGET}/spdd/canvas/${PREFIX}-"*.md; do
-    id="$(basename "${path}")"
-    id="${id%.md}"
-    num="${id#${PREFIX}-}"
-    num="${num%%-*}"
-    if [[ "${num}" =~ ^[0-9]+$ ]] && ((10#${num} > max)); then
-      max=$((10#${num}))
-    fi
-  done
-  shopt -u nullglob
-  echo $((max + 1))
-}
 
 items=()
 if [[ "${CREATE_ALL}" -eq 1 ]]; then
@@ -169,8 +154,10 @@ create_work() {
   local title="$1"
   local number slug work_id feature_dir canvas_path milestone_requirement_path
   local feature_requirement_path progress_log status_date milestone_requirement_rel
-  number="$(next_number)"
-  slug="$(slugify "${title}")"
+  number="$(next_work_number "${PREFIX}" "${TARGET}" \
+    "${TARGET}/agent-context/features/${PREFIX}-"* \
+    "${TARGET}/spdd/canvas/${PREFIX}-"*.md)"
+  slug="$(slugify "${title}" strict)"
   if [[ -z "${slug}" ]]; then
     slug="milestone-work"
   fi
@@ -181,7 +168,7 @@ create_work() {
   milestone_requirement_rel="requirements/milestones/${work_id}.md"
   feature_requirement_path="${feature_dir}/requirement.md"
   progress_log="${feature_dir}/progress-log.md"
-  status_date="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  status_date="$(sdlc_timestamp_iso)"
 
   if [[ "${DRY_RUN}" -eq 1 ]]; then
     echo "[dry-run] would create ${work_id} from milestone item: ${title}"

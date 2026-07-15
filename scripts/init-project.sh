@@ -3,6 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/framework-install.sh"
 
 usage() {
   cat <<'EOF'
@@ -95,12 +97,7 @@ copy_if_missing() {
 }
 
 ensure_dir() {
-  local dir="$1"
-  if [[ "${DRY_RUN}" -eq 1 ]]; then
-    echo "[dry-run] would mkdir -p ${dir}"
-    return
-  fi
-  mkdir -p "${dir}"
+  framework_ensure_dir "$1" "${DRY_RUN}"
 }
 
 ensure_gitkeep() {

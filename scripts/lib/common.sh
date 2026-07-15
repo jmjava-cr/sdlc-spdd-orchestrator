@@ -49,6 +49,21 @@ sdlc_ensure_dir() {
   fi
 }
 
+# Create a markdown file with a title when missing (respects dry-run).
+sdlc_ensure_file() {
+  local path="$1"
+  local title="$2"
+  local dry="${3:-0}"
+  if [[ ! -f "${path}" ]]; then
+    if [[ "${dry}" -eq 1 ]]; then
+      echo "[dry-run] would create ${path}"
+    else
+      mkdir -p "$(dirname "${path}")"
+      printf '# %s\n\n' "${title}" > "${path}"
+    fi
+  fi
+}
+
 # Collapse newlines/pipes and truncate for compact index cells.
 sdlc_oneline() {
   local text="$1"

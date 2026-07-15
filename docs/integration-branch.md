@@ -25,7 +25,7 @@
 |---------|-----------|----------|
 | FEAT-001-shared-script-library | T01 inventory | `spdd/analysis/FEAT-001-shared-script-library-analysis.md` |
 | FEAT-001-shared-script-library | T02 lib helpers | `scripts/lib/*.sh` installed to `scripts/sdlc-spdd/lib/` |
-| FEAT-001-shared-script-library | T03 cluster A | `resolve-agent-context.sh`, `index-spdd-analysis.sh` → `areas.sh` |
+| FEAT-001-shared-script-library | T03 clusters A–F | Lib migration across capture, session, work-id, install, remaining runtime scripts |
 
 ---
 

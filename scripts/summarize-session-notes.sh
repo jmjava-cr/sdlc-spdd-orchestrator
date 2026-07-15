@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+
 usage() {
   cat <<'EOF'
 Usage: summarize-session-notes.sh [--target <path>] (--all|--file <path>) [--dry-run]
@@ -64,7 +68,7 @@ if [[ "${IMPORT_ALL}" -eq 0 && -z "${NOTE_FILE}" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 session_notes_dir="${TARGET}/session-notes"
 memory_dir="${TARGET}/agent-context/memory"
 session_history="${memory_dir}/session-history.md"
@@ -108,7 +112,7 @@ for note in "${notes[@]}"; do
 
   rel="${note#${TARGET}/}"
   marker="Imported session note: ${rel}"
-  timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  timestamp="$(sdlc_timestamp_iso)"
 
   if [[ "${DRY_RUN}" -eq 0 && -f "${session_history}" ]] && grep -Fq "${marker}" "${session_history}"; then
     skipped=$((skipped + 1))

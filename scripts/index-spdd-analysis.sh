@@ -3,6 +3,8 @@ set -euo pipefail
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=/dev/null
 source "${_SCRIPT_DIR}/lib/areas.sh"
 
 usage() {
@@ -69,8 +71,8 @@ if [[ -z "${WORK_ID}" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
-timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
+timestamp="$(sdlc_timestamp_iso)"
 memory_dir="${TARGET}/agent-context/memory"
 analysis_file="${TARGET}/spdd/analysis/${WORK_ID}-analysis.md"
 feature_analysis="${TARGET}/agent-context/features/${WORK_ID}/analysis-context.md"

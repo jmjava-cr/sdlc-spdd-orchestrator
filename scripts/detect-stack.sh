@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+
 usage() {
   cat <<'EOF'
 Usage: detect-stack.sh --target <path>
@@ -29,7 +33,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 memory_file="${TARGET}/agent-context/memory/project-memory.md"
 mkdir -p "$(dirname "${memory_file}")"
 
@@ -57,7 +61,7 @@ detected=()
 [[ -d "${TARGET}/.github/workflows" ]] && detected+=("GitHub Actions workflows")
 [[ -d "${TARGET}/charts" || -f "${TARGET}/Chart.yaml" ]] && detected+=("Helm chart")
 
-timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+timestamp="$(sdlc_timestamp_iso)"
 {
   echo
   echo "### Detection run: ${timestamp}"

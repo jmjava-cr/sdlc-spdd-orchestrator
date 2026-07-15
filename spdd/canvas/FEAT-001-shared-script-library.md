@@ -131,12 +131,12 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### T03 - Refactor consumers to source the lib
 
-- Status: In Progress
+- Status: Complete
 - Description: Migrate scripts cluster by cluster, deleting local copies; one reviewable step per cluster.
 - Files: scripts/*.sh
 - Tests: existing validation scripts per cluster
 - Validation: Behavior-identical CLI/output/exit codes
-- Notes: Cluster A (resolve-agent-context.sh, index-spdd-analysis.sh → areas.sh) landed on integration branch.
+- Notes: Clusters A–F complete on integration branch (2026-07-15).
 
 ### T04 - Verify + document the convention
 

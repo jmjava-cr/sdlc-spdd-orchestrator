@@ -3,6 +3,8 @@ set -euo pipefail
 
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=/dev/null
 source "${_SCRIPT_DIR}/lib/areas.sh"
 
 # Resolve SDLC Agents-style context for progressive disclosure:
@@ -93,7 +95,7 @@ if [[ -n "${PHASE}" ]]; then
   esac
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 
 if [[ -n "${TEXT_FILE}" ]]; then
   if [[ ! -f "${TEXT_FILE}" ]]; then

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/milestone.sh"
+
 usage() {
   cat <<'EOF'
 Usage: start-agent-session.sh [--target <path>] [--work-id <WORK-ID>] [--phase <phase>] [--milestone <file>]
@@ -67,7 +73,7 @@ case "${PHASE}" in
     ;;
 esac
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 
 pointer_script="${TARGET}/agent-context/sdlc-pointer.sh"
 if [[ -f "${pointer_script}" && -n "${WORK_ID}" ]]; then
@@ -88,8 +94,8 @@ if [[ -f "${workflow_script}" && -n "${WORK_ID}" ]]; then
   workflow_brief_md="$(sdlc_workflow_brief_markdown "${WORK_ID}")"
 fi
 
-timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-safe_timestamp="$(date -u +"%Y%m%dT%H%M%SZ")"
+timestamp="$(sdlc_timestamp_iso)"
+safe_timestamp="$(sdlc_timestamp_file)"
 session_dir="${TARGET}/agent-context/sessions"
 mkdir -p "${session_dir}"
 
@@ -101,7 +107,7 @@ session_file="${session_dir}/${session_name}.md"
 current_file="${session_dir}/current-session.md"
 roadmap_file="${TARGET}/ROADMAP.md"
 session_notes_dir="${TARGET}/session-notes"
-today_note="${session_notes_dir}/$(date -u +"%Y-%m-%d").md"
+today_note="${session_notes_dir}/$(sdlc_timestamp_day).md"
 
 feature_dir=""
 feature_canvas=""
@@ -211,44 +217,8 @@ if ((${#milestone_files[@]} > 0)); then
   milestone_list="${milestone_list%$'\n'}"
 fi
 
-resolve_milestone() {
-  local candidate="${1:-}"
-  if [[ -n "${candidate}" ]]; then
-    if [[ "${candidate}" != *.md ]]; then
-      candidate="${candidate}.md"
-    fi
-    if [[ -f "${TARGET}/${candidate}" ]]; then
-      echo "${candidate}"
-      return 0
-    fi
-    if [[ -f "${candidate}" ]]; then
-      echo "${candidate#${TARGET}/}"
-      return 0
-    fi
-    echo ""
-    return 1
-  fi
-
-  if [[ -z "${WORK_ID}" ]]; then
-    echo ""
-    return 1
-  fi
-
-  shopt -s nullglob
-  for file in "${milestone_files[@]}"; do
-    if grep -q "${WORK_ID}" "${file}" 2>/dev/null; then
-      echo "${file#${TARGET}/}"
-      shopt -u nullglob
-      return 0
-    fi
-  done
-  shopt -u nullglob
-  echo ""
-  return 1
-}
-
-active_milestone="$(resolve_milestone "${MILESTONE}" || true)"
-today_note_rel="session-notes/$(date -u +"%Y-%m-%d").md"
+active_milestone="$(resolve_milestone "${TARGET}" "${WORK_ID}" "${MILESTONE}" relative || true)"
+today_note_rel="session-notes/$(sdlc_timestamp_day).md"
 
 resolve_script=""
 if [[ -x "${TARGET}/scripts/sdlc-spdd/resolve-agent-context.sh" ]]; then
@@ -350,7 +320,7 @@ New agents: load these first so you know how to operate within the SDLC-SPDD fra
 | Artifact | Path | Status |
 |----------|------|--------|
 | Roadmap | ROADMAP.md | $(status_for "${roadmap_file}") |
-| Today's session notes | session-notes/$(date -u +"%Y-%m-%d").md | $(status_for "${today_note}") |
+| Today's session notes | session-notes/$(sdlc_timestamp_day).md | $(status_for "${today_note}") |
 
 Milestone docs:
 

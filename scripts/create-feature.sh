@@ -3,6 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/lib/work-id.sh"
 
 usage() {
   cat <<'EOF'
@@ -51,33 +53,22 @@ fi
 TARGET="$(cd "${TARGET}" && pwd)"
 
 case "${TYPE}" in
-  feature) PREFIX="FEAT"; TEMPLATE="feature-template.md" ;;
-  bug) PREFIX="BUG"; TEMPLATE="bugfix-template.md" ;;
-  refactor) PREFIX="REF"; TEMPLATE="refactor-template.md" ;;
-  spike) PREFIX="SPIKE"; TEMPLATE="spike-template.md" ;;
+  feature) TEMPLATE="feature-template.md" ;;
+  bug) TEMPLATE="bugfix-template.md" ;;
+  refactor) TEMPLATE="refactor-template.md" ;;
+  spike) TEMPLATE="spike-template.md" ;;
   *)
     echo "Unsupported type: ${TYPE}" >&2
     exit 1
     ;;
 esac
 
-slug="$(echo "${NAME}" | tr '[:upper:]' '[:lower:]' | tr ' _' '-' | sed 's/[^a-z0-9-]//g')"
+PREFIX="$(work_type_prefix "${TYPE}")"
+slug="$(slugify "${NAME}" legacy)"
 features_dir="${TARGET}/agent-context/features"
 mkdir -p "${features_dir}"
 
-max=0
-shopt -s nullglob
-for dir in "${features_dir}/${PREFIX}-"*; do
-  id="$(basename "${dir}")"
-  num="${id#${PREFIX}-}"
-  num="${num%%-*}"
-  if [[ "${num}" =~ ^[0-9]+$ ]] && (( 10#${num} > max )); then
-    max=$((10#${num}))
-  fi
-done
-shopt -u nullglob
-
-next=$((max + 1))
+next="$(next_work_number "${PREFIX}" "${TARGET}" "${features_dir}/${PREFIX}-"*)"
 work_id="$(printf '%s-%03d-%s' "${PREFIX}" "${next}" "${slug}")"
 
 feature_dir="${features_dir}/${work_id}"

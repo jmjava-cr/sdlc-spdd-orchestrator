@@ -13,6 +13,7 @@ Sourced library files for SDLC-SPDD runtime scripts. Not executed directly.
 | `milestone.sh` | yes | `resolve_milestone` (absolute or relative paths) |
 | `context-index.sh` | yes | Context index header + `prepend_context_index_rows` |
 | `shipped-docs-boundary.sh` | no | Orchestrator doc install skip list |
+| `framework-install.sh` | no | Shared `ensure_dir` for init/upgrade |
 
 ## Sourcing convention
 
