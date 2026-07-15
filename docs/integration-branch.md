@@ -2,7 +2,8 @@
 
 **Purpose:** Collect planned merges off `main` for manual testing before a single merge back to `main`.  
 **Created:** 2026-07-15  
-**Base:** `origin/main` @ `3b519cb`
+**Base:** `origin/main` @ `3b519cb`  
+**Tracking issue:** [#28 — Merge integration branch to main](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28)
 
 ---
 
