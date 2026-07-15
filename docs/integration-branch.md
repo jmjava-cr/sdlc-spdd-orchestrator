@@ -132,7 +132,7 @@ In Cursor / Copilot / Claude on the target project:
 - [ ] `/sdlc-next` returns orientation
 - [ ] `/sdlc-team` shows registry
 - [ ] `/sdlc-shelf` parks active work
-- [ ] `/sdlc-advance` moves phase when gates allow
+- [ ] `/sdlc-advance` either advances or correctly refuses when gates are unmet (a minimal DEMO stub often refuses — that is expected)
 
 ### D. Upgrade path
 

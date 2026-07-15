@@ -487,7 +487,9 @@ sdlc_team_claim() {
   note="$(_team_compose_note "${existing_note}" "${branch}" "${pr}" "${jira}" "${note_extra}")"
   # shellcheck source=/dev/null
   source "${SDLC_ROOT}/agent-context/sdlc-workflow.sh"
-  sdlc_workflow_resume "${work_id}" "${phase}" 1 0 "${note}"
+  # Pass force through so `sdlc.sh claim <ID> --force` can take over a foreign claim
+  # (sdlc_workflow_resume re-checks the team registry with force_claim).
+  sdlc_workflow_resume "${work_id}" "${phase}" 1 "${force}" "${note}"
   echo "Team registry updated — commit agent-context/work-registry.tsv to share with teammates."
 }
 

@@ -2,7 +2,7 @@
 
 **One-page command reference** for print/PDF or a second monitor. For concept definitions (what is a Work ID, operation, sync?), see [Top useful concepts and commands](useful-concepts-and-commands.md). For prompt wording, see [Session prompt standard](session-prompt-standard.md).
 
-`/sdlc-spdd-*` rows below are **AI chat commands** (Cursor/Copilot/Claude Code), not terminal commands. `./scripts/...` rows are shell. [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
+`/sdlc-spdd-*` rows below are **AI chat lifecycle commands** (Cursor/Copilot/Claude Code), not terminal commands. `/sdlc-*` workflow commands (`claim`, `shelf`, `advance`, `next`, `team`) are chat wrappers for `sdlc.sh`. `./scripts/...` rows are shell. [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
 
 Export options:
 
@@ -180,7 +180,8 @@ and continue to planning:
 
 | Need | Command |
 |------|---------|
-| What now? (orientation) | `/sdlc-spdd-whereami` or `./scripts/sdlc-spdd/sdlc.sh next` |
+| What now? (orientation) | `/sdlc-next`, `/sdlc-spdd-whereami`, or `./scripts/sdlc-spdd/sdlc.sh next` |
+| Claim / shelf / advance / team | `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-team` |
 | Initialize repo context | `/sdlc-spdd-init` |
 | Analyze requirement + scope code areas | `/sdlc-spdd-analysis @requirements/file.md` |
 | Turn analysis into canvas | `/sdlc-spdd-plan @spdd/analysis/WORK-ID-analysis.md` |

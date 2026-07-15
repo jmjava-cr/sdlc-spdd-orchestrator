@@ -55,7 +55,8 @@ Each work item also has a canonical canvas under `spdd/canvas/`. Keep both copie
 ## SDLC Pointer (current chore/task)
 
 **Quick start:** `./scripts/sdlc.sh` (or `./scripts/sdlc.sh next`) shows what to do now.
-In chat: `/sdlc-spdd-whereami`.
+In chat: `/sdlc-next` or `/sdlc-spdd-whereami`. Workflow chat wrappers for the same
+CLI: `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team`.
 
 Agents can drift onto the wrong Work ID when several chores are open. The pointer
 manager keeps a single active chore in `.sdlc/pointer` (local state; not committed)

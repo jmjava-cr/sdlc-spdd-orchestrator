@@ -255,7 +255,34 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+echo "== Test 14b: claim --force takes over foreign claim =="
+T="${WORK}/team-claim-force"
+work_id="FEAT-009b-force"
+setup_feature "${T}" "${work_id}"
+mkdir -p "${T}/scripts/sdlc-spdd"
+cp "${REPO_ROOT}/scripts/sdlc.sh" "${T}/scripts/sdlc-spdd/sdlc.sh"
+chmod +x "${T}/scripts/sdlc-spdd/sdlc.sh"
+SDLC_USER="alice" SDLC_ROOT="${T}" wf "${T}" claim "${work_id}" >/dev/null
+if SDLC_USER="bob" SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" claim "${work_id}" >/dev/null 2>&1; then
+  bad "claim without --force should refuse foreign owner"
+else
+  ok "claim without --force refuses foreign owner"
+fi
+if SDLC_USER="bob" SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" claim "${work_id}" --force >/dev/null; then
+  if grep -q $'FEAT-009b-force\tactive\t.*\tbob\t' "${T}/agent-context/work-registry.tsv"; then
+    ok "claim --force takes over via sdlc.sh wrapper"
+  else
+    bad "claim --force succeeded but owner not bob"
+  fi
+else
+  bad "claim --force should succeed"
+fi
+
+# ---------------------------------------------------------------------------
 echo "== Test 15: list-work discovers repo Work IDs =="
+T="${WORK}/team"
+work_id="FEAT-009-team"
+# reuse team fixture from Test 14 (bob owns after --force resume)
 out="$(SDLC_ROOT="${T}" wf "${T}" list-work)"
 if grep -q 'FEAT-009-team' <<< "${out}"; then ok "list-work shows work id"; else bad "list-work missing id"; fi
 
