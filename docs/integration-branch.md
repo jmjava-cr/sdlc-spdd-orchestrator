@@ -72,17 +72,28 @@ Contributor guides: [Command specs](contributing-command-specs.md) · [Extension
 
 ## Manual test checklist
 
-Use a **throwaway target** so you do not disturb a real project:
+Use a **throwaway target** so you do not disturb a real project.
+
+Preferred install path (`setup-agent-prompts.sh` wraps `init-project.sh` and supports `--all`).
+Create the target directory first — `init-project.sh` requires it to exist:
 
 ```bash
 export TARGET=/tmp/sdlc-integration-test
 rm -rf "${TARGET}"
-./scripts/init-project.sh --target "${TARGET}" --all
+mkdir -p "${TARGET}"
+./scripts/setup-agent-prompts.sh --target "${TARGET}" --all
+```
+
+Equivalent direct init (no `--all` on `init-project.sh` — list assistants explicitly):
+
+```bash
+mkdir -p "${TARGET}"
+./scripts/init-project.sh --target "${TARGET}" --cursor --copilot --claude
 ```
 
 ### A. Install and adapter parity
 
-- [ ] `init-project.sh --all` completes without error
+- [ ] Install completes without error
 - [ ] Workflow commands exist in target: `.cursor/commands/sdlc-claim.md`, `.github/prompts/sdlc-claim.prompt.md`, `.claude/commands/sdlc-claim.md`
 - [ ] Grounding files list workflow commands (`/sdlc-claim`, `/sdlc-team`, etc.)
 - [ ] `./scripts/validate-command-adapters.sh --target "${TARGET}"` passes
@@ -93,16 +104,21 @@ From `${TARGET}`:
 
 ```bash
 cd "${TARGET}"
+
+# Blank init has no Work IDs yet — create a stub canvas so list-work/claim are realistic:
+mkdir -p spdd/canvas
+printf '%s\n' '# DEMO-001-integration-smoke' '' '## Final Status' '' '- Status: In Progress' \
+  > spdd/canvas/DEMO-001-integration-smoke.md
+
 ./scripts/sdlc-spdd/sdlc.sh list-work
-# Claim any Work ID that exists in the target (after init, use a canvas you create,
-# or claim FEAT-001-shared-script-library if the milestone template is present):
-./scripts/sdlc-spdd/sdlc.sh claim FEAT-001-shared-script-library
+./scripts/sdlc-spdd/sdlc.sh claim DEMO-001-integration-smoke
 ./scripts/sdlc-spdd/sdlc.sh next
 ./scripts/sdlc-spdd/sdlc.sh team
 ./scripts/sdlc-spdd/sdlc.sh shelf --reason "integration test"
 ./scripts/sdlc-spdd/sdlc.sh list-work
 ```
 
+- [ ] `list-work` shows `DEMO-001-integration-smoke`
 - [ ] `claim` sets `.sdlc/pointer` and updates `work-registry.tsv`
 - [ ] `next` shows phase and recommended command
 - [ ] `team` shows registry row
@@ -112,13 +128,15 @@ cd "${TARGET}"
 
 In Cursor / Copilot / Claude on the target project:
 
-- [ ] `/sdlc-claim <WORK-ID>` appears in command palette
+- [ ] `/sdlc-claim DEMO-001-integration-smoke` appears in command palette
 - [ ] `/sdlc-next` returns orientation
 - [ ] `/sdlc-team` shows registry
 - [ ] `/sdlc-shelf` parks active work
 - [ ] `/sdlc-advance` moves phase when gates allow
 
 ### D. Upgrade path
+
+From the **orchestrator repo** (`upgrade-project.sh` supports `--all`; it does **not** take `--force`):
 
 ```bash
 ./scripts/upgrade-project.sh --target "${TARGET}" --all

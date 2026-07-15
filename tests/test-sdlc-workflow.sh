@@ -156,6 +156,26 @@ out="$(SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" next)"
 if grep -q "${work_id}" <<< "${out}"; then ok "sdlc.sh wrapper works"; else bad "sdlc.sh wrapper failed"; fi
 
 # ---------------------------------------------------------------------------
+echo "== Test 10b: sdlc.sh claim does not re-enter CLI (exec + nested source) =="
+T="${WORK}/wrapper-claim"
+work_id="FEAT-005b-claim"
+setup_feature "${T}" "${work_id}"
+mkdir -p "${T}/scripts/sdlc-spdd" "${T}/spdd/canvas"
+printf '%s\n' "# ${work_id}" '' '## Final Status' '' '- Status: In Progress' \
+  > "${T}/spdd/canvas/${work_id}.md"
+cp "${REPO_ROOT}/scripts/sdlc.sh" "${T}/scripts/sdlc-spdd/sdlc.sh"
+chmod +x "${T}/scripts/sdlc-spdd/sdlc.sh"
+if SDLC_USER="tester" SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" claim "${work_id}" >/dev/null 2>"${T}/claim.err"; then
+  if grep -q $'FEAT-005b-claim\tactive\t' "${T}/agent-context/work-registry.tsv"; then
+    ok "sdlc.sh claim updates registry without CLI re-entry"
+  else
+    bad "sdlc.sh claim exited 0 but registry missing row"
+  fi
+else
+  bad "sdlc.sh claim failed (possible CLI re-entry): $(head -3 "${T}/claim.err")"
+fi
+
+# ---------------------------------------------------------------------------
 echo "== Test 11: session brief includes workflow state =="
 T="${WORK}/brief"
 work_id="FEAT-006-brief"
@@ -193,9 +213,11 @@ echo "== Test 13: capture wrapper guards pointer =="
 T="${WORK}/capture-guard"
 work_id="FEAT-008-cap"
 setup_feature "${T}" "${work_id}"
-mkdir -p "${T}/scripts/sdlc-spdd"
+mkdir -p "${T}/scripts/sdlc-spdd/lib"
 cp "${REPO_ROOT}/scripts/sdlc.sh" "${T}/scripts/sdlc-spdd/sdlc.sh"
 cp "${CAPTURE}" "${T}/scripts/sdlc-spdd/capture-session-memory.sh"
+# capture-session-memory.sh sources scripts/sdlc-spdd/lib/*.sh (FEAT-001)
+cp "${REPO_ROOT}/scripts/lib/"*.sh "${T}/scripts/sdlc-spdd/lib/"
 chmod +x "${T}/scripts/sdlc-spdd/sdlc.sh" "${T}/scripts/sdlc-spdd/capture-session-memory.sh"
 SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" resume "${work_id}" >/dev/null
 if SDLC_ROOT="${T}" "${T}/scripts/sdlc-spdd/sdlc.sh" capture --summary "ok" >/dev/null 2>&1; then

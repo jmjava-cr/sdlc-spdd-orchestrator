@@ -141,6 +141,7 @@ SDLC (`agent-context/sessions/`, `agent-context/memory/`) artifacts.
 Before merging doc or script changes that touch the three-part model (Planning, SPDD, SDLC), verify:
 
 - [ ] **Workflow CLI** — daily runbook, first-day walkthrough, cheat sheet, and session prompt standard teach `sdlc.sh` (`next`, `claim`, `capture`) not raw scripts alone
+- [ ] **Workflow chat commands** — `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team` appear alongside shell equivalents where users start/claim/orient
 - [ ] **Pointer + team registry** — docs explain `.sdlc/pointer` / `.sdlc/workflows/` (local) vs `work-registry.tsv` (committed); claim/release commit reminder present
 - [ ] **Whereami** — `/sdlc-spdd-whereami` in assistant command tables (README, cheat sheet, cursor/copilot/claude usage)
 - [ ] **Jira draft** — milestone `## Jira` convention referenced from runbook, cheat sheet, planning prompts where Jira drafts appear

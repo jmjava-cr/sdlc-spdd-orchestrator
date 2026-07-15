@@ -16,6 +16,12 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   set -euo pipefail
 fi
 
+# Track nested source depth so CLI does not re-enter when this file is sourced
+# from sdlc_team_claim/release while already executing as the main script
+# (sdlc.sh exec's this file with an absolute $0, which makes BASH_SOURCE==$0
+# even for nested source).
+_SDLC_WORKFLOW_LOAD_DEPTH=$(( ${_SDLC_WORKFLOW_LOAD_DEPTH:-0} + 1 ))
+
 _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "${_SCRIPT_DIR}/sdlc-pointer.sh"
@@ -1207,8 +1213,8 @@ sdlc_workflow_status() {
   echo "  ./scripts/sdlc.sh resume <WORK-ID>  # pick up shelved work"
 }
 
-# CLI when script executed directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+# CLI when script executed directly (skip nested re-source from team registry)
+if [[ "${BASH_SOURCE[0]}" == "${0}" && "${_SDLC_WORKFLOW_LOAD_DEPTH}" -eq 1 ]]; then
   cmd="${1:-status}"
   shift || true
   case "${cmd}" in

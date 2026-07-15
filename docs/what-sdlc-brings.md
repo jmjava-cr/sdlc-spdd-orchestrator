@@ -144,6 +144,7 @@ Scripts bridge planning and governance:
 | `summarize-session-notes.sh` | session notes -> durable memory |
 | `capture-session-memory.sh` / `sdlc.sh capture` | session -> memory, notes, milestone, roadmap |
 | `sdlc.sh claim` / `team` | team Work ID registry (committed) |
+| `/sdlc-claim`, `/sdlc-team`, `/sdlc-next`, … | chat wrappers for the same workflow CLI |
 
 ## How the Three Concepts Connect in a Session
 
