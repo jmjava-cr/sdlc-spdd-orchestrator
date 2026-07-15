@@ -32,10 +32,10 @@ Use [docs/integration-branch.md](../docs/integration-branch.md) for gates and ma
 
 ## PRs to close (do not merge separately)
 
-| PR | Superseded by |
-|----|----------------|
-| [#25](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/25) | #27 |
-| [#26](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/26) | #27 |
+| PR | Status | Superseded by |
+|----|--------|---------------|
+| [#25](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/25) | **Closed** 2026-07-15 (not merged) | #27 |
+| [#26](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/26) | **Closed** 2026-07-15 (not merged) | #27 |
 
 ## Issues staying open
 
@@ -69,8 +69,7 @@ For the full gate list, use Quick start in [integration-branch.md](../docs/integ
 gh issue close 23 --comment "Landed via integration branch PR #27. Supersedes #25."
 gh issue close 7 --comment "Implemented on main: validate-command-adapters.sh grounding checks + CI paths."
 gh issue close 28 --comment "Integration branch merged to main via PR #27."
-gh pr close 25 --comment "Superseded by integration PR #27."
-gh pr close 26 --comment "Superseded by integration PR #27."
+# PRs #25 and #26 already closed as superseded by #27 (2026-07-15).
 ```
 
 ## Branch cleanup after merge

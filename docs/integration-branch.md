@@ -45,7 +45,7 @@ Then work through [Manual test checklist](#manual-test-checklist) below.
 | `cursor/workflow-agent-commands-981e` | [#25](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/25) | `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team` |
 | `cursor/catch-up-branch-evaluation-981e` | [#26](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/26) | `docs/catch-up.md`, branch-evaluation session note |
 
-Do **not** merge #25 or #26 separately — [#27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27) supersedes both.
+Do **not** merge #25 or #26 separately — [#27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27) supersedes both. Those draft PRs were **closed** (not merged) on 2026-07-15.
 
 ### Built directly on integration (maintainability refactors)
 
