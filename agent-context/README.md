@@ -39,7 +39,7 @@ replace directory scans and chronological history reads.
 |------|-------------|
 | `memory/code-areas.md` | At capture — known categories; match session content here first |
 | `memory/domain-index.md` | Fowler/Troy scoped scan — filter by domain keyword before reading code |
-| `memory/context-index.md` | Before touching code — filter by Area; Kinds: analysis, session, decision, pitfall, pattern |
+| `memory/context-index.md` | Before touching code — filter by Area; Kinds: analysis, session, decision, pitfall, pattern, metric |
 | `memory/session-index.md` | Session-only view — filter by Work ID or Area, newest first |
 | `memory/phase-index.md` | Phase-known — playbooks, harness, planning files by SDLC phase |
 

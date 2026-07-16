@@ -25,7 +25,7 @@ Do not modify application source code.
 8. Record the source of the change, such as a Jira key, GitHub issue, review finding, or stakeholder decision.
 9. **Append a prompt-optimization ledger entry** to
    `agent-context/memory/prompt-optimization-log.md` (Date, Work ID, Change,
-   Hypothesis, Signal, Outcome).
+   Hypothesis, Signal, Outcome: `improved` / `neutral` / `worse` / `unknown`).
 10. Do not change code.
 11. Recommend the next SDLC-SPDD prompt.
 

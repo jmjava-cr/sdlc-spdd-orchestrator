@@ -30,6 +30,18 @@ if [[ -f "${_SCRIPT_DIR}/sdlc-team-registry.sh" ]]; then
   source "${_SCRIPT_DIR}/sdlc-team-registry.sh"
 fi
 
+# Optional readiness helpers (installed scripts/sdlc-spdd/lib or orchestrator scripts/lib).
+_wf_readiness_lib=""
+if [[ -f "${SDLC_ROOT}/scripts/sdlc-spdd/lib/readiness.sh" ]]; then
+  _wf_readiness_lib="${SDLC_ROOT}/scripts/sdlc-spdd/lib/readiness.sh"
+elif [[ -f "${SDLC_ROOT}/scripts/lib/readiness.sh" ]]; then
+  _wf_readiness_lib="${SDLC_ROOT}/scripts/lib/readiness.sh"
+fi
+if [[ -n "${_wf_readiness_lib}" ]]; then
+  # shellcheck source=/dev/null
+  source "${_wf_readiness_lib}"
+fi
+
 SDLC_WORKFLOW_DIR="${SDLC_DIR}/workflows"
 SDLC_WORKFLOW_LOCK="${SDLC_DIR}/workflow.lock"
 
@@ -211,12 +223,34 @@ _wf_ensure_state() {
   fi
 }
 
+_wf_work_readiness() {
+  local work_id="$1"
+  local canvas
+  canvas="$(_wf_canvas_path "${work_id}")"
+  [[ -n "${canvas}" ]] || return 0
+  if declare -F canvas_readiness >/dev/null 2>&1; then
+    canvas_readiness "${canvas}"
+  fi
+}
+
 sdlc_workflow_recommended_command() {
   local phase="${1:-init}"
   local work_id="${2:-}"
   local operation="${3:-}"
+  local readiness=""
   if [[ -z "${operation}" && -n "${work_id}" ]]; then
     operation="$(_wf_resolve_operation "${work_id}" "${phase}")"
+  fi
+  if [[ -n "${work_id}" ]] && declare -F canvas_readiness >/dev/null 2>&1; then
+    readiness="$(_wf_work_readiness "${work_id}")"
+  fi
+  # Architecture-first: do not recommend /sdlc-spdd-code when readiness blocks coding.
+  if [[ "${phase}" == "code" && -n "${readiness}" ]]; then
+    if declare -F readiness_allows_coding >/dev/null 2>&1 \
+      && ! readiness_allows_coding "${readiness}"; then
+      echo "/sdlc-spdd-architect @spdd/canvas/${work_id}.md  # readiness=${readiness} — not Ready For Coding"
+      return 0
+    fi
   fi
   case "${phase}" in
     init) echo "/sdlc-spdd-init" ;;
@@ -410,6 +444,15 @@ sdlc_workflow_next() {
   echo
   echo "Do now (assistant):"
   echo "  $(sdlc_workflow_recommended_command "${phase}" "${work_id}" "${operation}")"
+  if [[ "${phase}" == "code" ]]; then
+    local readiness
+    readiness="$(_wf_work_readiness "${work_id}")"
+    if [[ -n "${readiness}" ]] && declare -F readiness_allows_coding >/dev/null 2>&1 \
+      && ! readiness_allows_coding "${readiness}"; then
+      echo
+      echo "Note: canvas readiness is '${readiness}' — run architect (or prompt-update) before coding."
+    fi
+  fi
   echo
   echo "Or run in terminal:"
   echo "  $(sdlc_workflow_shell_start "${work_id}" "${phase}")"
@@ -508,6 +551,7 @@ sdlc_workflow_status_json() {
     printf '"phase_total":%s,' "${#SDLC_PHASE_ORDER[@]}"
     printf '"operation":"%s",' "$(_wf_json_escape "${operation}")"
     printf '"operation_title":"%s",' "$(_wf_json_escape "${op_title}")"
+    printf '"readiness":"%s",' "$(_wf_json_escape "$(_wf_work_readiness "${work_id}")")"
     printf '"recommended_command":"%s",' "$(_wf_json_escape "$(sdlc_workflow_recommended_command "${phase}" "${work_id}" "${operation}")")"
     printf '"shell_start":"%s",' "$(_wf_json_escape "$(sdlc_workflow_shell_start "${work_id}" "${phase}")")"
     printf '"shell_capture":"%s",' "$(_wf_json_escape "$(sdlc_workflow_shell_capture "${work_id}" "${phase}")")"

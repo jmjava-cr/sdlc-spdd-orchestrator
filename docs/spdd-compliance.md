@@ -89,7 +89,7 @@ This scaffold implements Martin Fowler's [SPDD article](https://martinfowler.com
 | `spdd/analysis/<WORK-ID>-analysis.md` | Step 3 strategic analysis (domain keywords, scoped areas) |
 | `spdd/canvas/<WORK-ID>.md` | REASONS Canvas governing prompt |
 | `agent-context/memory/domain-index.md` | Keyword → area → analysis/canvas lookup |
-| `agent-context/memory/context-index.md` | Area → context (Kinds: analysis, session, decision, pitfall, pattern) |
+| `agent-context/memory/context-index.md` | Area → context (Kinds: analysis, session, decision, pitfall, pattern, metric) |
 | `agent-context/memory/code-areas.md` | Canonical code-area registry |
 
 After `/sdlc-spdd-analysis`, run:

@@ -12,6 +12,7 @@ Sourced library files for SDLC-SPDD runtime scripts. Not executed directly.
 | `work-id.sh` | yes | `slugify`, `next_work_number`, `work_type_prefix` |
 | `milestone.sh` | yes | `resolve_milestone` (absolute or relative paths) |
 | `context-index.sh` | yes | Context index header + `prepend_context_index_rows` |
+| `readiness.sh` | yes | Canvas readiness normalize/extract (FEAT-005) |
 | `shipped-docs-boundary.sh` | no | Orchestrator doc install skip list |
 | `framework-install.sh` | no | Shared `ensure_dir` for init/upgrade |
 

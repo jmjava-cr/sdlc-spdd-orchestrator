@@ -28,11 +28,13 @@ setup_feature() {
   mkdir -p "${t}/agent-context/sessions" \
     "${t}/agent-context/features/${work_id}" \
     "${t}/spdd/canvas" \
-    "${t}/spdd/analysis"
+    "${t}/spdd/analysis" \
+    "${t}/scripts/lib"
   cp "${POINTER}" "${t}/agent-context/sdlc-pointer.sh"
   cp "${WORKFLOW}" "${t}/agent-context/sdlc-workflow.sh"
   cp "${REPO_ROOT}/agent-context/sdlc-team-registry.sh" "${t}/agent-context/sdlc-team-registry.sh"
   cp "${REPO_ROOT}/templates/agent-context/work-registry.tsv" "${t}/agent-context/work-registry.tsv"
+  cp "${REPO_ROOT}/scripts/lib/readiness.sh" "${t}/scripts/lib/readiness.sh"
   chmod +x "${t}/agent-context/sdlc-pointer.sh" "${t}/agent-context/sdlc-workflow.sh" "${t}/agent-context/sdlc-team-registry.sh"
 }
 
@@ -249,6 +251,44 @@ if grep -q 'all canvas operations complete' <<< "${out}"; then
   ok "next reports all operations complete"
 else
   bad "next should say all operations complete: ${out}"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12c: code phase with Needs Analysis redirects next to architect =="
+T="${WORK}/ops-readiness"
+work_id="FEAT-012c-readiness"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012c-readiness
+
+## Metadata
+- Work ID: FEAT-012c-readiness
+- Status: In Progress
+- Readiness: Needs Analysis
+
+## O - Operations
+
+### T01 - First
+
+- Status: Not Started
+
+## Final Status
+
+- Status:
+EOF
+wf "${T}" resume "${work_id}" --phase code >/dev/null
+out="$(wf "${T}" next)"
+if grep -q 'sdlc-spdd-architect' <<< "${out}" && grep -q 'not Ready For Coding' <<< "${out}"; then
+  ok "next redirects to architect when readiness blocks coding"
+else
+  bad "next should recommend architect when Needs Analysis: ${out}"
+fi
+json="$(wf "${T}" status --json)"
+if grep -q '"readiness":"needs-analysis"' <<< "${json}" \
+  && grep -q 'sdlc-spdd-architect' <<< "${json}"; then
+  ok "json readiness + recommended_command reflect gate"
+else
+  bad "json missing readiness gate fields: ${json}"
 fi
 
 # ---------------------------------------------------------------------------

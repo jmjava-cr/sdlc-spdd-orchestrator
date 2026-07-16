@@ -11,22 +11,25 @@ Do not make code changes unless explicitly asked.
 
 
 1. Read the REASONS Canvas.
-2. Inspect changed files.
-3. Compare implementation to Requirements.
-4. Compare implementation to Entities.
-5. Compare implementation to Approach.
-6. Compare implementation to Structure.
-7. Verify Operations are complete.
-8. Verify Norms were followed.
-9. Verify Safeguards were respected.
-10. Check tests.
-11. Check for unrelated changes.
-12. Check for architecture drift.
-13. Check for unexplained dependencies.
-14. Produce a review report.
-15. Classify findings as implementation mismatch, canvas/intent mismatch, or non-behavioral refactor.
-16. Recommend `/sdlc-spdd-prompt-update` for behavior or requirement changes before additional code changes.
-17. Recommend `/sdlc-spdd-sync` for accepted non-behavioral refactors after review.
+2. Note Metadata `- Readiness:` (or YAML `readiness:`). If code was implemented while
+   readiness was not Ready For Coding, flag that as a process finding (Changes Requested
+   or Approved With Notes depending on severity).
+3. Inspect changed files.
+4. Compare implementation to Requirements.
+5. Compare implementation to Entities.
+6. Compare implementation to Approach.
+7. Compare implementation to Structure.
+8. Verify Operations are complete.
+9. Verify Norms were followed.
+10. Verify Safeguards were respected.
+11. Check tests.
+12. Check for unrelated changes.
+13. Check for architecture drift.
+14. Check for unexplained dependencies.
+15. Produce a review report.
+16. Classify findings as implementation mismatch, canvas/intent mismatch, or non-behavioral refactor.
+17. Recommend `/sdlc-spdd-prompt-update` for behavior or requirement changes before additional code changes.
+18. Recommend `/sdlc-spdd-sync` for accepted non-behavioral refactors after review.
 
 ## Output
 
@@ -51,4 +54,5 @@ Include:
 - Optional improvements
 - Test gaps
 - Drift from canvas
+- Readiness at review time (and whether coding proceeded without Ready For Coding)
 - Recommended next command

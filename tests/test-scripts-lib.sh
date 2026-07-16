@@ -26,6 +26,8 @@ source "${LIB}/work-id.sh"
 source "${LIB}/milestone.sh"
 # shellcheck source=/dev/null
 source "${LIB}/context-index.sh"
+# shellcheck source=/dev/null
+source "${LIB}/readiness.sh"
 
 echo "== common.sh =="
 assert_eq "$(sdlc_oneline $'hello\nworld' 20)" "hello world" "oneline collapses newlines"
@@ -97,11 +99,19 @@ fi
 echo "== paths.sh manifest =="
 # shellcheck source=/dev/null
 source "${LIB}/paths.sh"
-if ((${#SDLC_SHIPPED_LIB_FILES[@]} >= 6)); then
-  ok "SDLC_SHIPPED_LIB_FILES lists shipped libs"
+if printf '%s\n' "${SDLC_SHIPPED_LIB_FILES[@]}" | grep -qx 'readiness.sh' \
+  && ((${#SDLC_SHIPPED_LIB_FILES[@]} >= 7)); then
+  ok "SDLC_SHIPPED_LIB_FILES lists shipped libs including readiness.sh"
 else
-  bad "SDLC_SHIPPED_LIB_FILES too short"
+  bad "SDLC_SHIPPED_LIB_FILES missing readiness.sh or too short"
 fi
+
+echo "== readiness.sh =="
+assert_eq "$(normalize_readiness 'Ready For Coding')" "ready-for-coding" "normalize Ready For Coding"
+assert_eq "$(normalize_readiness 'Needs Redesign')" "needs-redesign" "normalize Needs Redesign"
+if readiness_allows_coding "ready-for-coding"; then ok "allows coding when ready"; else bad "allows coding when ready"; fi
+if readiness_allows_coding ""; then ok "allows coding when absent"; else bad "allows coding when absent"; fi
+if ! readiness_allows_coding "needs-analysis"; then ok "blocks coding when needs-analysis"; else bad "blocks coding when needs-analysis"; fi
 
 echo
 echo "Summary: ${pass} passed, ${fail} failed"
