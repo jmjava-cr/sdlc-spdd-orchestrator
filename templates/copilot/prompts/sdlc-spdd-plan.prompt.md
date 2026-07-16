@@ -48,6 +48,8 @@ If skill directives are provided, record included and excluded skills in the can
 10. Break work into small, method-level Operations.
 11. Link the Work ID to roadmap or milestone when known.
 12. Reference the analysis path in canvas Metadata.
+12a. Set Metadata `- Readiness: Needs Analysis` (canvas readiness vocabulary) unless
+    a prior architect pass already set a later value such as Ready For Coding.
 13. Do not modify source code.
 14. Do not invent requirements that were not requested.
 15. Ask for clarification only when needed to prevent incorrect work.

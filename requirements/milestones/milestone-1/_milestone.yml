@@ -1,0 +1,7 @@
+name: "Milestone 1 — Make it right"
+number: 1
+start_date: "2026-06-01"
+end_date: ""
+status: "in_progress"
+related_epics: []
+notes: "Framework readability/maintainability/extensibility. Prompt optimization deferred to make-it-fast."

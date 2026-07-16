@@ -4,16 +4,17 @@
 
 - Work ID: FEAT-005-canvas-readiness-indicators
 - Work Type: Feature
-- Status: Draft
-- Readiness: Needs Analysis
+- Status: Complete
+- Readiness: Complete
 - Created: 2026-06-19
-- Updated: 2026-06-19
+- Updated: 2026-07-15 (analysis + architect)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown
 - Source System: Roadmap
 - Roadmap: ROADMAP.md
-- Milestone: milestone-1.md
+- Milestone: requirements/milestones/milestone-1/MILESTONE-1.md
+- Analysis: spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md
 - Delivery stage: make it fast (measurement for optimization) — **deferred, do last**
 - Related PR:
 
@@ -32,11 +33,11 @@ refactors (FEAT-001→003) and with/after FEAT-004.
 
 ### Acceptance Criteria
 
-- [ ] Canvases carry a machine-parseable `readiness:` value from a fixed vocabulary.
-- [ ] `validate-reasons-canvas.sh` reads and validates `readiness:`.
-- [ ] Validate/review cycle counts are captured as leading indicators, reusing the FEAT-004 metric Kind in `context-index.md`.
-- [ ] Canvases without the field still validate (backward compatible).
-- [ ] Docs describe the readiness vocabulary and indicators.
+- [x] Canvases carry a machine-parseable `readiness:` value from a fixed vocabulary.
+- [x] `validate-reasons-canvas.sh` reads and validates `readiness:`.
+- [x] Validate/review cycle counts are captured as leading indicators, reusing the FEAT-004 metric Kind in `context-index.md`.
+- [x] Canvases without the field still validate (backward compatible).
+- [x] Docs describe the readiness vocabulary and indicators.
 
 ### Non-Goals
 
@@ -47,10 +48,19 @@ refactors (FEAT-001→003) and with/after FEAT-004.
 - FEAT-004 metric Kind exists (or is co-delivered) as the indicator substrate.
 - Markdown-first; reuse existing validation + index machinery.
 
-### Open Questions
+### Resolved Decisions (architect — 2026-07-15)
 
-- Readiness vocabulary (e.g. `draft | needs-analysis | needs-clarification | ready-for-coding`) — finalize in analysis.
-- Whether counts are derived from existing logs or captured at validate/review time.
+- **Vocabulary (fixed):** `needs-analysis` | `needs-clarification` | `needs-redesign` |
+  `ready-for-coding` | `blocked` | `reviewed` | `complete`.
+  Title Case aliases accepted (`Needs Analysis`, `Ready For Coding`, `Needs Redesign`,
+  `Blocked`, …). Values starting with `Reviewed` normalize to `reviewed`.
+  Architect-phase values `Needs Redesign` / `Blocked` are part of the same vocabulary
+  (aligned with `/sdlc-spdd-architect`).
+- **Placement:** optional YAML frontmatter `readiness:` **or** Metadata bullet `- Readiness:`.
+  Missing field → validation still passes (backward compatible). Unknown value → **warn**, exit 0
+  for that check (do not fail older free-text notes beyond warn).
+- **Leading indicators:** optional capture flags `--validate-cycles` / `--review-cycles`
+  (non-negative ints) folded into Kind: `metric` rows — not scraped from logs.
 
 ## E - Entities
 
@@ -110,35 +120,35 @@ refactors (FEAT-001→003) and with/after FEAT-004.
 
 ### T01 - Define readiness vocabulary + placement
 
-- Status: Not Started
+- Status: Complete
 - Description: Finalize the fixed readiness values and front-matter location.
-- Files: spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md, docs
+- Files: spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md, docs/context-loading-and-scaling.md, canvas Resolved Decisions
 - Tests: Not applicable
 - Validation: Analysis review
 
 ### T02 - Validate readiness in validate-reasons-canvas.sh
 
-- Status: Not Started
+- Status: Complete
 - Description: Parse/validate `readiness:`; optional for backward compatibility.
 - Files: scripts/validate-reasons-canvas.sh
-- Tests: validation smoke (with/without field)
+- Tests: tests/test-canvas-readiness.sh (Tests 1–5)
 - Validation: old canvases still pass
 
 ### T03 - Capture leading indicators
 
-- Status: Not Started
+- Status: Complete
 - Description: Record validate/review counts as `metric` rows (FEAT-004 Kind).
 - Files: scripts/capture-session-memory.sh
-- Tests: capture smoke
+- Tests: tests/test-canvas-readiness.sh (Test 6)
 - Validation: indicators indexed, scoped by area
 
 ### T04 - Document vocabulary + indicators
 
-- Status: Not Started
+- Status: Complete
 - Description: Document readiness values and indicator meaning.
-- Files: docs/*
+- Files: docs/context-loading-and-scaling.md
 - Tests: Not applicable
-- Validation: doc consistency
+- Validation: doc consistency + posture boundary
 
 ## N - Norms
 
@@ -161,25 +171,25 @@ refactors (FEAT-001→003) and with/after FEAT-004.
 
 ## Review Checklist
 
-- [ ] Requirements satisfied
-- [ ] Entities updated correctly
-- [ ] Approach followed or synced
-- [ ] Structure followed or synced
-- [ ] Operations completed
-- [ ] Norms followed
-- [ ] Safeguards respected
-- [ ] Tests added or updated
-- [ ] No unrelated refactors
-- [ ] Documentation updated if needed
+- [x] Requirements satisfied
+- [x] Entities updated correctly
+- [x] Approach followed or synced
+- [x] Structure followed or synced
+- [x] Operations completed
+- [x] Norms followed
+- [x] Safeguards respected
+- [x] Tests added or updated
+- [x] No unrelated refactors
+- [x] Documentation updated if needed
 
 ## Sync Notes
 
-Make-it-fast measurement, deferred until the refactors (FEAT-001→003) and FEAT-004
-land. Use sync notes to track drift.
+Implementation matches analysis Resolved Decisions. Readiness is optional on
+Metadata or YAML frontmatter; cycle counts are capture flags. No scoring.
 
 ## Final Status
 
-- Status:
-- Completed Date:
-- PR:
-- Follow-Up Tasks:
+- Status: Complete (T01–T04)
+- Completed Date: 2026-07-15
+- PR: (local on cursor/integration-981e)
+- Follow-Up Tasks: SPIKE-001 / SPIKE-002 when scheduled

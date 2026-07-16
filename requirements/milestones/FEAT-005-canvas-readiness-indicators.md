@@ -1,3 +1,18 @@
+---
+work_id: "FEAT-005-canvas-readiness-indicators"
+jira_key: ""
+jira_epic: ""
+jira_type: "Story"
+jira_status: "Done"
+jira_assignee: ""
+jira_due_date: ""
+jira_sprint: ""
+milestone: "milestone-1"
+blocks: []
+depends_on: []
+related: []
+---
+
 # Requirement: FEAT-005-canvas-readiness-indicators
 
 ## Summary
@@ -27,11 +42,11 @@ and any later optimization.
 
 ## Acceptance Criteria
 
-- [ ] Canvases carry a machine-parseable `readiness:` value (fixed vocabulary).
-- [ ] `validate-reasons-canvas.sh` reads/validates the `readiness:` value.
-- [ ] Validate/review cycle counts are captured as leading indicators (indexed, reusing the FEAT-004 metric Kind).
-- [ ] Existing canvases without the field still validate (backward compatible).
-- [ ] Docs describe the readiness vocabulary and indicators.
+- [x] Canvases carry a machine-parseable `readiness:` value (fixed vocabulary).
+- [x] `validate-reasons-canvas.sh` reads/validates the `readiness:` value.
+- [x] Validate/review cycle counts are captured as leading indicators (indexed, reusing the FEAT-004 metric Kind).
+- [x] Existing canvases without the field still validate (backward compatible).
+- [x] Docs describe the readiness vocabulary and indicators.
 
 ## Non-Goals
 
@@ -39,7 +54,4 @@ and any later optimization.
 
 ## Next Step
 
-Deferred. When its turn comes:
-
-    /sdlc-spdd-analysis @requirements/milestones/FEAT-005-canvas-readiness-indicators.md
-    /sdlc-spdd-plan @spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md
+Complete (2026-07-15). Follow-up: SPIKE-001 / SPIKE-002 as scheduled.

@@ -34,9 +34,10 @@ Properties:
 
 Everything below is pulled into context **only when needed**:
 
-- `requirements/`, `requirements/milestones/`
+- `requirements/`, `requirements/milestones/` (flat or `milestone-N/` stubs)
 - `spdd/analysis/`, `spdd/canvas/`, `spdd/tasks/`, `spdd/reviews/`, `spdd/sync/`
-- `ROADMAP.md`, `milestone-*.md`, `session-notes/`
+- `ROADMAP.md`, root `milestone-*.md` and/or
+  `requirements/milestones/milestone-N/MILESTONE-N.md`, `session-notes/`
 - `agent-context/sessions/`, `agent-context/memory/`,
   `agent-context/features/`, `agent-context/harness/`, `agent-context/playbooks/`
 
@@ -68,7 +69,7 @@ instruction, not an enforced mechanism. Pressure points as a project grows:
 | Artifact | Growth | Risk | Mitigation |
 |----------|--------|------|------------|
 | `agent-context/memory/session-history.md` | Bounded recent window (rotates) | Low — `capture-session-memory.sh` keeps the most recent `--history-limit` entries inline and moves older ones to `agent-context/memory/archive/` | Retrieve via [bootstrap indexes](#bootstrap-and-index-based-loading), not by reading this file |
-| `agent-context/sessions/` | One brief per session (unbounded count) | Low if agents read only `current-session.md` | Treat `current-session.md` as the single entry point |
+| `agent-context/sessions/` | Session briefs (`current-session.md` + timestamped) | Low if agents read only `current-session.md`; count bounded by `--session-limit` (default 20; older → `sessions/archive/`) | Treat `current-session.md` as the single entry point |
 | `agent-context/features/`, `spdd/canvas/`, `spdd/reviews/`, `spdd/sync/` | One set per Work ID | Low when scoped to one Work ID; listings grow | Scope reads to the active Work ID subtree |
 | `session-notes/` | One file per day (unbounded count) | Low — only recent notes matter | Read only the current and recent dates |
 
@@ -137,7 +138,7 @@ that prose against the codebase — not by parsing the canvas.
 |-------|----------|-----------|
 | `agent-context/memory/code-areas.md` | Canonical category name | Known code areas; read **first at capture** to match session content |
 | `agent-context/memory/domain-index.md` | Domain keyword → area + artifact | Fowler Step 3 scoped scan; filter before reading code |
-| `agent-context/memory/context-index.md` | Code area → context (Kind: analysis, session, decision, pitfall, pattern) | Find prior work **and** durable memory for an area, across any Work ID or date |
+| `agent-context/memory/context-index.md` | Code area → context (Kind: analysis, session, decision, pitfall, pattern, **metric**) | Find prior work **and** durable memory for an area, across any Work ID or date |
 | `agent-context/memory/session-index.md` | Session (newest first), Work ID + Areas | Session-only view; full detail in `agent-context/memory/sessions/<entry>` |
 | `agent-context/memory/phase-index.md` | SDLC phase → static files | Playbooks, harness, planning docs when you know the phase (not area-specific) |
 
@@ -147,6 +148,7 @@ Supporting artifacts (not indexes — indexes point here):
 |----------|------|
 | `agent-context/memory/sessions/<entry>.md` | Immutable per-session detail |
 | `agent-context/memory/session-history.md` | Recent chronological window; older entries in `agent-context/memory/archive/` |
+| `agent-context/memory/prompt-optimization-log.md` | Prompt/outcome ledger (Date, Work ID, Change, Hypothesis, Signal, Outcome); rotates like session-history |
 | `agent-context/features/<WORK-ID>/progress-log.md` | Work-ID-scoped timeline; load for active Work ID only |
 
 ### What is a code area?
@@ -171,6 +173,9 @@ Example: you are about to change `src/billing`.
    - `decision` → `architecture-decisions.md` at the **Entry** heading
    - `pitfall` → `known-pitfalls.md` at the **Entry** heading
    - `pattern` → `reusable-patterns.md` at the **Entry** heading
+   - `metric` → capture metrics (`readiness`, `review-result`, `rework`,
+     `context-files`, `validate-cycles`, `review-cycles`) and related
+     prompt-optimization signals for that area
 3. Optionally filter `session-index.md` by the same area for a session-only view.
 4. Load `spdd/canvas/<WORK-ID>.md` for any matched row.
 
@@ -196,7 +201,16 @@ At session end, `capture-session-memory.sh` runs a **session-driven category flo
    - `session-index` + `context-index` (Kind: `session`) — one row per area
    - additional `context-index` rows when `--decisions`, `--pitfalls`, or
      `--patterns` are provided (Kinds: `decision`, `pitfall`, `pattern`)
+   - optional capture metrics via `--readiness`, `--review-result`
+     (`pass|fail|mixed|blocked`), `--rework` (non-negative int),
+     `--context-files`, and leading indicators `--validate-cycles` /
+     `--review-cycles` (non-negative ints) → Kind: `metric` (scoped to
+     resolved areas; omitted flags leave capture behavior unchanged; unknown
+     `--review-result` warns and skips)
    - memory entries without resolved areas are written but **not** indexed
+7. Rotate `session-history.md` and `prompt-optimization-log.md` (when present)
+   with the same `--history-limit` / `--no-history-rotate` controls; older
+   `###` sections move to `agent-context/memory/archive/`.
 
 > **Guardrail — read the whole last session document.** Parsing covers the full
 > latest timestamped session brief in `agent-context/sessions/`, plus
@@ -211,6 +225,50 @@ script parses them, matches known categories, and registers new ones automatical
       --summary "Implemented billing retry in src/billing" \
       --decisions "Retry uses exponential backoff" \
       --pitfalls "Legacy orders omit tax field"
+
+**Capture with metrics** (optional):
+
+    ./scripts/sdlc-spdd/capture-session-memory.sh --target . --work-id <WORK-ID> \
+      --phase review \
+      --summary "Review passed after one prompt-update" \
+      --areas "scripts/capture-session-memory.sh" \
+      --readiness "Ready For Coding" \
+      --review-result pass \
+      --rework 1 \
+      --context-files 14
+
+`--rework` counts corrective prompt-update/sync cycles **after** the canvas first
+reached Ready For Coding (not re-run code operations).
+
+**Prompt-optimization ledger:** `/sdlc-spdd-prompt-update` and `/sdlc-spdd-retro`
+append entries to `agent-context/memory/prompt-optimization-log.md` (Date, Work ID,
+Change, Hypothesis, Signal, Outcome). Capture rotates that ledger like
+`session-history.md`.
+
+### Canvas readiness vocabulary (optional)
+
+Canvases may declare readiness as YAML frontmatter `readiness:` **or** a Metadata
+bullet `- Readiness:`. Canonical values:
+
+| Canonical | Common aliases |
+|-----------|----------------|
+| `needs-analysis` | Needs Analysis |
+| `needs-clarification` | Needs Clarification |
+| `needs-redesign` | Needs Redesign |
+| `ready-for-coding` | Ready For Coding |
+| `blocked` | Blocked |
+| `reviewed` | Reviewed, Reviewed — … |
+| `complete` | Complete, Done |
+
+Parenthetical notes are ignored when normalizing (for example
+`Ready For Coding (implemented on integration)` → `ready-for-coding`).
+Values that start with a canonical token after normalization (for example
+`Reviewed — Approved With Notes`) map to that token.
+
+`validate-reasons-canvas.sh` checks sections first; readiness is optional. Missing
+→ OK. Unrecognized → warning only (does not fail validation). Leading indicators
+`--validate-cycles` / `--review-cycles` record how many validate/review cycles it
+took to reach ready (capture-time; Kind: `metric`).
 
 **Optional `--areas`** — override or supplement when parsing missed something:
 
@@ -229,8 +287,8 @@ the code area. A practical default:
 | Phase | Load |
 |-------|------|
 | init | repo structure, stack detection output |
-| analysis | requirement, `domain-index.md`, `context-index.md`, `code-areas.md`; scan only matched code areas |
-| plan | `spdd/analysis/<WORK-ID>-analysis.md`, requirement, `ROADMAP.md`, active `milestone-*.md` |
+| analysis | requirement (incl. optional Jira frontmatter), **Scope Lock**, `domain-index.md`, `context-index.md`, `code-areas.md`; scan only matched code areas |
+| plan | `spdd/analysis/<WORK-ID>-analysis.md`, requirement, `ROADMAP.md`, active milestone definition (root or `…/milestone-N/`) |
 | architect | analysis + Work ID canvas, `architecture-decisions.md`, `agent-context/harness/` |
 | code | Work ID canvas, that feature's `progress-log.md`, `known-pitfalls.md` |
 | api-test | Work ID canvas Requirements/Operations, implemented endpoints for this Work ID |

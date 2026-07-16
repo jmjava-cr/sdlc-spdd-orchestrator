@@ -1,0 +1,28 @@
+name: Validate Requirements Format
+
+on:
+  pull_request:
+    paths:
+      - 'requirements/milestones/**'
+      - 'scripts/validate-requirements-format.sh'
+      - 'templates/requirements/**'
+      - '.github/workflows/validate-requirements-format.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'requirements/milestones/**'
+      - 'scripts/validate-requirements-format.sh'
+      - 'templates/requirements/**'
+      - '.github/workflows/validate-requirements-format.yml'
+
+jobs:
+  validate-requirements-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: bash -n scripts/validate-requirements-format.sh
+
+      - name: Validate requirements format
+        run: ./scripts/validate-requirements-format.sh

@@ -4,10 +4,10 @@
 
 - Work ID: SPIKE-001-guide-rag-context-backend
 - Work Type: Spike
-- Status: Draft
-- Readiness: Needs Analysis
+- Status: Shelved — blocked on Guide MCP
+- Readiness: Ready For Coding
 - Created: 2026-06-19
-- Updated: 2026-06-19 (confirmational research via live MCP store)
+- Updated: 2026-07-15 (analysis resume; MCP blocked)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown harness ↔ JVM (Embabel guide) + Neo4j graph + RAG, over MCP (SSE)
@@ -184,7 +184,7 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T01 - Stand up guide + ingest orchestrator memory (leg 2 — RAG chunks)
 
-- Status: In Progress
+- Status: Shelved — blocked on Guide MCP
 - Description: Local guide instance; point `guide.directories` at orchestrator memory; append-ingest; verify store stats.
 - Files: (guide config; no orchestrator changes)
 - Validation: Ingestion summary shows orchestrator memory loaded as chunks
@@ -192,7 +192,7 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T02 - Design SDLC-SPDD DICE entity schema (Embabel conventions)
 
-- Status: In Progress
+- Status: Complete
 - Description: Define `NamedEntity` types per Embabel conventions (`id`/`name`/`description`, `@Semantics` relationships, `DataDictionary.fromClasses` or `dataDictionaryFromPackages`). Review against `dice/README.md` and `embabel-agent-rag` `NamedEntity`/`NamedEntityDataRepository` APIs. Finalize draft against one real Work ID.
 - Files: `spdd/analysis/SPIKE-001-dice-entity-schema.md`
 - Validation: Convention alignment table complete; ingest mapping uses `NamedEntityDataRepository`, not proposition pipeline
@@ -206,7 +206,7 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T04 - Connect Cursor to guide MCP + sanity retrieval (all legs)
 
-- Status: In Progress
+- Status: Shelved — blocked on Guide MCP
 - Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via fork domain-query tool on projected entities.
 - Files: (Cursor MCP config; fork tool)
 - Validation: Relevant results for a known Work ID/area via each leg
@@ -252,6 +252,8 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 - [ ] No secrets committed
 
 ## Sync Notes
+
+2026-07-15 analysis: FEAT-004/005 unblocked; Guide MCP down — A/B deferred. See spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md
 
 Spike to de-risk the make-it-fast retrieval direction via a **DICE (Domain-Integrated
 Context Engineering)** hybrid over guide/Neo4j: lexical index + embedding discovery +

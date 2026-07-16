@@ -13,33 +13,63 @@ Do not implement code. Do not create or update the REASONS Canvas.
 
 The user may provide:
 
-- A requirement document (`requirements/`, `requirements/milestones/`)
+- A requirement document (`requirements/`, `requirements/milestones/`, or
+  `requirements/milestones/milestone-N/<WORK-ID>.md`)
 - A user story or milestone item
-- `ROADMAP.md`, `milestone-*.md`, or `session-notes/`
+- `ROADMAP.md`, root `milestone-*.md`, or
+  `requirements/milestones/milestone-N/MILESTONE-N.md`
+- `session-notes/`
 - An existing Work ID when resuming analysis
 
 ## Required Behavior
 
 
-1. Read the business requirement and acceptance criteria.
-2. Extract **domain keywords** (for example billing, quota, plan, modelId) — nouns
-   and domain concepts, not file paths.
-3. Load `agent-context/memory/code-areas.md` and filter
+## Scope Lock-In (Before Analysis Generation)
+
+1. **Read the requirement document** — Prefer
+   `requirements/milestones/<WORK-ID>.md` or
+   `requirements/milestones/milestone-N/<WORK-ID>.md`. Extract declared scope
+   (IN SCOPE / NOT IN SCOPE), acceptance criteria, and any YAML frontmatter
+   (`jira_key`, `jira_epic`, `jira_status`, related work). Also read the `## Jira`
+   section when present. Do **not** modify Jira keys or external tracker fields.
+2. **Document scope boundaries** — Before scanning code, write what IS in scope,
+   what IS NOT, and where deferred work belongs (other Work IDs or later phases).
+3. **List deferred CHOREs / Work IDs** — For out-of-scope items, name the target
+   Work ID or “future phase” so they are not lost.
+
+## Analysis Generation (Locked Scope Only)
+
+4. Extract **domain keywords** (for example billing, quota, plan, modelId) — nouns
+   and domain concepts, not file paths. Keywords must serve locked scope only.
+5. Load `agent-context/memory/code-areas.md` and filter
    `agent-context/memory/context-index.md` and `agent-context/memory/domain-index.md`
    by those keywords and related code areas. Read matched artifacts newest-first;
    do not scan the whole repository.
-4. Use domain keywords to locate relevant source files, interfaces, and tests.
-   Read only modules that match the keywords or indexed code areas.
-5. Identify existing vs new domain concepts, relationships, business rules, and
-   technical risks. Deliberately avoid granular implementation detail at this stage.
-6. Record **code areas** (Java package or directory bucket) for scoped loading in
+6. Use domain keywords to locate relevant source files, interfaces, and tests.
+   Read only modules that match the keywords or indexed code areas **and** inform
+   locked scope.
+7. Identify existing vs new domain concepts, relationships, business rules, and
+   technical risks **within locked scope**. Deliberately avoid granular
+   implementation detail. For each concept, validate: does it address locked
+   scope, inform locked scope as context-only, or belong in Deferred?
+8. Record **code areas** (Java package or directory bucket) for scoped loading in
    later phases.
-7. Create or update the analysis artifact (see Output). Preserve prior analysis
-   history when updating.
-8. After writing the analysis file, tell the user to run
-   `./scripts/sdlc-spdd/index-spdd-analysis.sh --target . --work-id <WORK-ID>`
-   so domain keywords and code areas feed the decision-memory indexes.
-9. Recommend `/sdlc-spdd-plan` as the next command once analysis is accepted.
+9. Create or update the analysis artifact (see Output). Preserve prior analysis
+   history when updating. Put **Scope Lock** immediately after Metadata.
+10. After writing the analysis file, tell the user to run
+    `./scripts/sdlc-spdd/index-spdd-analysis.sh --target . --work-id <WORK-ID>`
+    so domain keywords and code areas feed the decision-memory indexes.
+11. Recommend `/sdlc-spdd-plan` as the next command once analysis is accepted.
+
+## Common Pitfalls
+
+- **Scope creep before lock:** Do not generate full analysis and then discover
+  scope issues afterward. Lock scope first.
+- **Reference bloat:** Include existing patterns only when they inform locked
+  scope deliverables. Exclude context-only handlers, interfaces, and layers that
+  belong to other Work IDs.
+- **Layer bleed:** Schema CHOREs must not absorb entity/repository/API work;
+  defer those to their Work IDs.
 
 ## Output
 
@@ -51,14 +81,23 @@ Create or update:
 
 The analysis document must include these sections:
 
-- **Metadata** — Work ID, requirement source, timestamp
+- **Metadata** — Work ID, requirement source, timestamp, optional Jira key from
+  frontmatter/`## Jira` (read-only)
+- **Scope Lock** — required first major section after Metadata:
+  - In Scope for This Work
+  - NOT in Scope (Deferred) — with target Work ID or phase when known
+  - Reference Materials (Context Only, Not Deliverables)
 - **Domain Keywords** — bullet list of domain terms used for scoped code scan
 - **Code Areas** — bullet list of packages or directory buckets to load in later phases
-- **Existing Concepts** — what the codebase already has
-- **New Concepts** — what this work introduces
+- **Existing Concepts** — what the codebase already has (locked scope only)
+- **New Concepts** — what this work introduces (locked scope only)
 - **Strategic Direction** — approach, design decisions, trade-offs (what and why, not how)
 - **Risks and Gaps** — ambiguities, edge cases, AC coverage gaps
 - **Recommendation** — proceed to canvas, or clarify first
 
-Also print a short summary: Work ID, top keywords, code areas scoped, main risks,
-next command (`/sdlc-spdd-plan @spdd/analysis/<WORK-ID>-analysis.md`).
+Also print a short summary: Work ID, scope lock (in / deferred), top keywords,
+code areas scoped, main risks, next command
+(`/sdlc-spdd-plan @spdd/analysis/<WORK-ID>-analysis.md`).
+
+Guidance: `docs/analysis-phase-scope-validation.md` (installed as
+`docs/sdlc-spdd/analysis-phase-scope-validation.md`).

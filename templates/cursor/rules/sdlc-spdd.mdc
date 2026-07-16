@@ -51,7 +51,7 @@ Preserve context by reading relevant artifacts before answering:
 - `spdd/reviews/`
 - `spdd/sync/`
 - `ROADMAP.md`
-- `milestone-*.md`
+- `milestone-*.md` (root) and/or `requirements/milestones/milestone-N/MILESTONE-N.md`
 - `session-notes/`
 - `agent-context/sessions/`
 - `agent-context/memory/`
@@ -70,8 +70,8 @@ Load context by index, not by scanning. Keep working context small and relevant 
 
 Per-phase context budget:
 
-- plan: the requirement, `spdd/analysis/<WORK-ID>-analysis.md`, `ROADMAP.md`, active `milestone-*.md`
-- analysis: the requirement, `domain-index.md`, `context-index.md`, scoped code areas only
+- plan: the requirement, `spdd/analysis/<WORK-ID>-analysis.md`, `ROADMAP.md`, active milestone definition (root `milestone-*.md` or `requirements/milestones/milestone-N/`)
+- analysis: the requirement (Scope Lock first), `domain-index.md`, `context-index.md`, scoped code areas only
 - architect: the Work ID canvas, `agent-context/memory/architecture-decisions.md`, `agent-context/harness/`
 - code: the Work ID canvas, that feature's `progress-log.md`, `agent-context/memory/known-pitfalls.md`
 - api-test: the Work ID canvas Requirements/Operations, implemented endpoints for this Work ID

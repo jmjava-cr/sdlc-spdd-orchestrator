@@ -209,6 +209,49 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+echo "== Test 12b: empty Final Status does not keep last op incomplete =="
+T="${WORK}/ops-final"
+work_id="FEAT-012b-final"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012b-final - empty Final Status
+
+## Metadata
+- Work ID: FEAT-012b-final
+- Status: In Progress
+- Readiness: Ready For Coding
+
+## O - Operations
+
+### T01 - First
+
+- Status: Complete
+
+### T02 - Second
+
+- Status: Complete
+
+## Final Status
+
+- Status:
+- Completed Date:
+EOF
+wf "${T}" resume "${work_id}" --phase code >/dev/null
+wf "${T}" sync "${work_id}" >/dev/null
+op="$(grep '^operation=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2 || true)"
+if [[ -z "${op}" ]]; then
+  ok "all-complete canvas has empty next operation"
+else
+  bad "expected empty operation, got '${op}'"
+fi
+out="$(wf "${T}" next)"
+if grep -q 'all canvas operations complete' <<< "${out}"; then
+  ok "next reports all operations complete"
+else
+  bad "next should say all operations complete: ${out}"
+fi
+
+# ---------------------------------------------------------------------------
 echo "== Test 13: capture wrapper guards pointer =="
 T="${WORK}/capture-guard"
 work_id="FEAT-008-cap"

@@ -18,8 +18,11 @@ Do not modify application source code.
 6. Update Operations when the change affects implementation tasks.
 7. Update Norms and Safeguards when the change affects engineering constraints.
 8. Record the source of the change, such as a Jira key, GitHub issue, review finding, or stakeholder decision.
-9. Do not change code.
-10. Recommend the next SDLC-SPDD command.
+9. **Append a prompt-optimization ledger entry** to
+   `agent-context/memory/prompt-optimization-log.md` with Date, Work ID, Change,
+   Hypothesis, Signal, and Outcome for this prompt/canvas change.
+10. Do not change code.
+11. Recommend the next SDLC-SPDD command.
 
 ## Output
 
@@ -29,6 +32,7 @@ Update:
 - `spdd/canvas/<WORK-ID>.md`
 - `agent-context/features/<WORK-ID>/reasons-canvas.md`
 - `agent-context/features/<WORK-ID>/progress-log.md`
+- `agent-context/memory/prompt-optimization-log.md` (required ledger entry)
 
 Include:
 
@@ -36,5 +40,6 @@ Include:
 - Sections updated
 - Operations added, removed, or changed
 - Safeguards changed
+- Ledger entry summary (Change / Hypothesis / Outcome)
 - Whether the canvas is ready for architecture review or coding
 - Recommended next command

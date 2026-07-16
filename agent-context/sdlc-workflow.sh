@@ -570,6 +570,24 @@ Code phase: next operation (T01, T02, ...) is read from the REASONS Canvas autom
 EOF
 }
 
+_wf_requirement_path() {
+  local work_id="$1"
+  local root="${SDLC_ROOT}"
+  local path dir
+  shopt -s nullglob
+  for dir in "${root}"/requirements/milestones/milestone-*/; do
+    path="${dir}${work_id}.md"
+    if [[ -f "${path}" ]]; then
+      shopt -u nullglob
+      printf '%s' "${path}"
+      return 0
+    fi
+  done
+  shopt -u nullglob
+  path="${root}/requirements/milestones/${work_id}.md"
+  [[ -f "${path}" ]] && printf '%s' "${path}"
+}
+
 _wf_infer_phase_from_artifacts() {
   local work_id="$1"
   local root="${SDLC_ROOT}"
@@ -577,7 +595,7 @@ _wf_infer_phase_from_artifacts() {
   local req feature_req analysis canvas review retro sync_log progress
 
   feature_req="${root}/agent-context/features/${work_id}/requirement.md"
-  req="${root}/requirements/milestones/${work_id}.md"
+  req="$(_wf_requirement_path "${work_id}")"
   analysis="${root}/spdd/analysis/${work_id}-analysis.md"
   canvas="${root}/spdd/canvas/${work_id}.md"
   review="${root}/spdd/reviews/${work_id}-review.md"
@@ -585,7 +603,7 @@ _wf_infer_phase_from_artifacts() {
   sync_log="${root}/spdd/sync/${work_id}-sync.md"
   progress="${root}/agent-context/features/${work_id}/progress-log.md"
 
-  if [[ -f "${req}" || -f "${feature_req}" ]]; then
+  if [[ -n "${req}" || -f "${feature_req}" ]]; then
     inferred="analysis"
   fi
   if [[ -f "${analysis}" ]]; then
@@ -634,7 +652,7 @@ _wf_infer_gates_from_artifacts() {
   local req feature_req analysis canvas review retro sync_log progress
 
   feature_req="${root}/agent-context/features/${work_id}/requirement.md"
-  req="${root}/requirements/milestones/${work_id}.md"
+  req="$(_wf_requirement_path "${work_id}")"
   analysis="${root}/spdd/analysis/${work_id}-analysis.md"
   canvas="${root}/spdd/canvas/${work_id}.md"
   review="${root}/spdd/reviews/${work_id}-review.md"
@@ -642,7 +660,7 @@ _wf_infer_gates_from_artifacts() {
   sync_log="${root}/spdd/sync/${work_id}-sync.md"
   progress="${root}/agent-context/features/${work_id}/progress-log.md"
 
-  [[ -f "${req}" || -f "${feature_req}" ]] && echo "requirement_documented=passed"
+  [[ -n "${req}" || -f "${feature_req}" ]] && echo "requirement_documented=passed"
   [[ -f "${canvas}" || -f "${root}/agent-context/features/${work_id}/reasons-canvas.md" ]] && echo "canvas_exists=passed"
   if [[ -f "${canvas}" ]] && grep -Eqi 'ready[[:space:]]+for[[:space:]]+coding' "${canvas}" 2>/dev/null; then
     echo "architect_review=passed"
@@ -702,9 +720,22 @@ _wf_infer_next_operation() {
   canvas="$(_wf_canvas_path "${work_id}")"
   [[ -n "${canvas}" ]] || return 0
 
+  # Use [0-9][0-9] (not {2}) — mawk does not support brace quantifiers.
+  # Stop matching Status once a ## section boundary is hit so empty
+  # "Final Status / Status:" lines do not keep the last T## incomplete.
   awk '
     BEGIN { op = ""; have_status = 0; complete = 0 }
-    /^### T[0-9]{2}/ {
+    /^##[[:space:]]/ {
+      if (op != "" && (!have_status || !complete)) {
+        print op
+        exit
+      }
+      op = ""
+      have_status = 0
+      complete = 0
+      next
+    }
+    /^### T[0-9][0-9]/ {
       if (op != "" && (!have_status || !complete)) {
         print op
         exit
@@ -715,10 +746,12 @@ _wf_infer_next_operation() {
       complete = 0
       next
     }
-    op != "" && /^- Status:/ {
+    op != "" && /^-[[:space:]]*[Ss]tatus:[[:space:]]*/ {
       have_status = 1
-      line = tolower($0)
-      if (line ~ /complete|: done/) {
+      status = tolower($0)
+      sub(/^-[[:space:]]*status:[[:space:]]*/, "", status)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", status)
+      if (status ~ /^(complete|done|skipped)$/) {
         complete = 1
       } else {
         complete = 0

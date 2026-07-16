@@ -6,6 +6,8 @@ _SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${_SCRIPT_DIR}/lib/common.sh"
 # shellcheck source=/dev/null
 source "${_SCRIPT_DIR}/lib/work-id.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/milestone.sh"
 
 usage() {
   cat <<'EOF'
@@ -15,7 +17,8 @@ Create SDLC-SPDD work artifacts from milestone checklist items.
 
 Options:
   --target <path>       Target project path (default: .)
-  --milestone <file>    Milestone file, such as milestone-1.md (required)
+  --milestone <file>    Milestone definition: root milestone-1.md or
+                        requirements/milestones/milestone-1/MILESTONE-1.md (required)
   --all                 Create work for all unchecked milestone checklist items
   --item <text>         Create work for one milestone item
   --type <type>         feature, bug, refactor, or spike (default: feature)
@@ -25,7 +28,8 @@ Options:
 
 Examples:
   ./scripts/sdlc-spdd/create-work-from-milestone.sh --target . --milestone milestone-1.md --all
-  ./scripts/sdlc-spdd/create-work-from-milestone.sh --target . --milestone milestone-2.md --item "Add order status API" --type feature
+  ./scripts/sdlc-spdd/create-work-from-milestone.sh --target . \
+    --milestone requirements/milestones/milestone-2/MILESTONE-2.md --item "Add order status API"
 EOF
 }
 
@@ -108,16 +112,26 @@ case "${TYPE}" in
 esac
 
 TARGET="$(sdlc_resolve_target "${TARGET}")"
+milestone_arg="${MILESTONE}"
 if [[ "${MILESTONE}" != /* ]]; then
-  MILESTONE="${TARGET}/${MILESTONE}"
+  if [[ -f "${TARGET}/${MILESTONE}" ]]; then
+    MILESTONE="${TARGET}/${MILESTONE}"
+  elif resolved="$(resolve_milestone "${TARGET}" "" "${milestone_arg}" absolute 2>/dev/null)"; then
+    MILESTONE="${resolved}"
+  else
+    MILESTONE="${TARGET}/${MILESTONE}"
+  fi
 fi
 if [[ ! -f "${MILESTONE}" ]]; then
-  echo "Milestone file not found: ${MILESTONE}" >&2
+  echo "Milestone file not found: ${milestone_arg}" >&2
+  echo "Tried: ${MILESTONE}" >&2
   exit 1
 fi
 
 milestone_rel="${MILESTONE#${TARGET}/}"
 roadmap_rel="${ROADMAP#${TARGET}/}"
+requirement_parent="$(requirement_dir_for_milestone "${TARGET}" "${MILESTONE}")"
+requirement_parent_rel="${requirement_parent#${TARGET}/}"
 
 items=()
 if [[ "${CREATE_ALL}" -eq 1 ]]; then
@@ -164,11 +178,13 @@ create_work() {
   work_id="$(printf '%s-%03d-%s' "${PREFIX}" "${number}" "${slug}")"
   feature_dir="${TARGET}/agent-context/features/${work_id}"
   canvas_path="${TARGET}/spdd/canvas/${work_id}.md"
-  milestone_requirement_path="${TARGET}/requirements/milestones/${work_id}.md"
-  milestone_requirement_rel="requirements/milestones/${work_id}.md"
+  milestone_requirement_path="${requirement_parent}/${work_id}.md"
+  milestone_requirement_rel="${requirement_parent_rel}/${work_id}.md"
   feature_requirement_path="${feature_dir}/requirement.md"
   progress_log="${feature_dir}/progress-log.md"
   status_date="$(sdlc_timestamp_iso)"
+  milestone_number="$(_milestone_number_from_path "${MILESTONE}" || true)"
+  milestone_frontmatter_id="milestone-${milestone_number:-1}"
 
   if [[ "${DRY_RUN}" -eq 1 ]]; then
     echo "[dry-run] would create ${work_id} from milestone item: ${title}"
@@ -180,7 +196,7 @@ create_work() {
     return
   fi
 
-  mkdir -p "${feature_dir}/tasks" "${TARGET}/spdd/canvas" "${TARGET}/requirements/milestones"
+  mkdir -p "${feature_dir}/tasks" "${TARGET}/spdd/canvas" "${requirement_parent}"
 
   cat > "${canvas_path}" <<EOF
 # REASONS Canvas: ${work_id} - ${title}
@@ -190,6 +206,7 @@ create_work() {
 - Work ID: ${work_id}
 - Work Type: ${WORK_TYPE}
 - Status: Draft
+- Readiness: Needs Analysis
 - Created: ${status_date}
 - Updated: ${status_date}
 - Owner:
@@ -353,6 +370,21 @@ EOF
   cp "${canvas_path}" "${feature_dir}/reasons-canvas.md"
 
   cat > "${milestone_requirement_path}" <<EOF
+---
+work_id: "${work_id}"
+jira_key: ""
+jira_epic: ""
+jira_type: "Story"
+jira_status: "To Do"
+jira_assignee: ""
+jira_due_date: ""
+jira_sprint: ""
+milestone: "${milestone_frontmatter_id}"
+blocks: []
+depends_on: []
+related: []
+---
+
 # Requirement: ${work_id}
 
 ## Summary
@@ -365,6 +397,23 @@ ${title}
 - Milestone: ${milestone_rel}
 - Derived from milestone checklist item
 
+## Scope
+
+### IN SCOPE
+
+- ${title}
+
+### NOT IN SCOPE
+
+- TBD (name deferred Work IDs during \`/sdlc-spdd-analysis\`)
+
+## Related Work
+
+| Relationship | Work ID | Status | Notes |
+|--------------|---------|--------|-------|
+| Blocks | (none) | — | — |
+| Depends On | (none) | — | — |
+
 ## Acceptance Criteria
 
 - [ ] Define acceptance criteria before coding.
@@ -372,7 +421,8 @@ ${title}
 ## Jira
 
 Draft for issue creation — paste the fields below into Jira UI, MCP, or your approved API.
-After the issue exists, set **Key** and commit; \`claim\` auto-links \`jira:<KEY>\` in the team registry.
+After the issue exists, set **Key** (and matching \`jira_key\` frontmatter) and commit;
+\`claim\` auto-links \`jira:<KEY>\` in the team registry.
 
 - Key: TBD
 - Issue type: Story
@@ -394,6 +444,7 @@ Derived from ${milestone_rel}.
 
 Run:
 
+    /sdlc-spdd-analysis @${milestone_requirement_rel}
     /sdlc-spdd-plan @${milestone_requirement_rel} @${roadmap_rel} @${milestone_rel}
 EOF
 
@@ -444,20 +495,19 @@ for item in "${items[@]}"; do
 done
 
 if ((${#created_work_ids[@]} > 0)); then
-  if [[ -f "${TARGET}/${roadmap_rel}" ]]; then
-    plan_refs="@requirements/milestones/<WORK-ID>.md @${roadmap_rel} @${milestone_rel}"
-  else
-    plan_refs="@requirements/milestones/<WORK-ID>.md @${milestone_rel}"
-  fi
   echo
   echo "Next SPDD prompts (see docs/sdlc-spdd/spdd-prompt-standard.md):"
   for work_id in "${created_work_ids[@]}"; do
-    plan_cmd="${plan_refs//<WORK-ID>/${work_id}}"
+    req_ref="@${requirement_parent_rel}/${work_id}.md"
     echo
     echo "  ${work_id}:"
-    echo "    /sdlc-spdd-analysis @${milestone_requirement_rel}"
+    echo "    /sdlc-spdd-analysis ${req_ref}"
     echo "    ./scripts/sdlc-spdd/index-spdd-analysis.sh --target . --work-id ${work_id}"
-    echo "    /sdlc-spdd-plan @spdd/analysis/${work_id}-analysis.md"
+    if [[ -f "${TARGET}/${roadmap_rel}" ]]; then
+      echo "    /sdlc-spdd-plan @spdd/analysis/${work_id}-analysis.md @${roadmap_rel} @${milestone_rel}"
+    else
+      echo "    /sdlc-spdd-plan @spdd/analysis/${work_id}-analysis.md @${milestone_rel}"
+    fi
     echo "    /sdlc-spdd-architect @spdd/canvas/${work_id}.md"
   done
 fi

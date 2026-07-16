@@ -3,8 +3,9 @@
 SDLC-SPDD supports a project planning pattern based on:
 
 - root `ROADMAP.md`
-- root `milestone-1.md`, `milestone-2.md`, and later milestone files
-- `requirements/milestones/` with per-item requirement stubs from milestone checklists
+- milestone definitions at **either** root `milestone-N.md` **or** (preferred)
+  `requirements/milestones/milestone-N/MILESTONE-N.md` with optional `_milestone.yml`
+- `requirements/milestones/` with per-item requirement stubs (flat or under `milestone-N/`)
 - root `session-notes/` with daily agent-session summaries
 
 These files are project planning artifacts, not framework-owned prompts. Install and upgrade scripts create missing scaffolding, but preserve existing roadmap and milestone content.
@@ -13,7 +14,7 @@ These files are project planning artifacts, not framework-owned prompts. Install
 
 Use this mental model:
 
-    ROADMAP.md / milestone-*.md / requirements/milestones/ / session-notes/
+    ROADMAP.md / milestone definitions / requirements/milestones/ / session-notes/
             -> inform and summarize
     spdd/canvas/ + agent-context/
             -> govern and remember
@@ -24,25 +25,33 @@ Do not migrate away from roadmap, milestone, and session-note files. Keep them a
 
 ## File Layout
 
-Recommended target-project layout:
+Recommended target-project layout (subdirectory milestones):
 
     ROADMAP.md
-    milestone-1.md
-    milestone-2.md
     requirements/milestones/
+      milestone-1/
+        _milestone.yml
+        MILESTONE-1.md
+        FEAT-001-….md
+      milestone-2/
+        _milestone.yml
+        MILESTONE-2.md
     session-notes/
       2026-06-06.md
-      2026-06-07.md
     spdd/canvas/
     agent-context/
+
+Legacy root `milestone-1.md` remains supported. See
+[MIGRATION-root-to-subdirectories.md](MIGRATION-root-to-subdirectories.md) and
+[jira-compatible-requirements-format.md](jira-compatible-requirements-format.md).
 
 ## How These Files Fit SDLC-SPDD
 
 | Artifact | Role in SDLC-SPDD |
 |----------|-------------------|
 | `ROADMAP.md` | milestone-level progress and current focus |
-| `milestone-*.md` | milestone goals, scope, linked Work IDs, and milestone summaries |
-| `requirements/milestones/<WORK-ID>.md` | milestone-derived requirement stub for plan prompts |
+| `milestone-*.md` or `…/milestone-N/MILESTONE-N.md` | milestone goals, scope, linked Work IDs, and milestone summaries |
+| `requirements/milestones/<WORK-ID>.md` (or under `milestone-N/`) | milestone-derived requirement stub for analysis/plan prompts |
 | `session-notes/YYYY-MM-DD.md` | daily summary of agent sessions |
 | `spdd/canvas/<WORK-ID>.md` | SPDD design contract for a work item |
 | `agent-context/memory/session-history.md` | durable cross-session memory |
@@ -63,7 +72,8 @@ The roadmap and milestones tell the agent why the work matters. The canvas tells
 If missing, install creates:
 
 - `ROADMAP.md`
-- `milestone-1.md` when no `milestone-*.md` files exist
+- `requirements/milestones/milestone-1/MILESTONE-1.md` and `_milestone.yml` when no
+  root `milestone-*.md` and no subdirectory milestone definitions exist
 - `session-notes/`
 
 Existing files are preserved.
@@ -73,7 +83,7 @@ Existing files are preserved.
 Upgrade creates missing roadmap/milestone/session-notes scaffolding but does not overwrite:
 
 - existing `ROADMAP.md`
-- existing `milestone-*.md`
+- existing root `milestone-*.md` or subdirectory `MILESTONE-N.md`
 - existing files under `session-notes/`
 
 ## Planning with Milestones

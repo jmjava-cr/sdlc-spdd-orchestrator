@@ -136,8 +136,22 @@ run_part "Planning (inform and summarize)" \
   Planning "milestone requirements directory" "requirements/milestones" dir \
   Planning "milestone requirements README" "requirements/milestones/README.md" file \
   Planning "session notes directory" "session-notes" dir \
-  Planning "roadmap file" "ROADMAP.md" file \
-  Planning "milestone file" "milestone-*.md" glob
+  Planning "roadmap file" "ROADMAP.md" file
+
+# Milestone definition: root milestone-*.md OR requirements/milestones/milestone-N/
+checks=$((checks + 1))
+shopt -s nullglob
+root_ms=("${TARGET}"/milestone-*.md)
+subdir_ms=("${TARGET}"/requirements/milestones/milestone-*/MILESTONE-*.md)
+subdir_readme=("${TARGET}"/requirements/milestones/milestone-*/README.md)
+shopt -u nullglob
+if ((${#root_ms[@]} > 0 || ${#subdir_ms[@]} > 0 || ${#subdir_readme[@]} > 0)); then
+  echo "  ok  Planning milestone file: root milestone-*.md and/or requirements/milestones/milestone-N/"
+else
+  echo "  fail Planning milestone file: need root milestone-*.md or requirements/milestones/milestone-N/MILESTONE-N.md"
+  failures=$((failures + 1))
+fi
+echo
 
 run_part "SPDD (govern and remember)" \
   SPDD "canvas directory" "spdd/canvas" dir \
@@ -172,11 +186,14 @@ run_part "Runtime scripts and docs" \
   Runtime "validate command adapters script" "scripts/sdlc-spdd/validate-command-adapters.sh" executable \
   Runtime "verify command effects script" "scripts/sdlc-spdd/verify-agent-command-effects.sh" executable \
   Runtime "validate canvas script" "scripts/sdlc-spdd/validate-reasons-canvas.sh" executable \
+  Runtime "validate requirements format script" "scripts/sdlc-spdd/validate-requirements-format.sh" executable \
   Runtime "verify install script" "scripts/sdlc-spdd/verify-project-install.sh" executable \
   Runtime "workflow helper script" "scripts/sdlc-spdd/sdlc.sh" executable \
   Runtime "shared script lib dir" "scripts/sdlc-spdd/lib" dir \
   Runtime "areas helper lib" "scripts/sdlc-spdd/lib/areas.sh" file \
-  Runtime "common helper lib" "scripts/sdlc-spdd/lib/common.sh" file
+  Runtime "common helper lib" "scripts/sdlc-spdd/lib/common.sh" file \
+  Runtime "milestone helper lib" "scripts/sdlc-spdd/lib/milestone.sh" file \
+  Runtime "prompt-optimization ledger" "agent-context/memory/prompt-optimization-log.md" file
 
 if [[ "${REQUIRE_CURSOR}" -eq 1 && "${REQUIRE_COPILOT}" -eq 1 ]]; then
   run_part "Adapter parity workflow" \

@@ -276,6 +276,74 @@ assert_contains "${phase_index}" "quality-gates.md" "review phase harness entry"
 assert_contains "${phase_index}" "java-feature-playbook.md" "code phase playbook entry"
 
 # ---------------------------------------------------------------------------
+echo "== Test 21: start-agent-session rotates old briefs into sessions/archive =="
+T="${WORK}/sess-rot"; mkdir -p "${T}"
+"${START}" --target "${T}" --work-id FEAT-100-a --phase plan --session-limit 2 >/dev/null 2>&1
+sleep 1
+"${START}" --target "${T}" --work-id FEAT-100-b --phase plan --session-limit 2 >/dev/null 2>&1
+sleep 1
+"${START}" --target "${T}" --work-id FEAT-100-c --phase plan --session-limit 2 >/dev/null 2>&1
+sess="${T}/agent-context/sessions"
+assert_file "${sess}/current-session.md"
+active_count="$(ls -1 "${sess}"/[0-9]*T*.md 2>/dev/null | wc -l | tr -d ' ')"
+if [[ "${active_count}" == "2" ]]; then ok "keeps 2 timestamped briefs"; else bad "expected 2 active briefs, got ${active_count}"; fi
+arch_count="$(ls -1 "${sess}/archive"/[0-9]*T*.md 2>/dev/null | wc -l | tr -d ' ')"
+if [[ "${arch_count}" == "1" ]]; then ok "archived 1 older brief"; else bad "expected 1 archived brief, got ${arch_count}"; fi
+"${START}" --target "${T}" --work-id FEAT-100-d --phase plan --session-limit 2 --no-session-rotate >/dev/null 2>&1
+active_count="$(ls -1 "${sess}"/[0-9]*T*.md 2>/dev/null | wc -l | tr -d ' ')"
+if [[ "${active_count}" -ge 3 ]]; then ok "--no-session-rotate skips archive"; else bad "expected >=3 active with --no-session-rotate, got ${active_count}"; fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 22: capture metric flags write Kind: metric rows (FEAT-004 T02) =="
+T="${WORK}/metrics"; mkdir -p "${T}"
+cap --work-id FEAT-004-metrics --phase code --summary "With metrics" \
+  --areas "scripts/capture-session-memory.sh" \
+  --readiness "Ready For Coding" --review-result pass --rework 0 --context-files 8
+assert_count "$(mem context-index.md)" '^\| scripts/capture-session-memory.sh \| metric \|' 1 "metric kind indexed"
+assert_contains "$(mem context-index.md)" "review-result=pass" "metric entry includes review-result"
+assert_contains "$(mem session-history.md)" "Metrics: readiness=" "session history records metrics"
+# Omitting flags must not invent metric rows
+T="${WORK}/metrics-omit"; mkdir -p "${T}"
+cap --work-id FEAT-004-omit --phase code --summary "No metrics" --areas "scripts/capture-session-memory.sh"
+assert_count "$(mem context-index.md)" '\| metric \|' 0 "no metric rows when flags omitted"
+# Unknown review-result warns and skips that field only
+T="${WORK}/metrics-bad"; mkdir -p "${T}"
+out="$(${CAPTURE} --target "${T}" --work-id FEAT-004-bad --phase code --summary "Bad enum" \
+  --areas "scripts/x" --review-result nope --rework 1 2>&1)" || true
+if grep -q "Warning: --review-result" <<<"${out}"; then ok "unknown review-result warns"; else bad "expected warning for bad review-result"; fi
+assert_contains "$(mem context-index.md)" "rework=1" "valid rework still indexed after bad review-result"
+if grep -q 'review-result=nope' "$(mem context-index.md)" 2>/dev/null; then
+  bad "invalid review-result should not be indexed"
+else
+  ok "invalid review-result skipped"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 23: prompt-optimization ledger rotates like session-history (FEAT-004 T04) =="
+T="${WORK}/ledger-rot"; mkdir -p "${T}/agent-context/memory"
+ledger="$(mem prompt-optimization-log.md)"
+{
+  echo '# Prompt Optimization Log'
+  echo
+  echo '## Entries'
+  for i in 1 2 3; do
+    echo
+    echo "### Entry ${i}"
+    echo
+    echo "- Date: 2026-07-0${i}"
+    echo "- Work ID: FEAT-004-rot"
+    echo "- Change: c${i}"
+    echo "- Hypothesis: h${i}"
+    echo "- Signal: s${i}"
+    echo "- Outcome: unknown"
+  done
+} > "${ledger}"
+cap --work-id FEAT-004-rot --phase code --summary "rotate ledger" --history-limit 2 --areas "scripts/x"
+assert_count "${ledger}" '^### ' 2 "ledger keeps recent window"
+assert_file "$(mem archive/prompt-optimization-log.md)"
+assert_count "$(mem archive/prompt-optimization-log.md)" '^### ' 1 "older ledger entry archived"
+
+# ---------------------------------------------------------------------------
 echo
 echo "Summary: ${pass} passed, ${fail} failed"
 if [[ "${fail}" -gt 0 ]]; then

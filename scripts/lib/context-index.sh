@@ -9,7 +9,7 @@ context_index_header_capture() {
 Maps code areas to indexed project context. Filter by Area to find prior sessions,
 analysis artifacts, architecture decisions, known pitfalls, and reusable patterns
 for the code you are about to touch — across any Work ID or date. Newest first.
-Kinds: analysis, session, decision, pitfall, pattern.
+Kinds: analysis, session, decision, pitfall, pattern, metric.
 
 | Area | Kind | Work ID | Phase | Timestamp | Source | Entry |
 |------|------|---------|-------|-----------|--------|-------|

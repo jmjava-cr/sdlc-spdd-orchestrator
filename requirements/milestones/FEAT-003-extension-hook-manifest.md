@@ -1,3 +1,18 @@
+---
+work_id: "FEAT-003-extension-hook-manifest"
+jira_key: ""
+jira_epic: ""
+jira_type: "Story"
+jira_status: "Done"
+jira_assignee: ""
+jira_due_date: ""
+jira_sprint: ""
+milestone: "milestone-1"
+blocks: []
+depends_on: []
+related: []
+---
+
 # Requirement: FEAT-003-extension-hook-manifest
 
 ## Summary

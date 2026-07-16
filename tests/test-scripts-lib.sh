@@ -69,6 +69,22 @@ rel="$(resolve_milestone "${WORK}" FEAT-099-demo "" relative)"
 assert_eq "${abs}" "${WORK}/milestone-1.md" "resolve_milestone absolute"
 assert_eq "${rel}" "milestone-1.md" "resolve_milestone relative"
 
+# Subdirectory preferred over root when both exist
+mkdir -p "${WORK}/requirements/milestones/milestone-1"
+echo 'FEAT-099-demo' > "${WORK}/requirements/milestones/milestone-1/MILESTONE-1.md"
+abs="$(resolve_milestone "${WORK}" FEAT-099-demo "" absolute 2>/dev/null)"
+assert_eq "${abs}" "${WORK}/requirements/milestones/milestone-1/MILESTONE-1.md" \
+  "resolve_milestone prefers subdirectory"
+
+req_dir="$(requirement_dir_for_milestone "${WORK}" "${abs}")"
+assert_eq "${req_dir}" "${WORK}/requirements/milestones/milestone-1" \
+  "requirement_dir_for_milestone nested"
+
+printf '# req\n' > "${WORK}/requirements/milestones/milestone-1/FEAT-099-demo.md"
+req_rel="$(resolve_requirement_path "${WORK}" FEAT-099-demo relative 2>/dev/null)"
+assert_eq "${req_rel}" "requirements/milestones/milestone-1/FEAT-099-demo.md" \
+  "resolve_requirement_path nested"
+
 echo "== context-index.sh =="
 idx="${WORK}/agent-context/memory/context-index.md"
 prepend_context_index_rows "${idx}" "| src/foo | session | FEAT-1 | code | 2026-01-01T00:00:00Z | brief | entry |"

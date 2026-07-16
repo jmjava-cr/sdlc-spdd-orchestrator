@@ -6,3 +6,16 @@
 # Override owner label: export SDLC_USER="your-name"
 # Opt out of registry writes: export SDLC_NO_TEAM_REGISTRY=1
 work_id	status	phase	operation	owner	updated	note
+CHORE-001-docgen-initial-documentation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
+CHORE-002-docgen-video-generation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
+FEAT-001-shared-script-library	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
+FEAT-002-command-spec-generation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
+FEAT-003-extension-hook-manifest	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
+FEAT-004-prompt-optimization-ledger	done	sync		John Menke	2026-07-15T23:22:00Z	FEAT-004 Complete (T01-T05); review Approved With Notes canvas Final Status: Complete
+FEAT-005-canvas-readiness-indicators	done	sync		John Menke	2026-07-15T23:26:07Z	FEAT-005 Complete (T01-T04) canvas Final Status: Complete
+FEAT-006-analysis-scope-lock	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
+FEAT-007-jira-compatible-requirements	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
+FEAT-008-milestone-subdirectory-layout	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
+FEAT-009-session-brief-archive	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
+SPIKE-001-guide-rag-context-backend	shelved	code	T01	John Menke	2026-07-15T23:22:33Z	Blocked: Guide MCP not connected; analysis + entity schema ready; resume T01 when guide is up
+SPIKE-002-local-llm-and-embedding-format	shelved	analysis	T01	John Menke	2026-07-15T23:31:32Z	Blocked: Guide MCP not connected; analysis ready; resume with SPIKE-001 when guide is up

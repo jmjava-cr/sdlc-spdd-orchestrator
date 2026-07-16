@@ -154,15 +154,27 @@ copy_if_missing \
   "${REPO_ROOT}/templates/project-docs/ROADMAP.md" \
   "${TARGET}/ROADMAP.md"
 
+# Prefer subdirectory milestone layout for new projects; keep root milestone-*.md
+# if already present (backward compatible).
 shopt -s nullglob
-milestone_files=("${TARGET}"/milestone-*.md)
+root_milestones=("${TARGET}"/milestone-*.md)
+subdir_milestones=("${TARGET}"/requirements/milestones/milestone-*/MILESTONE-*.md)
 shopt -u nullglob
-if ((${#milestone_files[@]} == 0)); then
+if ((${#root_milestones[@]} == 0 && ${#subdir_milestones[@]} == 0)); then
+  ensure_dir "${TARGET}/requirements/milestones/milestone-1"
   copy_if_missing \
-    "${REPO_ROOT}/templates/project-docs/milestone-1.md" \
-    "${TARGET}/milestone-1.md"
+    "${REPO_ROOT}/templates/requirements/milestones/milestone-definition.md" \
+    "${TARGET}/requirements/milestones/milestone-1/MILESTONE-1.md"
+  copy_if_missing \
+    "${REPO_ROOT}/templates/requirements/milestones/milestone-template.yml" \
+    "${TARGET}/requirements/milestones/milestone-1/_milestone.yml"
 else
-  skipped+=("${TARGET}/milestone-*.md")
+  if ((${#root_milestones[@]} > 0)); then
+    skipped+=("${TARGET}/milestone-*.md")
+  fi
+  if ((${#subdir_milestones[@]} > 0)); then
+    skipped+=("${TARGET}/requirements/milestones/milestone-*/")
+  fi
 fi
 
 copy_if_missing \
@@ -176,6 +188,7 @@ for file in \
   known-pitfalls.md \
   reusable-patterns.md \
   session-history.md \
+  prompt-optimization-log.md \
   phase-index.md; do
   copy_if_missing \
     "${REPO_ROOT}/agent-context/memory/${file}" \
@@ -289,6 +302,7 @@ for file in \
   validate-command-adapters.sh \
   verify-agent-command-effects.sh \
   validate-reasons-canvas.sh \
+  validate-requirements-format.sh \
   verify-project-install.sh \
   sdlc.sh; do
   copy_if_missing \

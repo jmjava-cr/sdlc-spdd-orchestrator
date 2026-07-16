@@ -6,6 +6,29 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Analysis Scope Lock-In: `/sdlc-spdd-analysis` locks IN/NOT scope before generation;
+  guidance in `docs/analysis-phase-scope-validation.md` (FEAT-006)
+- Jira-compatible requirements format: YAML frontmatter schema, CHORE/feature templates,
+  `_milestone.yml`, `scripts/validate-requirements-format.sh`,
+  `docs/jira-compatible-requirements-format.md` (FEAT-007)
+- Milestone subdirectory layout: preferred
+  `requirements/milestones/milestone-N/MILESTONE-N.md` with root `milestone-*.md`
+  still supported; migration guide `docs/MIGRATION-root-to-subdirectories.md` (FEAT-008)
+- Session-brief archive/rotation in `start-agent-session.sh` (`--session-limit`,
+  `--no-session-rotate`) → `agent-context/sessions/archive/` (FEAT-009)
+- Prompt-optimization ledger + capture metrics (`--readiness`, `--review-result`,
+  `--rework`, `--context-files`); ledger rotation; Kind: `metric` (FEAT-004)
+- Canvas readiness vocabulary in `validate-reasons-canvas.sh` + leading indicators
+  `--validate-cycles` / `--review-cycles`; plan/architect/create-work aligned (FEAT-005)
+- CI: `test-canvas-readiness.yml`, `test-scripts-lib.yml`, `validate-requirements-format.yml`;
+  dogfood `spdd/canvas` in `validate-canvas.yml`
+
+### Fixed
+
+- Canvas operation inference on mawk: `_wf_infer_next_operation` used `{2}` brace
+  quantifiers that never matched; use `[0-9][0-9]` (Test 12)
+- Empty Final Status `- Status:` no longer keeps the last T## incomplete (Test 12b)
+- Architect readiness vocabulary aligned with FEAT-005 (`needs-redesign`, `blocked`, …)
 - SDLC pointer manager (`agent-context/sdlc-pointer.sh`): persistent Work ID in `.sdlc/pointer`, guarded execution wrappers ([#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20), closes [#19](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/19))
 - Workflow CLI (`scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh`): phase/gate tracking, `next`/`advance`/`skip`/`shelf`/`resume`/`sync`, guarded `capture` ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21))
 - Team Work ID registry (`agent-context/work-registry.tsv`, `sdlc-team-registry.sh`): `claim`/`release`/`team`/`list-work`, stale TTL, branch/PR/Jira notes ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21))

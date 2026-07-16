@@ -42,6 +42,14 @@ Options:
   --history-limit <n>   Keep at most n recent entries inline in session-history.md;
                         older entries move to agent-context/memory/archive/ (default 20)
   --no-history-rotate   Keep session-history.md append-only (do not rotate/archive)
+  --readiness <text>    Optional capture metric: canvas readiness value
+  --review-result <v>   Optional capture metric: pass|fail|mixed|blocked
+                        (unknown values warn and are skipped; capture continues)
+  --rework <n>          Optional capture metric: non-negative integer (corrective
+                        prompt-update/sync cycles after first Ready For Coding)
+  --context-files <n>   Optional capture metric: approximate context file count
+  --validate-cycles <n> Optional leading indicator: non-negative validate cycle count
+  --review-cycles <n>   Optional leading indicator: non-negative review cycle count
   --dry-run             Print the memory entry without writing files
   --help                Print this help message
 
@@ -49,6 +57,9 @@ Examples:
   ./scripts/capture-session-memory.sh --work-id FEAT-001-order-status-api --phase code --summary "Implemented T01 in com.acme.order" --validation "mvn test"
   ./scripts/capture-session-memory.sh --work-id FEAT-002-payments --phase code --summary "Added src/payments module and wired checkout"
   ./scripts/capture-session-memory.sh --work-id BUG-003-null-discount --summary-file notes.md --pitfalls "Discount can be null in legacy orders"
+  ./scripts/capture-session-memory.sh --work-id FEAT-004-prompt-optimization-ledger --phase code \
+    --summary "Captured metrics" --areas "scripts/capture-session-memory.sh" \
+    --readiness "Ready For Coding" --review-result pass --rework 0 --context-files 12
 EOF
 }
 
@@ -70,6 +81,12 @@ HISTORY_LIMIT=20
 ROTATE_HISTORY=1
 RESOLVE_SESSION_AREAS=1
 DRY_RUN=0
+METRIC_READINESS=""
+METRIC_REVIEW_RESULT=""
+METRIC_REWORK=""
+METRIC_CONTEXT_FILES=""
+METRIC_VALIDATE_CYCLES=""
+METRIC_REVIEW_CYCLES=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -141,6 +158,30 @@ while [[ $# -gt 0 ]]; do
       RESOLVE_SESSION_AREAS=0
       shift
       ;;
+    --readiness)
+      METRIC_READINESS="${2:-}"
+      shift 2
+      ;;
+    --review-result)
+      METRIC_REVIEW_RESULT="${2:-}"
+      shift 2
+      ;;
+    --rework)
+      METRIC_REWORK="${2:-}"
+      shift 2
+      ;;
+    --context-files)
+      METRIC_CONTEXT_FILES="${2:-}"
+      shift 2
+      ;;
+    --validate-cycles)
+      METRIC_VALIDATE_CYCLES="${2:-}"
+      shift 2
+      ;;
+    --review-cycles)
+      METRIC_REVIEW_CYCLES="${2:-}"
+      shift 2
+      ;;
     --dry-run)
       DRY_RUN=1
       shift
@@ -210,6 +251,8 @@ project_memory="${memory_dir}/project-memory.md"
 architecture_decisions="${memory_dir}/architecture-decisions.md"
 known_pitfalls="${memory_dir}/known-pitfalls.md"
 reusable_patterns="${memory_dir}/reusable-patterns.md"
+prompt_optimization_log="${memory_dir}/prompt-optimization-log.md"
+archive_ledger="${archive_dir}/prompt-optimization-log.md"
 progress_log="${feature_dir}/progress-log.md"
 current_session="${session_dir}/current-session.md"
 daily_session_note="${session_notes_dir}/${session_day}.md"
@@ -550,6 +593,55 @@ done
 areas_display="${areas_display%, }"
 [[ -z "${areas_display}" ]] && areas_display="none"
 
+# Optional capture metrics (FEAT-004 T02). Invalid values warn and are skipped.
+METRIC_PARTS=()
+if [[ -n "${METRIC_REVIEW_RESULT}" ]]; then
+  case "${METRIC_REVIEW_RESULT}" in
+    pass|fail|mixed|blocked) ;;
+    *)
+      echo "Warning: --review-result '${METRIC_REVIEW_RESULT}' is not pass|fail|mixed|blocked; skipping." >&2
+      METRIC_REVIEW_RESULT=""
+      ;;
+  esac
+fi
+if [[ -n "${METRIC_REWORK}" ]]; then
+  if ! [[ "${METRIC_REWORK}" =~ ^[0-9]+$ ]]; then
+    echo "Warning: --rework '${METRIC_REWORK}' must be a non-negative integer; skipping." >&2
+    METRIC_REWORK=""
+  fi
+fi
+if [[ -n "${METRIC_CONTEXT_FILES}" ]]; then
+  if ! [[ "${METRIC_CONTEXT_FILES}" =~ ^[0-9]+$ ]]; then
+    echo "Warning: --context-files '${METRIC_CONTEXT_FILES}' must be a non-negative integer; skipping." >&2
+    METRIC_CONTEXT_FILES=""
+  fi
+fi
+if [[ -n "${METRIC_VALIDATE_CYCLES}" ]]; then
+  if ! [[ "${METRIC_VALIDATE_CYCLES}" =~ ^[0-9]+$ ]]; then
+    echo "Warning: --validate-cycles '${METRIC_VALIDATE_CYCLES}' must be a non-negative integer; skipping." >&2
+    METRIC_VALIDATE_CYCLES=""
+  fi
+fi
+if [[ -n "${METRIC_REVIEW_CYCLES}" ]]; then
+  if ! [[ "${METRIC_REVIEW_CYCLES}" =~ ^[0-9]+$ ]]; then
+    echo "Warning: --review-cycles '${METRIC_REVIEW_CYCLES}' must be a non-negative integer; skipping." >&2
+    METRIC_REVIEW_CYCLES=""
+  fi
+fi
+[[ -n "${METRIC_READINESS}" ]] && METRIC_PARTS+=("readiness=$(sdlc_oneline "${METRIC_READINESS}" 80)")
+[[ -n "${METRIC_REVIEW_RESULT}" ]] && METRIC_PARTS+=("review-result=${METRIC_REVIEW_RESULT}")
+[[ -n "${METRIC_REWORK}" ]] && METRIC_PARTS+=("rework=${METRIC_REWORK}")
+[[ -n "${METRIC_CONTEXT_FILES}" ]] && METRIC_PARTS+=("context-files=${METRIC_CONTEXT_FILES}")
+[[ -n "${METRIC_VALIDATE_CYCLES}" ]] && METRIC_PARTS+=("validate-cycles=${METRIC_VALIDATE_CYCLES}")
+[[ -n "${METRIC_REVIEW_CYCLES}" ]] && METRIC_PARTS+=("review-cycles=${METRIC_REVIEW_CYCLES}")
+METRIC_ENTRY=""
+if ((${#METRIC_PARTS[@]} > 0)); then
+  local_ifs="${IFS}"
+  IFS='; '
+  METRIC_ENTRY="${METRIC_PARTS[*]}"
+  IFS="${local_ifs}"
+fi
+
 sdlc_ensure_file "${session_history}" "Session History" "${DRY_RUN}"
 sdlc_ensure_file "${project_memory}" "Project Memory" "${DRY_RUN}"
 sdlc_ensure_file "${architecture_decisions}" "Architecture Decisions" "${DRY_RUN}"
@@ -558,6 +650,11 @@ sdlc_ensure_file "${reusable_patterns}" "Reusable Patterns" "${DRY_RUN}"
 sdlc_ensure_file "${progress_log}" "Progress Log: ${WORK_ID}" "${DRY_RUN}"
 if [[ "${WRITE_SESSION_NOTE}" -eq 1 ]]; then
   sdlc_ensure_file "${daily_session_note}" "Session Notes: ${session_day}" "${DRY_RUN}"
+fi
+
+metric_line=""
+if [[ -n "${METRIC_ENTRY}" ]]; then
+  metric_line=$'\n'"- Metrics: ${METRIC_ENTRY}"
 fi
 
 entry="$(cat <<EOF
@@ -572,12 +669,20 @@ entry="$(cat <<EOF
 - Reusable patterns: ${PATTERNS:-None}
 - Milestone: ${MILESTONE:-None}
 - Roadmap note: ${ROADMAP_NOTE:-None}
-- Next: ${NEXT_STEP:-Not recorded}
+- Next: ${NEXT_STEP:-Not recorded}${metric_line}
 EOF
 )"
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
   echo "${entry}"
+  if [[ -n "${METRIC_ENTRY}" && "${areas_display}" != "none" ]]; then
+    echo
+    echo "# dry-run context-index metric rows (Kind: metric)"
+    for _a in "${areas[@]}"; do
+      [[ -z "${_a}" ]] && continue
+      echo "| ${_a} | metric | ${WORK_ID} | ${PHASE} | ${timestamp} | capture-metrics | ${METRIC_ENTRY} |"
+    done
+  fi
   exit 0
 fi
 
@@ -599,6 +704,10 @@ _session_entry_rel="sessions/$(basename "${session_entry_file}")"
 _section_anchor="### ${timestamp} - ${WORK_ID}"
 if [[ "${areas_display}" != "none" ]]; then
   append_context_index_for_areas "session" "spdd/canvas/${WORK_ID}.md" "${_session_entry_rel}"
+fi
+
+if [[ -n "${METRIC_ENTRY}" && "${areas_display}" != "none" ]]; then
+  append_context_index_for_areas "metric" "capture-metrics" "${METRIC_ENTRY}"
 fi
 
 # Grow the canonical category registry with areas not previously seen.
@@ -624,6 +733,10 @@ fi
 # Bound the recent window unless the caller opted out.
 if [[ "${ROTATE_HISTORY}" -eq 1 ]]; then
   rotate_session_history "${session_history}" "${HISTORY_LIMIT}" "${archive_history}"
+  # Same rotation pattern for the prompt-optimization ledger (FEAT-004 T04).
+  if [[ -f "${prompt_optimization_log}" ]]; then
+    rotate_session_history "${prompt_optimization_log}" "${HISTORY_LIMIT}" "${archive_ledger}"
+  fi
 fi
 
 if [[ "${WRITE_SESSION_NOTE}" -eq 1 ]]; then

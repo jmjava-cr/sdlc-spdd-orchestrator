@@ -1,0 +1,28 @@
+name: Test Canvas Readiness
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/validate-reasons-canvas.sh'
+      - 'scripts/capture-session-memory.sh'
+      - 'tests/test-canvas-readiness.sh'
+      - '.github/workflows/test-canvas-readiness.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/validate-reasons-canvas.sh'
+      - 'scripts/capture-session-memory.sh'
+      - 'tests/test-canvas-readiness.sh'
+      - '.github/workflows/test-canvas-readiness.yml'
+
+jobs:
+  test-canvas-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: bash -n scripts/validate-reasons-canvas.sh scripts/capture-session-memory.sh tests/test-canvas-readiness.sh
+
+      - name: Run canvas readiness + leading-indicator tests
+        run: ./tests/test-canvas-readiness.sh

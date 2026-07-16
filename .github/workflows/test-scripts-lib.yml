@@ -1,0 +1,28 @@
+name: Test Scripts Lib
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/lib/**'
+      - 'tests/test-scripts-lib.sh'
+      - '.github/workflows/test-scripts-lib.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/lib/**'
+      - 'tests/test-scripts-lib.sh'
+      - '.github/workflows/test-scripts-lib.yml'
+
+jobs:
+  test-scripts-lib:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: |
+          bash -n tests/test-scripts-lib.sh
+          for f in scripts/lib/*.sh; do bash -n "$f"; done
+
+      - name: Run scripts/lib smoke tests
+        run: ./tests/test-scripts-lib.sh

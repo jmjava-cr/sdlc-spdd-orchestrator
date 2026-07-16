@@ -110,22 +110,52 @@ _team_auto_branch() {
 
 _team_milestone_path() {
   local work_id="$1"
-  local path="${SDLC_ROOT}/requirements/milestones/${work_id}.md"
+  local root="${SDLC_ROOT}"
+  local path dir
+  # Prefer subdirectory stubs when present.
+  shopt -s nullglob
+  for dir in "${root}"/requirements/milestones/milestone-*/; do
+    path="${dir}${work_id}.md"
+    if [[ -f "${path}" ]]; then
+      shopt -u nullglob
+      printf '%s' "${path}"
+      return 0
+    fi
+  done
+  shopt -u nullglob
+  path="${root}/requirements/milestones/${work_id}.md"
   [[ -f "${path}" ]] && printf '%s' "${path}"
 }
 
-# Reads Jira key from requirements/milestones/<WORK-ID>.md ## Jira section (- Key: ABC-123).
+# Reads Jira key from requirement ## Jira section (- Key: ABC-123), or jira_key frontmatter.
 _team_jira_from_milestone() {
   local work_id="$1"
   local path
   path="$(_team_milestone_path "${work_id}")"
   [[ -n "${path}" ]] || return 0
-  awk '
+  local from_section
+  from_section="$(awk '
     /^## Jira/ { in_jira=1; next }
     /^## / { if (in_jira) exit }
     in_jira && /^[[:space:]]*(-[[:space:]]+)?[Kk]ey:[[:space:]]*/ {
       sub(/^[[:space:]]*(-[[:space:]]+)?[Kk]ey:[[:space:]]*/, "")
       gsub(/^[[:space:]]+|[[:space:]]+$/, "")
+      if ($0 ~ /^[A-Z][A-Z0-9]+-[0-9]+$/ && $0 !~ /^(TBD|TODO|NONE)$/i) {
+        print $0
+        exit
+      }
+    }
+  ' "${path}")"
+  if [[ -n "${from_section}" ]]; then
+    printf '%s' "${from_section}"
+    return 0
+  fi
+  awk '
+    NR==1 && /^---[[:space:]]*$/ { in_fm=1; next }
+    in_fm && /^---[[:space:]]*$/ { exit }
+    in_fm && /^jira_key:[[:space:]]*/ {
+      sub(/^jira_key:[[:space:]]*/, "")
+      gsub(/^["[:space:]]+|["[:space:]]+$/, "")
       if ($0 ~ /^[A-Z][A-Z0-9]+-[0-9]+$/ && $0 !~ /^(TBD|TODO|NONE)$/i) {
         print $0
         exit
@@ -347,13 +377,15 @@ sdlc_team_discover_work_ids() {
   for path in \
     "${root}"/agent-context/features/*/ \
     "${root}"/spdd/canvas/*.md \
-    "${root}"/requirements/milestones/*.md; do
+    "${root}"/requirements/milestones/*.md \
+    "${root}"/requirements/milestones/milestone-*/*.md; do
     if [[ -d "${path}" ]]; then
       base="$(basename "${path}")"
     else
       base="$(basename "${path}" .md)"
     fi
     [[ "${base}" == "README" ]] && continue
+    [[ "${base}" == MILESTONE-* || "${base}" == milestone-* ]] && continue
     [[ -n "${base}" ]] || continue
     seen["${base}"]=1
   done
@@ -367,7 +399,9 @@ sdlc_team_infer_work_summary() {
   local parts=()
   [[ -d "${root}/agent-context/features/${work_id}" ]] && parts+=("feature workspace")
   [[ -f "${root}/spdd/canvas/${work_id}.md" ]] && parts+=("canvas")
-  [[ -f "${root}/requirements/milestones/${work_id}.md" ]] && parts+=("milestone")
+  if [[ -n "$(_team_milestone_path "${work_id}" || true)" ]]; then
+    parts+=("milestone")
+  fi
   local jira_key
   jira_key="$(_team_jira_from_milestone "${work_id}")"
   if [[ -n "${jira_key}" ]]; then

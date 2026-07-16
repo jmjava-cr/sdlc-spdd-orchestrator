@@ -23,7 +23,9 @@ Review and harden a REASONS Canvas before implementation. Do not implement code.
 8. Add missing Safeguards.
 9. Identify architecture risks.
 10. Identify test strategy.
-11. Mark whether the work is ready for coding.
+11. Mark whether the work is ready for coding by setting Metadata
+    `- Readiness:` (or YAML frontmatter `readiness:`) to a **canvas readiness**
+    vocabulary value (see Output). Prefer Title Case aliases agents already use.
 
 ## Output
 
@@ -36,11 +38,18 @@ Update the canvas with:
 - Required tests
 - Quality gates
 - Risks
-- Readiness decision
+- Readiness decision (Metadata `- Readiness:` or YAML `readiness:`)
 
-Use one of these readiness values:
+Use one of these readiness values (FEAT-005 vocabulary; Title Case aliases OK):
 
-- Ready For Coding
+- Needs Analysis
 - Needs Clarification
 - Needs Redesign
+- Ready For Coding
 - Blocked
+- Reviewed
+- Complete
+
+Canonical tokens (equivalent): `needs-analysis`, `needs-clarification`,
+`needs-redesign`, `ready-for-coding`, `blocked`, `reviewed`, `complete`.
+`validate-reasons-canvas.sh` accepts these; unknown values warn only.
