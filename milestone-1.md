@@ -21,14 +21,16 @@ Make it right (do first):
 3. **FEAT-003 — extension/hook manifest.** A clean, documented extension point.
 4. **FEAT-006 — Python orchestration engine (v2).** Reusable `sdlc_engine`
    package + `SDLC_ENGINE` shell shim; port remaining helpers gradually.
-5. **Readability pass — consistent structure, naming, and examples** across code
+5. **FEAT-007 — Local SQLite index (pre-GUIDE).** Regenerable `.sdlc/index.sqlite`
+   query cache; multi-user sync stays git until/unless GUIDE lands.
+6. **Readability pass — consistent structure, naming, and examples** across code
    and docs.
 
 Make it fast (do last, deferred):
 
-6. **FEAT-004 — prompt-optimization ledger + capture metrics.** Already specced;
+7. **FEAT-004 — prompt-optimization ledger + capture metrics.** Already specced;
    parked until the refactors above land. (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`.)
-7. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
+8. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
 
 Work IDs are numbered in execution order. FEAT-001–003 are complete on `main`;
 FEAT-006 (Python engine) is in progress; FEAT-004 (deferred) is at Ready For
@@ -47,7 +49,8 @@ grounding files). This is enforced by `./scripts/check-posture-boundary.sh`.
 | FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Complete | On integration branch |
 | FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Complete | On integration branch |
 | FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete | On integration branch |
-| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | In Progress | Python v2 engine + shell shim |
+| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | Complete | Python v2 engine + shell shim (merged #31) |
+| FEAT-007-local-sqlite-index | spdd/canvas/FEAT-007-local-sqlite-index.md | requirements/milestones/FEAT-007-local-sqlite-index.md | Complete | Pre-GUIDE local SQLite query cache |
 | FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Draft | Make it fast; runs after refactors |
 | FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Draft | Make it fast; do last |
 | CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | requirements/milestones/CHORE-001-docgen-initial-documentation.md | Complete | Docgen bundle scaffold + initial narration (parallel) |

@@ -145,6 +145,10 @@ SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system github
 ./scripts/sdlc.sh local start --name scratch --intent "offline explore"
 ./scripts/sdlc.sh local promote --type feature --name "Documented title" --dry-run
 
+./scripts/sdlc.sh db rebuild
+./scripts/sdlc.sh db query --columns work_id,registry_status,jira_key
+./scripts/sdlc.sh db query --search "orchestration"
+
 # Live GitHub pull against the current repo (needs gh auth)
 SDLC_GITHUB_INTEGRATION=1 pytest -q engine/tests/test_issues_github_integration.py --run-github-integration
 ```

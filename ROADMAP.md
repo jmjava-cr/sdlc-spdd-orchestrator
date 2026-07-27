@@ -155,7 +155,7 @@ Refresh this section from canvases with:
 
 ## SDLC-SPDD Work Summary
 
-Generated: 2026-07-27T01:12:54Z
+Generated: 2026-07-27T04:57:02Z
 
 | Work ID | Title | Type | Status | Milestone | Source | Canvas |
 |---------|-------|------|--------|-----------|--------|--------|
@@ -164,9 +164,10 @@ Generated: 2026-07-27T01:12:54Z
 | FEAT-001-shared-script-library | Shared script library (scripts/lib/) | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-001-shared-script-library.md |
 | FEAT-002-command-spec-generation | Single command spec → generated adapters | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-002-command-spec-generation.md |
 | FEAT-003-extension-hook-manifest | Extension/hook manifest | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-003-extension-hook-manifest.md |
-| FEAT-004-prompt-optimization-ledger | Prompt-optimization ledger + capture metrics | Feature | Draft | milestone-1.md | - Docs URL: | spdd/canvas/FEAT-004-prompt-optimization-ledger.md |
+| FEAT-004-prompt-optimization-ledger | Prompt-optimization ledger + capture metrics | Feature | Draft | milestone-1.md | TBD | spdd/canvas/FEAT-004-prompt-optimization-ledger.md |
 | FEAT-005-canvas-readiness-indicators | Canvas readiness + leading indicators | Feature | Draft | milestone-1.md | TBD | spdd/canvas/FEAT-005-canvas-readiness-indicators.md |
 | FEAT-006-python-orchestration-engine | Python orchestration engine (v2) | Feature | In Progress | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/pull/31 | spdd/canvas/FEAT-006-python-orchestration-engine.md |
-| SPIKE-001-guide-rag-context-backend | Guide as a DICE hybrid context backend | Spike | Draft | - Delivery stage: make it fast (optimization) — **spike, parked behind FEAT-004/005** | TBD | spdd/canvas/SPIKE-001-guide-rag-context-backend.md |
-| SPIKE-002-local-llm-and-embedding-format | Local models + embedding format for the retrieval backend | Spike | Draft | - Delivery stage: make it fast (optimization) — **spike, parked behind FEAT-004/005** | TBD | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md |
+| FEAT-007-local-sqlite-index | Local SQLite index (pre-GUIDE) | Feature | Ready For Coding | milestone-1.md | TBD | spdd/canvas/FEAT-007-local-sqlite-index.md |
+| SPIKE-001-guide-rag-context-backend | Guide as a DICE hybrid context backend | Spike | Draft | TBD | TBD | spdd/canvas/SPIKE-001-guide-rag-context-backend.md |
+| SPIKE-002-local-llm-and-embedding-format | Local models + embedding format for the retrieval backend | Spike | Draft | TBD | TBD | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md |
 <!-- SDLC-SPDD-ROADMAP-SUMMARY:END -->

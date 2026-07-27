@@ -6,9 +6,11 @@ import argparse
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 from . import __version__
 from .archive import ArchiveService
+from .db import LocalIndex, format_rows
 from .issues import IssueSyncService
 from .local_sessions import LocalSessionService
 from .pointer import PointerError, PointerStore
@@ -273,6 +275,50 @@ def cmd_issues(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_db(args: argparse.Namespace) -> int:
+    idx = LocalIndex(_project(args))
+    action = args.db_cmd
+    if action == "rebuild":
+        print(idx.rebuild().as_text(), end="")
+        return 0
+    if action == "status":
+        print(idx.status_text(), end="")
+        return 0
+    if action == "path":
+        print(idx.db_path)
+        return 0
+    if action == "query":
+        if args.sql:
+            rows = idx.query_sql(args.sql)
+        else:
+            rows = idx.find(
+                work_id=args.work_id or "",
+                status=args.status or "",
+                search=args.search or "",
+                limit=args.limit,
+            )
+        cols = args.columns.split(",") if args.columns else None
+        if cols:
+            cols = [c.strip() for c in cols if c.strip()]
+        if args.json:
+            print(json.dumps(rows, indent=2))
+        else:
+            print(format_rows(rows, cols), end="")
+        return 0
+    if action == "export":
+        out = Path(args.output) if args.output else None
+        if args.format == "sql":
+            text = idx.export_sql(out)
+        else:
+            text = idx.export_json(out)
+        if out:
+            print(f"Wrote {args.format} export to {out}")
+        else:
+            print(text, end="")
+        return 0
+    return 2
+
+
 def cmd_local(args: argparse.Namespace) -> int:
     svc = LocalSessionService(_project(args))
     action = args.local_cmd
@@ -473,6 +519,35 @@ def build_parser() -> argparse.ArgumentParser:
     lp.add_argument("--no-claim", action="store_true", help="Create artifacts without claiming")
     lp.add_argument("--dry-run", action="store_true")
     lp.set_defaults(func=cmd_local)
+
+    db = sub.add_parser(
+        "db",
+        help="Local regenerable SQLite index (query cache before GUIDE/Neo4j)",
+    )
+    db_sub = db.add_subparsers(dest="db_cmd", required=True)
+
+    db_sub.add_parser("rebuild", help="Rebuild .sdlc/index.sqlite from repo artifacts").set_defaults(
+        func=cmd_db
+    )
+    db_sub.add_parser("status", help="Show index path, counts, rebuild metadata").set_defaults(
+        func=cmd_db
+    )
+    db_sub.add_parser("path", help="Print absolute path to the SQLite file").set_defaults(func=cmd_db)
+
+    dq = db_sub.add_parser("query", help="Query work_items (filters or read-only SQL SELECT)")
+    dq.add_argument("sql", nargs="?", help="Optional SELECT … (read-only)")
+    dq.add_argument("--work-id")
+    dq.add_argument("--status", help="Match registry_status, canvas_status, or final_status")
+    dq.add_argument("--search", help="Full-text (FTS5) or LIKE search")
+    dq.add_argument("--limit", type=int, default=50)
+    dq.add_argument("--columns", help="Comma-separated columns for table output")
+    dq.add_argument("--json", action="store_true")
+    dq.set_defaults(func=cmd_db)
+
+    de = db_sub.add_parser("export", help="Export index as JSON or SQL dump (not for live multi-user sync)")
+    de.add_argument("--format", choices=["json", "sql"], default="json")
+    de.add_argument("--output", "-o", help="Write to file (default: stdout)")
+    de.set_defaults(func=cmd_db)
 
     rel = sub.add_parser("release", help="Release/shelf active claim")
     rel.add_argument("--reason", default="released")

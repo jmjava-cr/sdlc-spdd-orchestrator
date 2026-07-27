@@ -63,6 +63,34 @@ else
   fi
 fi
 
+echo "== db index rebuild via python engine =="
+# Seed a tiny work item so rebuild has something to index.
+mkdir -p "${tmp}/spdd/canvas" "${tmp}/requirements/milestones"
+cat > "${tmp}/spdd/canvas/FEAT-000-shim.md" <<'EOF'
+# REASONS Canvas: FEAT-000-shim - Shim
+
+## Metadata
+
+- Work ID: FEAT-000-shim
+- Status: Draft
+- Source Issue:
+
+## Final Status
+
+- Status: Draft
+EOF
+cp "${tmp}/spdd/canvas/FEAT-000-shim.md" "${tmp}/requirements/milestones/FEAT-000-shim.md"
+out="$(
+  SDLC_ENGINE=shell \
+    PYTHONPATH="${REPO_ROOT}/engine/src" \
+    python3 -m sdlc_engine --root "${tmp}" db rebuild
+)"
+if grep -Fq 'Rebuilt SQLite index' <<< "${out}" && [[ -f "${tmp}/.sdlc/index.sqlite" ]]; then
+  ok "db rebuild creates .sdlc/index.sqlite"
+else
+  bad "db rebuild unexpected: ${out}"
+fi
+
 echo
 echo "Results: ${pass} passed, ${fail} failed"
 if (( fail > 0 )); then exit 1; fi

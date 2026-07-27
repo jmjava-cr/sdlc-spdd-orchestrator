@@ -85,6 +85,7 @@ Also useful day to day:
 | [Command specs](contributing-command-specs.md) | You are editing Cursor/Copilot/Claude commands via `spec/commands/` |
 | [Extension manifest](contributing-extensions.md) | You are adding phase extensions, skills, or updating `manifest.md` |
 | [Guide RAG research and dogfooding](guide-rag-research-and-dogfooding.md) | You use Embabel Guide + MCP for `/sdlc-spdd-analysis` or want the framework self-improvement loop explained |
+| [Local SQLite index](local-sqlite-index.md) | Zero-install `.sdlc/index.sqlite` query cache before GUIDE/Neo4j; multi-user sync stays git |
 | [Narrated demos bundle](demos/README.md) | You maintain or extend the docgen bundle under `docs/demos/` |
 | [TESTING.md](../TESTING.md) | You need the command-testing confidence stack (CI gates, local smoke, planning-sync verification) |
 | [Design decisions](design-decisions.md) | You need rationale for major choices (including planned-but-not-installed features) |
