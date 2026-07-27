@@ -2,7 +2,7 @@
 
 **One-page command reference** for print/PDF or a second monitor. For concept definitions (what is a Work ID, operation, sync?), see [Top useful concepts and commands](useful-concepts-and-commands.md). For prompt wording, see [Session prompt standard](session-prompt-standard.md).
 
-`/sdlc-spdd-*` rows below are **AI chat commands** (Cursor/Copilot/Claude Code), not terminal commands. `./scripts/...` rows are shell. [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
+`/sdlc-spdd-*` rows below are **AI chat lifecycle commands** (Cursor/Copilot/Claude Code), not terminal commands. `/sdlc-*` workflow commands (`claim`, `shelf`, `advance`, `next`, `team`) are chat wrappers for `sdlc.sh`. `./scripts/...` rows are shell. [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
 
 Export options:
 
@@ -61,25 +61,31 @@ Upgrade older install:
 Orient first:
 
     ./scripts/sdlc-spdd/sdlc.sh next
+    /sdlc-next
     /sdlc-spdd-whereami
 
 Claim and resume:
 
     ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>
-    ./scripts/sdlc-spdd/sdlc.sh resume <WORK-ID> [--phase <phase>]
+    /sdlc-claim <WORK-ID>
+    ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID> --force   # take over after coordinating
+    ./scripts/sdlc-spdd/sdlc.sh resume <WORK-ID> [--phase <phase>] [--force]
     ./scripts/sdlc-spdd/sdlc.sh start
 
 Phase transitions:
 
     ./scripts/sdlc-spdd/sdlc.sh advance
+    /sdlc-advance
     ./scripts/sdlc-spdd/sdlc.sh skip <phase> --reason "..."
     ./scripts/sdlc-spdd/sdlc.sh shelf --reason "..."
+    /sdlc-shelf [reason]
     ./scripts/sdlc-spdd/sdlc.sh list-shelved
     ./scripts/sdlc-spdd/sdlc.sh sync
 
 Team coordination (commit `agent-context/work-registry.tsv` after claim/release):
 
     ./scripts/sdlc-spdd/sdlc.sh team
+    /sdlc-team
     ./scripts/sdlc-spdd/sdlc.sh list-work
     ./scripts/sdlc-spdd/sdlc.sh release --reason "..."
 
@@ -90,6 +96,8 @@ Guarded capture (pointer must match Work ID):
 Local state (gitignored): `.sdlc/pointer`, `.sdlc/workflows/`.
 
 In the orchestrator repo, use `./scripts/sdlc.sh` instead of `./scripts/sdlc-spdd/sdlc.sh`.
+
+Assistant workflow commands (`/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team`) wrap the same `sdlc.sh` actions from chat. Lifecycle skills remain `/sdlc-spdd-*`.
 
 ## Session Handoff
 
@@ -173,7 +181,9 @@ and continue to planning:
 
 | Need | Command |
 |------|---------|
-| What now? (orientation) | `/sdlc-spdd-whereami` or `./scripts/sdlc-spdd/sdlc.sh next` |
+| What now? (orientation) | `/sdlc-next`, `/sdlc-spdd-whereami`, or `./scripts/sdlc-spdd/sdlc.sh next` |
+| Claim / shelf / advance / team | `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-team` |
+| Take over a teammate claim | `/sdlc-claim <WORK-ID> --force` or `sdlc.sh claim <WORK-ID> --force` |
 | Initialize repo context | `/sdlc-spdd-init` |
 | Analyze requirement + scope code areas | `/sdlc-spdd-analysis @requirements/file.md` |
 | Turn analysis into canvas | `/sdlc-spdd-plan @spdd/analysis/WORK-ID-analysis.md` |

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/areas.sh"
+
 usage() {
   cat <<'EOF'
 Usage: index-spdd-analysis.sh --work-id <WORK-ID> [options]
@@ -65,8 +71,8 @@ if [[ -z "${WORK_ID}" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
-timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
+timestamp="$(sdlc_timestamp_iso)"
 memory_dir="${TARGET}/agent-context/memory"
 analysis_file="${TARGET}/spdd/analysis/${WORK_ID}-analysis.md"
 feature_analysis="${TARGET}/agent-context/features/${WORK_ID}/analysis-context.md"
@@ -79,43 +85,6 @@ if [[ ! -f "${analysis_file}" ]]; then
   echo "Analysis file not found: ${analysis_file}" >&2
   exit 1
 fi
-
-normalize_token() {
-  local t="$1"
-  t="$(printf '%s' "${t}" | tr '[:upper:]' '[:lower:]')"
-  t="${t#"${t%%[![:space:]]*}"}"
-  t="${t%"${t##*[![:space:]]}"}"
-  t="${t%%[.,;:)]}"
-  t="${t##[.,;(]}"
-  printf '%s' "${t}"
-}
-
-normalize_area() {
-  local a="$1"
-  a="$(printf '%s' "${a}" | tr '[:upper:]' '[:lower:]')"
-  a="${a#"${a%%[![:space:]]*}"}"
-  a="${a%"${a##*[![:space:]]}"}"
-  a="$(printf '%s' "${a}" | tr -s '/')"
-  a="${a%/}"
-  printf '%s' "${a}"
-}
-
-parse_section_bullets() {
-  local file="$1"
-  local section="$2"
-  awk -v section="${section}" '
-    BEGIN { in_section = 0 }
-    $0 ~ "^##[[:space:]]+" section "[[:space:]]*$" { in_section = 1; next }
-    in_section && /^## / { exit }
-    in_section && /^-[[:space:]]+/ {
-      line = $0
-      sub(/^-[[:space:]]+/, "", line)
-      sub(/[[:space:]]+\(.+\)$/, "", line)
-      gsub(/`/, "", line)
-      if (length(line) > 0) print line
-    }
-  ' "${file}"
-}
 
 declare -a keywords=()
 declare -a areas=()

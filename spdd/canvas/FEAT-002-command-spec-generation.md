@@ -4,10 +4,10 @@
 
 - Work ID: FEAT-002-command-spec-generation
 - Work Type: Feature (refactor)
-- Status: Draft
-- Readiness: Needs Analysis
+- Status: Complete
+- Readiness: Ready For Coding (implemented on integration)
 - Created: 2026-06-19
-- Updated: 2026-06-19
+- Updated: 2026-07-15
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown
@@ -15,7 +15,7 @@
 - Roadmap: ROADMAP.md
 - Milestone: milestone-1.md
 - Delivery stage: make it right (maintainability — kills drift)
-- Related PR:
+- Related PR: https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27
 
 ## R - Requirements
 
@@ -31,12 +31,12 @@ drift bugs and review burden.
 
 ### Acceptance Criteria
 
-- [ ] One canonical spec per command (shared body + per-assistant framing/front matter).
-- [ ] A generator emits the Cursor, Copilot, and Claude adapter files from the spec.
-- [ ] Generated adapters preserve today's behavior and pass `validate-command-adapters.sh`.
-- [ ] Command edits happen in the spec only; regeneration updates all three.
-- [ ] CI fails if checked-in adapters are stale relative to the spec.
-- [ ] Shipped generated adapters pass `check-posture-boundary.sh` (no posture language).
+- [x] One canonical spec per command (shared body + per-assistant framing/front matter).
+- [x] A generator emits the Cursor, Copilot, and Claude adapter files from the spec.
+- [x] Generated adapters preserve today's behavior and pass `validate-command-adapters.sh`.
+- [x] Command edits happen in the spec only; regeneration updates all three.
+- [x] CI fails if checked-in adapters are stale relative to the spec.
+- [x] Shipped generated adapters pass `check-posture-boundary.sh` (no posture language).
 
 ### Non-Goals
 
@@ -114,7 +114,7 @@ drift bugs and review burden.
 
 ### T01 - Extract shared vs. per-assistant content
 
-- Status: Not Started
+- Status: Complete
 - Description: Analyze the three adapter sets; document shared body and per-assistant deltas.
 - Files: spdd/analysis/FEAT-002-command-spec-generation-analysis.md
 - Tests: Not applicable
@@ -122,15 +122,15 @@ drift bugs and review burden.
 
 ### T02 - Define spec format + migrate one command
 
-- Status: Not Started
+- Status: Complete
 - Description: Lock the spec format; convert one command end to end as a proof of equivalence.
-- Files: spec source, scripts/generate-command-adapters.sh (initial)
+- Files: spec/commands/, scripts/generate-command-adapters.sh
 - Tests: diff generated vs. existing for that command
 - Validation: byte/intent-equivalent output
 
 ### T03 - Generate all commands
 
-- Status: Not Started
+- Status: Complete
 - Description: Generate every adapter from specs; reconcile until equivalent to current.
 - Files: templates/cursor/*, templates/copilot/prompts/*, templates/claude/commands/*
 - Tests: ./scripts/validate-command-adapters.sh
@@ -138,17 +138,17 @@ drift bugs and review burden.
 
 ### T04 - Wire generation + staleness check into CI
 
-- Status: Not Started
+- Status: Complete
 - Description: Fail CI when checked-in adapters differ from regeneration; enforce posture boundary on output.
-- Files: .github/workflows/*
+- Files: .github/workflows/validate-command-spec-generation.yml
 - Tests: CI dry-run
 - Validation: stale adapter fails; clean tree passes; check-posture-boundary.sh green
 
 ### T05 - Document the authoring workflow
 
-- Status: Not Started
+- Status: Complete
 - Description: Document "edit spec → regenerate"; update contributor docs.
-- Files: docs/, CONTRIBUTING.md
+- Files: spec/commands/README.md
 - Tests: Not applicable
 - Validation: doc consistency
 
@@ -191,7 +191,7 @@ analysis pass before coding. Use sync notes to track drift.
 
 ## Final Status
 
-- Status:
-- Completed Date:
-- PR:
-- Follow-Up Tasks:
+- Status: Complete (T01–T05)
+- Completed Date: 2026-07-15
+- PR: https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27 (integration)
+- Follow-Up Tasks: None for this Work ID

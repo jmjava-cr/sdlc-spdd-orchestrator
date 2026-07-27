@@ -49,14 +49,18 @@ own roadmaps and priorities. Keep our internal posture out of everything that
 installs into a target project.
 
 - **Shipped surfaces (must stay neutral):** `templates/**`, every `docs/*.md`
-  (installed as `docs/sdlc-spdd/`), the grounding files
+  that is *not* listed as orchestrator-only in
+  `scripts/lib/shipped-docs-boundary.sh` (installed as `docs/sdlc-spdd/`), the
+  grounding files
   (`templates/{claude/CLAUDE.md,copilot/copilot-instructions.md,cursor/rules/sdlc-spdd.mdc}`),
   and the `agent-context/` memory/playbook/harness files that install copies.
 - **Internal-only surfaces (posture allowed):** `ROADMAP.md` (repo root — targets get
-  `templates/project-docs/ROADMAP.md` instead), this `CONTRIBUTING.md`, and the repo-root
-  `README.md` (the orchestrator's own front page; it is not installed into target projects).
+  `templates/project-docs/ROADMAP.md` instead), this `CONTRIBUTING.md`, the repo-root
+  `README.md`, and orchestrator-only docs such as `docs/integration-branch.md`,
+  `docs/catch-up.md`, `docs/contributing-command-specs.md`,
+  `docs/contributing-extensions.md`, and `docs/guide-rag-research-and-dogfooding.md`.
 - **Never** put `make it work/right/fast`, `Kent Beck`, or `Delivery posture/stage`
-  language into a shipped surface. The posture lives only in the two internal files above.
+  language into a shipped surface. The posture lives only in the internal files above.
 - **Framework capabilities may ship, but described neutrally.** The
   prompt-optimization ledger (FEAT-004) is a legitimate, optional capability — when
   its docs/templates ship, they describe *what it does* ("record whether a prompt
@@ -89,6 +93,17 @@ Doc paths follow the same pattern:
 | Installed target application | `docs/sdlc-spdd/*.md` |
 
 Generated session briefs reference `docs/sdlc-spdd/…` because they are written for target projects.
+
+## Command adapters and extensions
+
+When changing assistant commands or the extension mechanism:
+
+| Task | Guide |
+|------|-------|
+| Edit Cursor/Copilot/Claude command text | [docs/contributing-command-specs.md](docs/contributing-command-specs.md) — edit `spec/commands/`, then `./scripts/generate-command-adapters.sh` |
+| Add phase extensions or skills | [docs/contributing-extensions.md](docs/contributing-extensions.md) |
+| Test / land the integration branch | [docs/integration-branch.md](docs/integration-branch.md) |
+| Reconcile remote branches after time away | [docs/catch-up.md](docs/catch-up.md) |
 
 ## Three-Part Design Mandate
 
@@ -126,8 +141,9 @@ SDLC (`agent-context/sessions/`, `agent-context/memory/`) artifacts.
 Before merging doc or script changes that touch the three-part model (Planning, SPDD, SDLC), verify:
 
 - [ ] **Workflow CLI** — daily runbook, first-day walkthrough, cheat sheet, and session prompt standard teach `sdlc.sh` (`next`, `claim`, `capture`) not raw scripts alone
+- [ ] **Workflow chat commands** — `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team` appear alongside shell equivalents where users start/claim/orient
 - [ ] **Pointer + team registry** — docs explain `.sdlc/pointer` / `.sdlc/workflows/` (local) vs `work-registry.tsv` (committed); claim/release commit reminder present
-- [ ] **Whereami** — `/sdlc-spdd-whereami` in assistant command tables (README, cheat sheet, cursor/copilot/claude usage)
+- [ ] **Whereami / next** — `/sdlc-next` and `/sdlc-spdd-whereami` in assistant orientation tables (README, cheat sheet, cursor/copilot/claude usage)
 - [ ] **Jira draft** — milestone `## Jira` convention referenced from runbook, cheat sheet, planning prompts where Jira drafts appear
 - [ ] **Three-part mandate** — no Planning, SPDD, or SDLC artifacts removed or conflated; see [design mandate](docs/three-part-operating-path.md#three-part-design-mandate)
 

@@ -1,5 +1,6 @@
 # /sdlc-spdd-retro
 
+
 You are the SDLC-SPDD Retro Agent.
 
 Your job is to capture reusable learnings after a feature, bugfix, refactor, or spike.
@@ -7,6 +8,7 @@ Your job is to capture reusable learnings after a feature, bugfix, refactor, or 
 Do not implement code.
 
 ## Required Behavior
+
 
 1. Read the REASONS Canvas.
 2. Read the progress log.
@@ -18,6 +20,7 @@ Do not implement code.
 8. Update project memory.
 
 ## Output
+
 
 Create or update:
 

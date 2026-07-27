@@ -39,11 +39,14 @@ Work moves through specialized phases instead of one undifferentiated "fix it" c
 
     Init -> Analysis -> Plan -> Architect -> Code -> API Test -> Review -> Prompt-update -> Retro -> Sync
 
-Each phase has a dedicated command. Run `/sdlc-spdd-*` in **AI chat** (Cursor/Copilot/Claude Code), not a terminal — see [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands):
+Each phase has a dedicated command. Run `/sdlc-spdd-*` in **AI chat** (Cursor/Copilot/Claude Code), not a terminal — see [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
+
+Rows for Orient / Claim below are **workflow wrappers** (`/sdlc-*`), not lifecycle phases — they manage Work ID and phase state via `sdlc.sh`.
 
 | Phase | Command |
 |-------|---------|
-| Orient | `/sdlc-spdd-whereami` |
+| Orient | `/sdlc-next` or `/sdlc-spdd-whereami` |
+| Claim / shelf / advance / team | `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-team` |
 | Initialize | `/sdlc-spdd-init` |
 | Analysis | `/sdlc-spdd-analysis` |
 | Plan | `/sdlc-spdd-plan` |
@@ -103,7 +106,7 @@ Session scripts create handoff briefs and resume prompts. The workflow CLI (`scr
 
 Output: `agent-context/sessions/current-session.md` with artifact status, planning context, and a copy-paste resume prompt. Local state: `.sdlc/pointer`, `.sdlc/workflows/` (gitignored). Team claims: `agent-context/work-registry.tsv` (committed).
 
-In chat: `/sdlc-spdd-whereami`.
+In chat: `/sdlc-next` or `/sdlc-spdd-whereami`.
 
 ### 8. Multi-assistant adapters
 
@@ -144,6 +147,7 @@ Scripts bridge planning and governance:
 | `summarize-session-notes.sh` | session notes -> durable memory |
 | `capture-session-memory.sh` / `sdlc.sh capture` | session -> memory, notes, milestone, roadmap |
 | `sdlc.sh claim` / `team` | team Work ID registry (committed) |
+| `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team` | chat wrappers for the same workflow CLI |
 
 ## How the Three Concepts Connect in a Session
 

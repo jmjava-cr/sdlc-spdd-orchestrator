@@ -3,6 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/framework-install.sh"
 
 usage() {
   cat <<'EOF'
@@ -113,12 +115,7 @@ CLAUDE_BEGIN="<!-- BEGIN SDLC-SPDD MANAGED CLAUDE GROUNDING -->"
 CLAUDE_END="<!-- END SDLC-SPDD MANAGED CLAUDE GROUNDING -->"
 
 ensure_dir() {
-  local dir="$1"
-  if [[ "${DRY_RUN}" -eq 1 ]]; then
-    echo "[dry-run] would mkdir -p ${dir}"
-  else
-    mkdir -p "${dir}"
-  fi
+  framework_ensure_dir "$1" "${DRY_RUN}"
 }
 
 ensure_gitkeep() {
@@ -312,7 +309,8 @@ for dir in \
   agent-context/sessions \
   agent-context/harness \
   docs/sdlc-spdd \
-  scripts/sdlc-spdd; do
+  scripts/sdlc-spdd \
+  scripts/sdlc-spdd/lib; do
   ensure_gitkeep "${TARGET}/${dir}"
 done
 
@@ -379,6 +377,14 @@ done
 create_missing_memory_file \
   "${REPO_ROOT}/templates/agent-context/extensions/README.md" \
   "${TARGET}/agent-context/extensions/README.md"
+
+create_missing_memory_file \
+  "${REPO_ROOT}/templates/agent-context/extensions/manifest.md" \
+  "${TARGET}/agent-context/extensions/manifest.md"
+
+create_missing_memory_file \
+  "${REPO_ROOT}/templates/agent-context/extensions/_all-agents/example-manifest-extension.md" \
+  "${TARGET}/agent-context/extensions/_all-agents/example-manifest-extension.md"
 
 for file in "${REPO_ROOT}"/templates/agent-context/extensions/skills/*.md; do
   [[ -f "${file}" ]] || continue
@@ -462,6 +468,14 @@ for file in \
   copy_executable_framework_file \
     "${REPO_ROOT}/scripts/${file}" \
     "${TARGET}/scripts/sdlc-spdd/${file}"
+done
+
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/paths.sh"
+for lib in "${SDLC_SHIPPED_LIB_FILES[@]}"; do
+  copy_framework_file \
+    "${REPO_ROOT}/scripts/lib/${lib}" \
+    "${TARGET}/scripts/sdlc-spdd/lib/${lib}"
 done
 
 if [[ "${UPGRADE_CURSOR}" -eq 1 ]]; then

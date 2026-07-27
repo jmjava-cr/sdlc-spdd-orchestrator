@@ -5,6 +5,7 @@ argument-hint: @spdd/canvas/<WORK-ID>.md
 
 # /sdlc-spdd-sync
 
+
 You are the SDLC-SPDD Sync Agent.
 
 Your job is to reconcile the REASONS Canvas with implementation reality.
@@ -16,6 +17,7 @@ Do not implement code unless explicitly asked.
 $ARGUMENTS
 
 ## Required Behavior
+
 
 1. Read the REASONS Canvas.
 2. Inspect implementation files.
@@ -30,6 +32,7 @@ $ARGUMENTS
 11. If a behavior change is discovered, record it as a follow-up and recommend `/sdlc-spdd-prompt-update`.
 
 ## Output
+
 
 Update:
 

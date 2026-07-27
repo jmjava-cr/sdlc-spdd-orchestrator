@@ -105,9 +105,12 @@ Skip this step for ad-hoc requirements — go to step 5.
 
     ./scripts/sdlc-spdd/sdlc.sh claim FEAT-001-order-status-api
 
+Or in AI chat: `/sdlc-claim FEAT-001-order-status-api`.
+
 Quick orientation (shell or chat):
 
     ./scripts/sdlc-spdd/sdlc.sh next
+    /sdlc-next
     /sdlc-spdd-whereami
 
 Open the session brief for the phase you are about to run. On day one that is usually `analysis`:
@@ -124,6 +127,8 @@ Then **paste the Resume Prompt** from `agent-context/sessions/current-session.md
 This first-day walkthrough uses the **ad-hoc entry** (you have a requirement but no prior canvas). If you mapped milestone work in step 4 and the canvas is already planned and architected, start the brief at `--phase code` instead. See [Session brief timing](three-part-operating-path.md#session-brief-timing) for the milestone-driven vs ad-hoc rule.
 
 See [Session prompt standard](session-prompt-standard.md). Source of truth: the generated **Resume Prompt** section in `current-session.md`.
+
+Workflow chat shortcuts for later phases: `/sdlc-advance` after a phase step, `/sdlc-shelf` to pause, `/sdlc-team` to see who owns what.
 
 ## 6. Analyze the Requirement
 
@@ -242,7 +247,7 @@ Review checks whether the implementation matches:
 - [ ] `/sdlc-spdd-init` completed.
 - [ ] Work ID chosen.
 - [ ] Milestone work mapped (if applicable).
-- [ ] Work claimed (`sdlc.sh claim`); team registry committed if shared repo.
+- [ ] Work claimed (`sdlc.sh claim` or `/sdlc-claim`); team registry committed if shared repo.
 - [ ] Session brief created; Resume Prompt pasted.
 - [ ] Requirement analyzed into `spdd/analysis/<WORK-ID>-analysis.md` and indexed.
 - [ ] Analysis planned into a REASONS Canvas.

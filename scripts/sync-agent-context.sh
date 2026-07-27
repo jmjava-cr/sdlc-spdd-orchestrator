@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+
 usage() {
   cat <<'EOF'
 Usage: sync-agent-context.sh --work-id <WORK-ID> [--from-canvas|--from-feature] [--dry-run] [--force]
@@ -58,7 +62,7 @@ if [[ -z "${WORK_ID}" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 feature_canvas="${TARGET}/agent-context/features/${WORK_ID}/reasons-canvas.md"
 canonical_canvas="${TARGET}/spdd/canvas/${WORK_ID}.md"
 

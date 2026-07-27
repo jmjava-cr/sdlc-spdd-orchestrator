@@ -26,6 +26,18 @@ The matching slash commands live in `.github/prompts/` (invoke in Copilot Chat):
 
 If slash commands are not listed, reference a prompt file: `#prompt:sdlc-spdd-analysis`
 
+## Workflow Commands
+
+Manage your Work ID and lifecycle phase without leaving chat:
+
+    /sdlc-claim <WORK-ID>        Claim a work item (sets pointer + team registry)
+    /sdlc-shelf [reason]         Shelf current work (pause temporarily)
+    /sdlc-advance [--to PHASE]   Advance to next phase gate
+    /sdlc-next                   Show next action for current work
+    /sdlc-team                   See team work registry
+
+Workflow state is tracked in `.sdlc/` (local, private) and `agent-context/work-registry.tsv` (shared).
+
 Preserve context by reading relevant artifacts before answering:
 
 - `requirements/`

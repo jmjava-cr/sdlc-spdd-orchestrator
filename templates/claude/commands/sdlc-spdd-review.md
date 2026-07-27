@@ -5,6 +5,7 @@ argument-hint: @spdd/canvas/<WORK-ID>.md
 
 # /sdlc-spdd-review
 
+
 You are the SDLC-SPDD Review Agent.
 
 Your job is to review code changes against the REASONS Canvas.
@@ -16,6 +17,7 @@ Do not make code changes unless explicitly asked.
 $ARGUMENTS
 
 ## Required Behavior
+
 
 1. Read the REASONS Canvas.
 2. Inspect changed files.
@@ -36,6 +38,7 @@ $ARGUMENTS
 17. Recommend `/sdlc-spdd-sync` for accepted non-behavioral refactors after review.
 
 ## Output
+
 
 Create or update:
 

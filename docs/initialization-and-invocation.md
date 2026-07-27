@@ -45,9 +45,10 @@ The command runs as a chat message. Claude Code reads `.claude/commands/sdlc-spd
 | Kind | Example | Where you run it |
 |------|---------|------------------|
 | **Shell** (terminal) | `./scripts/sdlc-spdd/sdlc.sh next`, `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` | Terminal in the target project |
-| **Assistant** (chat) | `/sdlc-spdd-whereami`, `/sdlc-spdd-init`, `/sdlc-spdd-plan @requirements/foo.md` | Cursor, Copilot, or Claude Code **chat** input |
+| **Assistant lifecycle** (chat) | `/sdlc-spdd-whereami`, `/sdlc-spdd-init`, `/sdlc-spdd-plan @requirements/foo.md` | Cursor, Copilot, or Claude Code **chat** |
+| **Assistant workflow** (chat) | `/sdlc-claim <WORK-ID>`, `/sdlc-next`, `/sdlc-advance`, `/sdlc-shelf`, `/sdlc-team` | Same chat — wraps `sdlc.sh` without leaving the assistant |
 
-All `/sdlc-spdd-*` lines in the docs are **assistant commands** unless they start with `./` or `cd`.
+All `/sdlc-spdd-*` and `/sdlc-*` (workflow) lines in the docs are **assistant commands** unless they start with `./` or `cd`.
 
 ## First-Time Application Setup
 
@@ -101,12 +102,13 @@ Before asking a new agent to continue previous work:
 
        ./scripts/sdlc-spdd/sdlc.sh next
 
-   In chat: `/sdlc-spdd-whereami`
+   In chat: `/sdlc-next` or `/sdlc-spdd-whereami`
 
 2. Claim or resume and open a session brief:
 
        cd /path/to/your/project
        ./scripts/sdlc-spdd/sdlc.sh claim FEAT-001-order-status-api
+       # or in chat: /sdlc-claim FEAT-001-order-status-api
        ./scripts/sdlc-spdd/sdlc.sh resume FEAT-001-order-status-api --phase code
        ./scripts/sdlc-spdd/sdlc.sh start
 

@@ -3,6 +3,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/framework-install.sh"
 
 usage() {
   cat <<'EOF'
@@ -95,12 +97,7 @@ copy_if_missing() {
 }
 
 ensure_dir() {
-  local dir="$1"
-  if [[ "${DRY_RUN}" -eq 1 ]]; then
-    echo "[dry-run] would mkdir -p ${dir}"
-    return
-  fi
-  mkdir -p "${dir}"
+  framework_ensure_dir "$1" "${DRY_RUN}"
 }
 
 ensure_gitkeep() {
@@ -146,7 +143,8 @@ for dir in \
   agent-context/sessions \
   agent-context/harness \
   docs/sdlc-spdd \
-  scripts/sdlc-spdd; do
+  scripts/sdlc-spdd \
+  scripts/sdlc-spdd/lib; do
   ensure_dir "${TARGET}/${dir}"
   ensure_gitkeep "${TARGET}/${dir}"
 done
@@ -199,6 +197,14 @@ done
 copy_if_missing \
   "${REPO_ROOT}/templates/agent-context/extensions/README.md" \
   "${TARGET}/agent-context/extensions/README.md"
+
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/extensions/manifest.md" \
+  "${TARGET}/agent-context/extensions/manifest.md"
+
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/extensions/_all-agents/example-manifest-extension.md" \
+  "${TARGET}/agent-context/extensions/_all-agents/example-manifest-extension.md"
 
 for file in "${REPO_ROOT}"/templates/agent-context/extensions/skills/*.md; do
   [[ -f "${file}" ]] || continue
@@ -291,6 +297,14 @@ for file in \
   if [[ "${DRY_RUN}" -eq 0 && -f "${TARGET}/scripts/sdlc-spdd/${file}" ]]; then
     chmod +x "${TARGET}/scripts/sdlc-spdd/${file}"
   fi
+done
+
+# shellcheck source=/dev/null
+source "${REPO_ROOT}/scripts/lib/paths.sh"
+for lib in "${SDLC_SHIPPED_LIB_FILES[@]}"; do
+  copy_if_missing \
+    "${REPO_ROOT}/scripts/lib/${lib}" \
+    "${TARGET}/scripts/sdlc-spdd/lib/${lib}"
 done
 
 if [[ "${INSTALL_CURSOR}" -eq 1 ]]; then

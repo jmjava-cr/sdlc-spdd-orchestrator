@@ -30,12 +30,14 @@ Goal: recover context before asking the assistant to act.
 
     ./scripts/sdlc-spdd/sdlc.sh next
 
-In chat: `/sdlc-spdd-whereami` (same answer as `next`, plus team registry context).
+In chat: `/sdlc-next` or `/sdlc-spdd-whereami` (same orientation family; `whereami` adds more registry context).
 
 **Team coordination** — before claiming work on a shared repo:
 
     ./scripts/sdlc-spdd/sdlc.sh team
     ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>    # commit agent-context/work-registry.tsv after
+
+In chat: `/sdlc-team`, `/sdlc-claim <WORK-ID>`.
 
 If you already have an active pointer, resume or switch:
 
@@ -43,7 +45,7 @@ If you already have an active pointer, resume or switch:
 
 **Full session loop** (recommended daily rhythm):
 
-1. Orient: `./scripts/sdlc-spdd/sdlc.sh next` (or `/sdlc-spdd-whereami` in chat).
+1. Orient: `./scripts/sdlc-spdd/sdlc.sh next` (or `/sdlc-next` / `/sdlc-spdd-whereami` in chat).
 2. Check canvas sync when resuming stale work:
 
        ./scripts/sdlc-spdd/resync-agent-session.sh --target . --work-id <WORK-ID> --check-only
@@ -55,7 +57,7 @@ If you already have an active pointer, resume or switch:
 
 4. **Paste the Resume Prompt** from `agent-context/sessions/current-session.md`. That generated prompt is the source of truth — it directs the agent to load only the files listed under **Resolved Context** in the same brief (phase extensions, Work ID artifacts, and area-filtered index rows).
 
-5. After completing a phase step: `./scripts/sdlc-spdd/sdlc.sh advance`
+5. After completing a phase step: `./scripts/sdlc-spdd/sdlc.sh advance` (or `/sdlc-advance` in chat). To pause: `/sdlc-shelf` or `sdlc.sh shelf --reason "..."`.
 
 Optional — ask for a status summary after pasting the resume prompt:
 
@@ -259,15 +261,19 @@ Script sequence: [Morning or Start-of-Session Check](#morning-or-start-of-sessio
 
 ### Daily workflow CLI reference
 
-| Goal | Command |
-|------|---------|
-| What now? | `./scripts/sdlc-spdd/sdlc.sh next` or `/sdlc-spdd-whereami` |
-| Open session brief | `./scripts/sdlc-spdd/sdlc.sh start` |
-| Move to next phase | `./scripts/sdlc-spdd/sdlc.sh advance` |
-| Skip a phase | `./scripts/sdlc-spdd/sdlc.sh skip <phase> --reason "..."` |
-| Re-read artifacts | `./scripts/sdlc-spdd/sdlc.sh sync` |
-| See all Work IDs | `./scripts/sdlc-spdd/sdlc.sh list-work` |
-| Team who-is-on-what | `./scripts/sdlc-spdd/sdlc.sh team` |
-| Claim for team | `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` → commit `work-registry.tsv` |
+| Goal | Shell | Chat |
+|------|-------|------|
+| What now? | `./scripts/sdlc-spdd/sdlc.sh next` | `/sdlc-next` or `/sdlc-spdd-whereami` |
+| Claim Work ID | `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` | `/sdlc-claim <WORK-ID>` |
+| Open session brief | `./scripts/sdlc-spdd/sdlc.sh start` | — |
+| Move to next phase | `./scripts/sdlc-spdd/sdlc.sh advance` | `/sdlc-advance` |
+| Pause current work | `./scripts/sdlc-spdd/sdlc.sh shelf --reason "..."` | `/sdlc-shelf` |
+| Skip a phase | `./scripts/sdlc-spdd/sdlc.sh skip <phase> --reason "..."` | — |
+| Re-read artifacts | `./scripts/sdlc-spdd/sdlc.sh sync` | — |
+| See all Work IDs | `./scripts/sdlc-spdd/sdlc.sh list-work` | — |
+| Team who-is-on-what | `./scripts/sdlc-spdd/sdlc.sh team` | `/sdlc-team` |
+| Claim for team | `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` → commit `work-registry.tsv` | `/sdlc-claim <WORK-ID>` |
+| Take over claim | `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID> --force` | `/sdlc-claim <WORK-ID> --force` |
 
 Local state (gitignored): `.sdlc/pointer`, `.sdlc/workflows/`. Shared via git: `agent-context/work-registry.tsv`.
+Non-stale foreign claims block until you coordinate and re-run with `--force`.

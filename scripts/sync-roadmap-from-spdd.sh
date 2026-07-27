@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/common.sh"
+
 usage() {
   cat <<'EOF'
 Usage: sync-roadmap-from-spdd.sh [--target <path>] [--roadmap <file>] [--dry-run]
@@ -43,7 +47,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 if [[ "${ROADMAP}" != /* ]]; then
   ROADMAP="${TARGET}/${ROADMAP}"
 fi
@@ -64,7 +68,7 @@ field_value() {
   echo
   echo "## SDLC-SPDD Work Summary"
   echo
-  echo "Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  echo "Generated: $(sdlc_timestamp_iso)"
   echo
   echo "| Work ID | Title | Type | Status | Milestone | Source | Canvas |"
   echo "|---------|-------|------|--------|-----------|--------|--------|"

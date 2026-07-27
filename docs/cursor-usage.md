@@ -22,6 +22,8 @@ Open the **target project** in Cursor. Open **Chat** or **Agent**. Type `/` and 
 
 ## Available Commands
 
+### Lifecycle (`/sdlc-spdd-*`)
+
 | Command | Purpose |
 |---------|---------|
 | `/sdlc-spdd-whereami` | Orient: team registry, active Work ID, phase, gates, next command |
@@ -36,9 +38,22 @@ Open the **target project** in Cursor. Open **Chat** or **Agent**. Type `/` and 
 | `/sdlc-spdd-retro` | Capture learnings into memory |
 | `/sdlc-spdd-sync` | Reconcile canvas with code |
 
+### Workflow (`/sdlc-*`)
+
+Chat wrappers for `./scripts/sdlc-spdd/sdlc.sh` — manage Work ID and phase without leaving chat:
+
+| Command | Purpose |
+|---------|---------|
+| `/sdlc-claim <WORK-ID>` | Claim work (sets pointer + team registry); `--force` to take over |
+| `/sdlc-next` | Show next action for current work (same family as `/sdlc-spdd-whereami`) |
+| `/sdlc-advance` | Advance to the next phase when gates allow |
+| `/sdlc-shelf` | Pause current work |
+| `/sdlc-team` | Show the team work registry |
+
 ## Tips
 
-- Run `/sdlc-spdd-whereami` or `./scripts/sdlc-spdd/sdlc.sh next` at session start for orientation.
+- Run `/sdlc-next`, `/sdlc-spdd-whereami`, or `./scripts/sdlc-spdd/sdlc.sh next` at session start for orientation.
+- Claim with `/sdlc-claim <WORK-ID>` (or shell `sdlc.sh claim`); commit `agent-context/work-registry.tsv` on shared repos.
 - Reference files with `@` paths in Cursor prompts.
 - Keep planning and architect phases free of application code changes.
 - Run review after each coding operation when possible.

@@ -139,7 +139,14 @@ Phase and gate tracking for the active Work ID. State lives in `.sdlc/workflows/
     ./scripts/sdlc-spdd/sdlc.sh advance    # move to next phase
     ./scripts/sdlc-spdd/sdlc.sh shelf --reason "..."
 
-In chat: `/sdlc-spdd-whereami`.
+In chat (wrappers for the same actions):
+
+    /sdlc-next
+    /sdlc-claim <WORK-ID>
+    /sdlc-advance
+    /sdlc-shelf
+    /sdlc-team
+    /sdlc-spdd-whereami
 
 ### Team Registry
 
@@ -147,6 +154,9 @@ Shared coordination via git. Who owns which Work ID, phase, branch, PR, and Jira
 
     ./scripts/sdlc-spdd/sdlc.sh team
     ./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>    # commit agent-context/work-registry.tsv
+    /sdlc-team
+    /sdlc-claim <WORK-ID>
+    /sdlc-claim <WORK-ID> --force    # take over after coordinating with the current owner
 
 File: `agent-context/work-registry.tsv`.
 
@@ -179,7 +189,9 @@ Use roadmap and milestone docs to give planning agents delivery context. Use REA
 
 ## Commands and Prompts
 
-`/sdlc-spdd-*` commands run in **AI chat** (Cursor/Copilot/Claude Code), not a terminal. [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
+`/sdlc-spdd-*` lifecycle commands and `/sdlc-*` workflow commands (`claim`, `shelf`,
+`advance`, `next`, `team`) run in **AI chat** (Cursor/Copilot/Claude Code), not a
+terminal. [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
 
 Command list (install, lifecycle, scripts): [Cheat sheet](sdlc-spdd-cheat-sheet.md).
 

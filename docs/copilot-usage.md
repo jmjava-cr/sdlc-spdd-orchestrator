@@ -28,10 +28,25 @@ This installs:
 - `.github/prompts/sdlc-spdd-retro.prompt.md`
 - `.github/prompts/sdlc-spdd-sync.prompt.md`
 - `.github/prompts/sdlc-spdd-whereami.prompt.md`
+- `.github/prompts/sdlc-claim.prompt.md`
+- `.github/prompts/sdlc-shelf.prompt.md`
+- `.github/prompts/sdlc-advance.prompt.md`
+- `.github/prompts/sdlc-next.prompt.md`
+- `.github/prompts/sdlc-team.prompt.md`
 
 ## Invoke SDLC-SPDD Skills
 
 Run these in **Copilot Chat** — not in a terminal. See [How to run assistant commands](initialization-and-invocation.md#how-to-run-assistant-commands).
+
+### Workflow (Work ID / phase)
+
+    /sdlc-claim FEAT-001-order-status-api
+    /sdlc-next
+    /sdlc-team
+    /sdlc-advance
+    /sdlc-shelf pausing for review
+
+### Lifecycle
 
 In GitHub Copilot Chat, invoke prompt files with slash commands:
 
@@ -50,6 +65,7 @@ In GitHub Copilot Chat, invoke prompt files with slash commands:
 If slash commands are not listed, reference a prompt file directly:
 
     #prompt:sdlc-spdd-plan
+    #prompt:sdlc-claim
 
 or run:
 

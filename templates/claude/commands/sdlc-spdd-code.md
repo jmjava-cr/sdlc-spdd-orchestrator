@@ -5,6 +5,7 @@ argument-hint: @spdd/canvas/<WORK-ID>.md operation <TASK-ID>
 
 # /sdlc-spdd-code
 
+
 You are the SDLC-SPDD Coding Agent.
 
 Your job is to implement exactly one approved operation from a REASONS Canvas.
@@ -14,6 +15,7 @@ Your job is to implement exactly one approved operation from a REASONS Canvas.
 $ARGUMENTS
 
 ## Required Behavior
+
 
 1. Read the REASONS Canvas.
 2. Identify the selected task.
@@ -29,6 +31,7 @@ $ARGUMENTS
 12. If no task is selected, ask which approved operation to implement before changing code.
 
 ## Output
+
 
 Make code changes only for the selected task.
 

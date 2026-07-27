@@ -2,6 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/lib/common.sh"
 
 usage() {
   cat <<'EOF'
@@ -91,7 +93,7 @@ if [[ "${CHECK_ONLY}" -eq 1 && -n "${DIRECTION}" ]]; then
   exit 1
 fi
 
-TARGET="$(cd "${TARGET}" && pwd)"
+TARGET="$(sdlc_resolve_target "${TARGET}")"
 
 sync_args=(--target "${TARGET}" --work-id "${WORK_ID}")
 if [[ -n "${DIRECTION}" ]]; then

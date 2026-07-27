@@ -28,10 +28,9 @@ Make it fast (do last, deferred):
    parked until the refactors above land. (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`.)
 6. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
 
-Work IDs are numbered in execution order. All five now have a requirement stub and a
-REASONS Canvas. FEAT-004 (deferred) is at Ready For Coding; the make-it-right
-canvases (FEAT-001→003) and FEAT-005 are drafts that each need an analysis pass
-(`/sdlc-spdd-analysis` → `/sdlc-spdd-plan` → `/sdlc-spdd-architect`) before coding.
+Work IDs are numbered in execution order. FEAT-001–003 are complete on the
+integration branch; FEAT-004 (deferred) is at Ready For Coding; FEAT-005 remains
+draft until make-it-fast work begins.
 
 ## Constraint
 
@@ -43,9 +42,9 @@ grounding files). This is enforced by `./scripts/check-posture-boundary.sh`.
 
 | Work ID | Canvas | Requirement | Status | Notes |
 |---------|--------|-------------|--------|-------|
-| FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Draft — Needs Analysis | Lead make-it-right refactor; plan next |
-| FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Draft — Needs Analysis | Make it right (maintainability) |
-| FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Draft — Needs Analysis | Make it right (extensibility) |
+| FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Complete (T01–T04) | On integration branch |
+| FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Complete (T01–T05) | On integration branch |
+| FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete (T01–T04) | On integration branch |
 | FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Ready For Coding — deferred | Make it fast; runs after refactors |
 | FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Draft — Needs Analysis | Make it fast; do last |
 | CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | requirements/milestones/CHORE-001-docgen-initial-documentation.md | Complete (T01–T07) | Docgen bundle scaffold + initial narration (parallel) |

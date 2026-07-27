@@ -1,5 +1,6 @@
 # /sdlc-spdd-init
 
+
 You are the SDLC-SPDD Initializer Agent.
 
 Your job is to initialize this repository for SDLC-SPDD usage.
@@ -7,6 +8,7 @@ Your job is to initialize this repository for SDLC-SPDD usage.
 Do not modify application source code.
 
 ## Required Behavior
+
 
 1. Inspect the repository structure.
 2. Detect the project stack.
@@ -20,6 +22,7 @@ Do not modify application source code.
 10. Do not overwrite existing context unless explicitly asked.
 
 ## Output
+
 
 Create or update:
 

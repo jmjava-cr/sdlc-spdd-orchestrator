@@ -4,10 +4,10 @@
 
 - Work ID: FEAT-001-shared-script-library
 - Work Type: Feature (refactor)
-- Status: Draft
-- Readiness: Needs Analysis
+- Status: Complete
+- Readiness: Ready For Coding (implemented on integration)
 - Created: 2026-06-19
-- Updated: 2026-06-19
+- Updated: 2026-07-15
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash
@@ -15,7 +15,7 @@
 - Roadmap: ROADMAP.md
 - Milestone: milestone-1.md
 - Delivery stage: make it right (maintainability) — **do first**
-- Related PR:
+- Related PR: https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27
 
 ## R - Requirements
 
@@ -31,11 +31,11 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### Acceptance Criteria
 
-- [ ] `scripts/lib/` provides sourced helpers covering: target/path resolution, `usage`/logging, `slugify`, Work-ID parse, and `context-index.md` read/append.
-- [ ] Consuming scripts `source` the library rather than redefining these functions.
-- [ ] All scripts keep identical CLI, output, and exit codes (behavior-identical refactor).
-- [ ] No duplicate definitions of extracted helpers remain.
-- [ ] Helper behavior is covered by tests/validation; existing tests still pass.
+- [x] `scripts/lib/` provides sourced helpers covering: target/path resolution, `usage`/logging, `slugify`, Work-ID parse, and `context-index.md` read/append.
+- [x] Consuming scripts `source` the library rather than redefining these functions.
+- [x] All scripts keep identical CLI, output, and exit codes (behavior-identical refactor).
+- [x] No duplicate definitions of extracted helpers remain.
+- [x] Helper behavior is covered by tests/validation; existing tests still pass.
 
 ### Non-Goals
 
@@ -51,6 +51,8 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 - Resolve during analysis: exact set of helpers and their grouping into files (one `common.sh` vs. several focused libs).
 - How installed/copied scripts in target projects resolve the lib path (relative vs. resolved).
+
+**Resolved in analysis (2026-07-15):** Focused libs under `scripts/lib/`; installed copy at `scripts/sdlc-spdd/lib/`. See `spdd/analysis/FEAT-001-shared-script-library-analysis.md`.
 
 ## E - Entities
 
@@ -113,7 +115,7 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### T01 - Inventory duplication
 
-- Status: Not Started
+- Status: Complete
 - Description: Catalog the duplicated functions and confirm behavior-identical intent; decide lib grouping + sourcing convention.
 - Files: spdd/analysis/FEAT-001-shared-script-library-analysis.md
 - Tests: Not applicable
@@ -121,27 +123,29 @@ command-spec generation, FEAT-003 extension manifest) build on a clean base.
 
 ### T02 - Create scripts/lib/ helpers
 
-- Status: Not Started
+- Status: Complete
 - Description: Implement the agreed helpers with the sourcing convention; no consumer changes yet.
 - Files: scripts/lib/*.sh
-- Tests: Unit/smoke for each helper
+- Tests: tests/test-scripts-lib.sh
 - Validation: Helpers behave identically to the originals
 
 ### T03 - Refactor consumers to source the lib
 
-- Status: Not Started
+- Status: Complete
 - Description: Migrate scripts cluster by cluster, deleting local copies; one reviewable step per cluster.
 - Files: scripts/*.sh
 - Tests: existing validation scripts per cluster
 - Validation: Behavior-identical CLI/output/exit codes
+- Notes: Clusters A–F complete on integration branch (2026-07-15).
 
 ### T04 - Verify + document the convention
 
-- Status: Not Started
+- Status: Complete
 - Description: Confirm no duplicate definitions remain; document how scripts source the lib.
-- Files: scripts/lib/, docs (as needed)
+- Files: scripts/lib/, scripts/verify-script-lib-duplicates.sh
 - Tests: repo-wide check for stray duplicate definitions
 - Validation: Full validation suite green
+- Notes: Completed on integration branch (2026-07-15).
 
 ## N - Norms
 
@@ -181,7 +185,7 @@ notes to track drift between the roadmap, canvas, and implementation.
 
 ## Final Status
 
-- Status:
-- Completed Date:
-- PR:
-- Follow-Up Tasks:
+- Status: Complete (T01–T04)
+- Completed Date: 2026-07-15
+- PR: https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27 (integration)
+- Follow-Up Tasks: None for this Work ID; readability pass is separate milestone item

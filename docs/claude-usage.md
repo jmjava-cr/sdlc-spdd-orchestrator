@@ -26,6 +26,11 @@ This installs:
 - `.claude/commands/sdlc-spdd-retro.md`
 - `.claude/commands/sdlc-spdd-sync.md`
 - `.claude/commands/sdlc-spdd-whereami.md`
+- `.claude/commands/sdlc-claim.md`
+- `.claude/commands/sdlc-shelf.md`
+- `.claude/commands/sdlc-advance.md`
+- `.claude/commands/sdlc-next.md`
+- `.claude/commands/sdlc-team.md`
 
 To install Cursor commands or GitHub Copilot prompt files instead, see [cursor-usage.md](cursor-usage.md) and [copilot-usage.md](copilot-usage.md). To install all three at once, use `./scripts/setup-agent-prompts.sh --target /path/to/your/project --all`.
 
@@ -36,6 +41,8 @@ Open the **target project** in Claude Code, then type `/` and pick a command (fo
 Project-scoped commands installed under `.claude/commands/` are available in any Claude Code session opened in that project. Arguments you type after the command (such as a canvas path) are passed to the command via Claude Code's `$ARGUMENTS` handling.
 
 ## Available Commands
+
+### Lifecycle (`/sdlc-spdd-*`)
 
 | Command | Purpose |
 |---------|---------|
@@ -50,6 +57,18 @@ Project-scoped commands installed under `.claude/commands/` are available in any
 | `/sdlc-spdd-prompt-update` | Update canvas first when requirements or behavior intent change |
 | `/sdlc-spdd-retro` | Capture learnings into memory |
 | `/sdlc-spdd-sync` | Reconcile canvas with code |
+
+### Workflow (`/sdlc-*`)
+
+Chat wrappers for `./scripts/sdlc-spdd/sdlc.sh`:
+
+| Command | Purpose |
+|---------|---------|
+| `/sdlc-claim <WORK-ID>` | Claim work (sets pointer + team registry); `--force` to take over |
+| `/sdlc-next` | Show next action for current work (same family as `/sdlc-spdd-whereami`) |
+| `/sdlc-advance` | Advance to the next phase when gates allow |
+| `/sdlc-shelf` | Pause current work |
+| `/sdlc-team` | Show the team work registry |
 
 ## Start Work in Claude Code
 

@@ -55,7 +55,8 @@ Each work item also has a canonical canvas under `spdd/canvas/`. Keep both copie
 ## SDLC Pointer (current chore/task)
 
 **Quick start:** `./scripts/sdlc.sh` (or `./scripts/sdlc.sh next`) shows what to do now.
-In chat: `/sdlc-spdd-whereami`.
+In chat: `/sdlc-next` or `/sdlc-spdd-whereami`. Workflow chat wrappers for the same
+CLI: `/sdlc-claim`, `/sdlc-shelf`, `/sdlc-advance`, `/sdlc-next`, `/sdlc-team`.
 
 Agents can drift onto the wrong Work ID when several chores are open. The pointer
 manager keeps a single active chore in `.sdlc/pointer` (local state; not committed)
@@ -98,7 +99,9 @@ sdlc_init
 ./scripts/sdlc.sh list-shelved
 ./scripts/sdlc.sh list-work      # discover Work IDs in the repo
 ./scripts/sdlc.sh capture --summary "finished T02"   # pointer-guarded
-./scripts/sdlc.sh sync-team      # mark done from canvas Final Status
+./scripts/sdlc.sh sync-team      # mark done/cancelled from canvas Final Status
+./scripts/sdlc.sh archive <ID>   # move Complete/Cancelled work into archive/
+./scripts/sdlc.sh archive --all  # archive every eligible Complete/Cancelled Work ID
 ```
 
 In **code** phase, the next canvas operation (`T01`, `T02`, …) is inferred automatically from the REASONS Canvas.
@@ -152,16 +155,30 @@ teammates see who is on which Work ID, phase, and operation.
 ./scripts/sdlc.sh team                   # team registry + your pointer
 ./scripts/sdlc.sh claim FEAT-001-alpha   # resume + register as active owner
 ./scripts/sdlc.sh release --reason "handoff to QA"
-./scripts/sdlc.sh resume OTHER-ID --force   # take over if teammate left stale claim
+# Take over a teammate's active claim (after coordinating with them):
+./scripts/sdlc.sh claim OTHER-ID --force
+./scripts/sdlc.sh resume OTHER-ID --force   # equivalent takeover via resume
 ```
 
 Set `SDLC_USER="Jane"` to label registry rows. Set `SDLC_NO_TEAM_REGISTRY=1` to opt out.
 
 **Stale claims:** active rows older than `SDLC_TEAM_STALE_DAYS` (default 7) show `[STALE>Nd]` in
-`team` / `list-work`. Stale claims warn but do not block; non-stale claims block until `--force`.
+`team` / `list-work`. Stale claims warn but do not block; non-stale claims block until
+`claim --force` or `resume --force`.
 
-**Done status:** canvases with `## Final Status` → `Status: Complete` are marked `done` when you run
-`team`, `list-work`, or `sync-team`.
+**Done / cancelled status:** canvases with `## Final Status` → `Status: Complete` are marked `done`,
+and `Status: Cancelled` / `Canceled` are marked `cancelled`, when you run `team`, `list-work`, or
+`sync-team`.
+
+**Archive completed/cancelled work** (keeps milestones in place; moves canvases, feature workspaces,
+analysis/review/sync, and matching session briefs under `archive/`):
+
+```bash
+./scripts/sdlc.sh archive FEAT-001-alpha
+./scripts/sdlc.sh archive --all
+./scripts/sdlc.sh archive FEAT-001-alpha --dry-run
+./scripts/sdlc.sh archive FEAT-001-alpha --force   # non-terminal Final Status
+```
 
 **Branch / PR / Jira linking** (stored in the `note` column):
 
