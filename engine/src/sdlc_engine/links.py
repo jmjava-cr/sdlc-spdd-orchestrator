@@ -59,8 +59,10 @@ def _section_body(text: str, heading: str) -> str:
 
 
 def _bullet_value(section: str, label: str) -> str:
+    # Use [ \t]* (not \s*) after the colon so an empty value does not swallow the
+    # next markdown bullet via a newline match.
     pattern = re.compile(
-        rf"^\s*(?:-\s+)?{re.escape(label)}:\s*(.+)$",
+        rf"^[ \t]*(?:-[ \t]+)?{re.escape(label)}:[ \t]*(.*)$",
         re.IGNORECASE | re.MULTILINE,
     )
     m = pattern.search(section)

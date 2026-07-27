@@ -148,10 +148,22 @@ python3 -m sdlc_engine shell setup-agent-prompts.sh -- --target /tmp/demo --all
 ## Tests
 
 ```bash
+# Unit + mocked Jira/GitHub write-back (default; offline-safe)
 PYTHONPATH=engine/src python3 -m pytest -q engine/tests
+
+# Live GitHub Issues pull (requires gh auth)
+SDLC_GITHUB_INTEGRATION=1 PYTHONPATH=engine/src python3 -m pytest -q \
+  engine/tests/test_issues_github_integration.py --run-github-integration
+
+# Live create + pull + close (CI uses GITHUB_TOKEN with issues:write)
+SDLC_GITHUB_INTEGRATION=1 SDLC_GITHUB_ISSUE_CREATE=1 \
+  PYTHONPATH=engine/src python3 -m pytest -q \
+  engine/tests/test_issues_github_integration.py --run-github-integration
 ```
 
-CI: `.github/workflows/test-sdlc-engine.yml`
+Jira is covered by mocked HTTP unit tests (`test_issues_mocked.py`). GitHub is
+covered both by a fake-`gh` unit path and a live integration job in
+`.github/workflows/test-sdlc-engine.yml`.
 
 ## Related
 

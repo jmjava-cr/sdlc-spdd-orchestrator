@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import shutil
@@ -10,14 +11,20 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 from .links import (
+    _JIRA_KEY_RE,
     collect_links,
     parse_milestone_requirement,
     set_milestone_bullet,
 )
 from .project import Project
 from .sync_local import LocalSyncService
+
+# Optional hooks for tests (inject fake gh / HTTP).
+GhRunner = Callable[[list[str], Path], subprocess.CompletedProcess]
+UrlOpener = Callable[..., object]
 
 
 @dataclass
@@ -30,10 +37,41 @@ class IssueDraft:
     extra: dict
 
 
+def _default_gh_runner(cmd: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(cmd, cwd=cwd, check=False, capture_output=True, text=True)
+
+
 class IssueSyncService:
-    def __init__(self, project: Project | None = None) -> None:
+    def __init__(
+        self,
+        project: Project | None = None,
+        *,
+        gh_runner: GhRunner | None = None,
+        urlopen: UrlOpener | None = None,
+    ) -> None:
         self.project = project or Project.resolve()
         self.local = LocalSyncService(self.project)
+        self._gh_runner = gh_runner or _default_gh_runner
+        self._urlopen = urlopen or urllib.request.urlopen
+
+    def _github_repo(self) -> str:
+        return (
+            os.environ.get("SDLC_GITHUB_REPO")
+            or os.environ.get("GH_REPO")
+            or ""
+        ).strip()
+
+    def _gh_cmd(self, *parts: str) -> list[str]:
+        cmd = ["gh", *parts]
+        repo = self._github_repo()
+        if repo:
+            # Insert --repo after the gh subcommand group (issue create/view/close).
+            # gh accepts: gh issue create --repo OWNER/NAME ...
+            if len(cmd) >= 3 and cmd[1] == "issue":
+                cmd[3:3] = ["--repo", repo]
+            else:
+                cmd.extend(["--repo", repo])
+        return cmd
 
     def draft(self, work_id: str, system: str = "both") -> list[IssueDraft]:
         req = self.project.milestone_path(work_id)
@@ -101,8 +139,6 @@ class IssueSyncService:
             return f"[dry-run] {msg}" if not apply else msg
         if system == "jira":
             key = draft.extra.get("key") or ""
-            from .links import _JIRA_KEY_RE
-
             if key and _JIRA_KEY_RE.match(key):
                 msg = f"Jira issue already linked as {key}; skip create."
                 return f"[dry-run] {msg}" if not apply else msg
@@ -129,30 +165,15 @@ class IssueSyncService:
     def _push_github(self, draft: IssueDraft) -> str:
         if draft.extra.get("number"):
             return f"GitHub issue already linked as #{draft.extra['number']}; skip create."
-        if not shutil.which("gh"):
+        if self._gh_runner is _default_gh_runner and not shutil.which("gh"):
             raise RuntimeError("gh CLI not found; install GitHub CLI or use --dry-run")
-        cmd = [
-            "gh",
-            "issue",
-            "create",
-            "--title",
-            draft.title,
-            "--body",
-            draft.body,
-        ]
+        cmd = self._gh_cmd("issue", "create", "--title", draft.title, "--body", draft.body)
         for label in draft.labels:
             cmd.extend(["--label", label])
-        proc = subprocess.run(
-            cmd,
-            cwd=self.project.root,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+        proc = self._gh_runner(cmd, self.project.root)
         if proc.returncode != 0:
             raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "gh issue create failed")
-        url = proc.stdout.strip()
-        # extract number
+        url = proc.stdout.strip().splitlines()[-1].strip()
         num = ""
         if "/issues/" in url:
             num = url.rstrip("/").split("/issues/")[-1]
@@ -161,16 +182,17 @@ class IssueSyncService:
             set_milestone_bullet(req, "GitHub", "Number", num)
             set_milestone_bullet(req, "GitHub", "URL", url)
             set_milestone_bullet(req, "GitHub", "Title", draft.title)
-        # repair local links
         self.local.repair_links(draft.work_id)
         return f"Created GitHub issue {url}"
 
+    def _jira_auth_header(self) -> str:
+        email = os.environ.get("JIRA_EMAIL", "")
+        token = os.environ.get("JIRA_API_TOKEN", "")
+        return "Basic " + base64.b64encode(f"{email}:{token}".encode()).decode()
+
     def _push_jira(self, draft: IssueDraft) -> str:
         if draft.extra.get("key"):
-            # already has a real key?
             key = draft.extra["key"]
-            from .links import _JIRA_KEY_RE
-
             if _JIRA_KEY_RE.match(key):
                 return f"Jira issue already linked as {key}; skip create."
         base = os.environ.get("JIRA_BASE_URL", "").rstrip("/")
@@ -189,21 +211,18 @@ class IssueSyncService:
                 "issuetype": {"name": draft.extra.get("issuetype") or "Story"},
             }
         }
-        # Jira Cloud often wants ADF for description; send plain string first — many sites still accept it
-        # via legacy. If it fails, user can paste from draft.
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
             f"{base}/rest/api/2/issue",
             data=data,
             method="POST",
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": self._jira_auth_header(),
+            },
         )
-        import base64
-
-        auth = base64.b64encode(f"{email}:{token}".encode()).decode()
-        req.add_header("Authorization", f"Basic {auth}")
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with self._urlopen(req, timeout=30) as resp:
                 body = json.loads(resp.read().decode())
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode(errors="replace")
@@ -211,7 +230,9 @@ class IssueSyncService:
         key = body.get("key", "")
         if key:
             set_milestone_bullet(self.project.milestone_path(draft.work_id), "Jira", "Key", key)
-            set_milestone_bullet(self.project.milestone_path(draft.work_id), "Jira", "Summary", draft.title)
+            set_milestone_bullet(
+                self.project.milestone_path(draft.work_id), "Jira", "Summary", draft.title
+            )
             self.local.repair_links(draft.work_id)
         return f"Created Jira issue {key} ({base}/browse/{key})"
 
@@ -221,14 +242,17 @@ class IssueSyncService:
             num = links.github_number
             if not num:
                 raise ValueError("no GitHub Number on milestone requirement")
-            if not shutil.which("gh"):
+            if self._gh_runner is _default_gh_runner and not shutil.which("gh"):
                 raise RuntimeError("gh CLI not found")
-            proc = subprocess.run(
-                ["gh", "issue", "view", num, "--json", "title,state,url,labels,body"],
-                cwd=self.project.root,
-                check=False,
-                capture_output=True,
-                text=True,
+            proc = self._gh_runner(
+                self._gh_cmd(
+                    "issue",
+                    "view",
+                    num,
+                    "--json",
+                    "title,state,url,labels,body",
+                ),
+                self.project.root,
             )
             if proc.returncode != 0:
                 raise RuntimeError(proc.stderr.strip() or "gh issue view failed")
@@ -242,6 +266,16 @@ class IssueSyncService:
                 set_milestone_bullet(req, "GitHub", "Title", data.get("title") or "")
                 set_milestone_bullet(req, "GitHub", "URL", data.get("url") or "")
                 set_milestone_bullet(req, "GitHub", "Number", str(num))
+                labels = data.get("labels") or []
+                if isinstance(labels, list) and labels:
+                    names = []
+                    for lab in labels:
+                        if isinstance(lab, dict) and lab.get("name"):
+                            names.append(str(lab["name"]))
+                        elif isinstance(lab, str):
+                            names.append(lab)
+                    if names:
+                        set_milestone_bullet(req, "GitHub", "Labels", ", ".join(names))
                 self.local.repair_links(work_id)
                 report += "Applied into requirements/milestones + local links.\n"
             else:
@@ -256,15 +290,12 @@ class IssueSyncService:
             token = os.environ.get("JIRA_API_TOKEN", "")
             if not (base and email and token):
                 raise RuntimeError("Jira pull requires JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN")
-            import base64
-
             req = urllib.request.Request(
                 f"{base}/rest/api/2/issue/{key}?fields=summary,status,labels",
                 method="GET",
+                headers={"Authorization": self._jira_auth_header()},
             )
-            auth = base64.b64encode(f"{email}:{token}".encode()).decode()
-            req.add_header("Authorization", f"Basic {auth}")
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with self._urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
             fields = data.get("fields", {})
             summary = fields.get("summary", "")
@@ -280,3 +311,13 @@ class IssueSyncService:
                 report += "Dry-run only; pass --apply to write milestone fields.\n"
             return report
         raise ValueError("system must be jira or github")
+
+    def close_github(self, number: str) -> str:
+        """Best-effort close for integration-test cleanup."""
+        proc = self._gh_runner(
+            self._gh_cmd("issue", "close", str(number)),
+            self.project.root,
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(proc.stderr.strip() or proc.stdout.strip() or "gh issue close failed")
+        return f"Closed GitHub issue #{number}"
