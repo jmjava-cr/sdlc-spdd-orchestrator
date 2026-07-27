@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Engine milestone sync usability: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull` for Jira/GitHub; claim auto-reads `## Jira` Key and `## GitHub` Number
 - Local/offline work sessions (`LOCAL-*`): `sdlc.sh local start|list|capture|shelf|resume|promote|abandon` — machine-private under `.sdlc/local-sessions/` until promoted into a documented Work ID
 - Issue sync test harness: mocked Jira HTTP + fake `gh` write-back tests; live GitHub Issues integration (`SDLC_GITHUB_INTEGRATION=1`) and CI job with `issues: write`
+- Jira description formatting: markdown → ADF (Cloud v3) / wiki (Server v2), structured sections from milestone `## Jira`, `issues draft --format adf|wiki`, pull ADF→markdown
 - Shared `scripts/lib/` helpers + consumer migration (FEAT-001); `verify-script-lib-duplicates.sh`
 - Canonical `spec/commands/*.spec.md` → generated Cursor/Copilot/Claude adapters (FEAT-002)
 - Extension manifest + resolver fallback (FEAT-003)

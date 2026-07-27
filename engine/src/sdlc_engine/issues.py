@@ -13,11 +13,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from .jira_format import (
+    adf_to_markdown,
+    build_jira_markdown,
+    markdown_to_adf,
+    markdown_to_wiki,
+)
 from .links import (
     _JIRA_KEY_RE,
     collect_links,
     parse_milestone_requirement,
     set_milestone_bullet,
+    set_milestone_subsection,
 )
 from .project import Project
 from .sync_local import LocalSyncService
@@ -83,28 +90,36 @@ class IssueSyncService:
         drafts: list[IssueDraft] = []
         systems = ["jira", "github"] if system == "both" else [system]
         if "jira" in systems:
-            body_parts = [
-                parsed.get("jira_description") or parsed.get("summary") or "",
-                "",
-                "### Acceptance criteria",
-                parsed.get("jira_acceptance") or "",
-                "",
-                f"Work ID: `{work_id}`",
-                f"Requirement: `requirements/milestones/{work_id}.md`",
-            ]
+            req_rel = f"requirements/milestones/{work_id}.md"
+            body_md = build_jira_markdown(
+                work_id=work_id,
+                summary=summary,
+                description=parsed.get("jira_description") or parsed.get("summary") or "",
+                acceptance=parsed.get("jira_acceptance") or "",
+                business_value=parsed.get("jira_business_value") or "",
+                scope_in=parsed.get("jira_scope_in") or "",
+                scope_out=parsed.get("jira_scope_out") or "",
+                requirement_rel=req_rel,
+            )
             labels = [x.strip() for x in (parsed.get("jira_labels") or "").split(",") if x.strip()]
+            fmt = self._jira_description_format(os.environ.get("JIRA_BASE_URL", ""))
+            extra = {
+                "issuetype": parsed.get("jira_type") or "Story",
+                "key": parsed.get("jira_key") or "",
+                "project": os.environ.get("JIRA_PROJECT", ""),
+                "components": parsed.get("jira_components") or "",
+                "description_format": fmt,
+                "description_wiki": markdown_to_wiki(body_md),
+                "description_adf": markdown_to_adf(body_md),
+            }
             drafts.append(
                 IssueDraft(
                     system="jira",
                     work_id=work_id,
                     title=summary[:255] or work_id,
-                    body="\n".join(body_parts).strip(),
+                    body=body_md,
                     labels=labels,
-                    extra={
-                        "issuetype": parsed.get("jira_type") or "Story",
-                        "key": parsed.get("jira_key") or "",
-                        "project": os.environ.get("JIRA_PROJECT", ""),
-                    },
+                    extra=extra,
                 )
             )
         if "github" in systems:
@@ -149,18 +164,55 @@ class IssueSyncService:
         return self._push_jira(draft)
 
     def _format_dry_run(self, draft: IssueDraft) -> str:
-        return "\n".join(
+        lines = [
+            f"[dry-run] would create {draft.system} issue for {draft.work_id}",
+            f"title: {draft.title}",
+            f"labels: {', '.join(draft.labels) or '-'}",
+        ]
+        if draft.system == "jira":
+            fmt = draft.extra.get("description_format") or "adf"
+            lines.append(f"description_format: {fmt} (Jira Cloud v3 uses ADF)")
+            lines.append("body (markdown source):")
+            lines.append(draft.body)
+            if fmt == "adf":
+                lines.append("body (ADF JSON):")
+                lines.append(json.dumps(draft.extra.get("description_adf"), indent=2))
+            else:
+                lines.append("body (wiki markup):")
+                lines.append(str(draft.extra.get("description_wiki") or ""))
+        else:
+            lines.append(f"extra: {json.dumps({k: v for k, v in draft.extra.items() if k != 'description_adf'})}")
+            lines.append("body:")
+            lines.append(draft.body)
+        lines.extend(
             [
-                f"[dry-run] would create {draft.system} issue for {draft.work_id}",
-                f"title: {draft.title}",
-                f"labels: {', '.join(draft.labels) or '-'}",
-                f"extra: {json.dumps(draft.extra)}",
-                "body:",
-                draft.body,
                 "",
                 "Re-run with --apply to create (requires gh auth or JIRA_* env).",
             ]
         )
+        return "\n".join(lines)
+
+    def _jira_api_version(self, base: str) -> str:
+        explicit = os.environ.get("JIRA_API_VERSION", "").strip()
+        if explicit in {"2", "3"}:
+            return explicit
+        # Cloud hosts need v3 + ADF; Server/DC often still on v2 wiki.
+        if "atlassian.net" in base.lower():
+            return "3"
+        return os.environ.get("JIRA_API_VERSION_DEFAULT", "3")
+
+    def _jira_description_format(self, base: str) -> str:
+        explicit = os.environ.get("JIRA_DESCRIPTION_FORMAT", "").strip().lower()
+        if explicit in {"adf", "wiki", "plain"}:
+            return explicit
+        return "adf" if self._jira_api_version(base) == "3" else "wiki"
+
+    def _jira_description_payload(self, draft: IssueDraft, fmt: str):
+        if fmt == "adf":
+            return draft.extra.get("description_adf") or markdown_to_adf(draft.body)
+        if fmt == "wiki":
+            return draft.extra.get("description_wiki") or markdown_to_wiki(draft.body)
+        return draft.body
 
     def _push_github(self, draft: IssueDraft) -> str:
         if draft.extra.get("number"):
@@ -203,30 +255,57 @@ class IssueSyncService:
             raise RuntimeError(
                 "Jira push requires JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT"
             )
-        payload = {
-            "fields": {
-                "project": {"key": project},
-                "summary": draft.title,
-                "description": draft.body,
-                "issuetype": {"name": draft.extra.get("issuetype") or "Story"},
-            }
+        api_ver = self._jira_api_version(base)
+        fmt = self._jira_description_format(base)
+        fields: dict = {
+            "project": {"key": project},
+            "summary": draft.title,
+            "description": self._jira_description_payload(draft, fmt),
+            "issuetype": {"name": draft.extra.get("issuetype") or "Story"},
         }
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            f"{base}/rest/api/2/issue",
-            data=data,
-            method="POST",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": self._jira_auth_header(),
-            },
-        )
-        try:
+        if draft.labels:
+            fields["labels"] = draft.labels
+        # Components: comma-separated names → [{"name": ...}]
+        comps = draft.extra.get("components") or ""
+        comp_names = [c.strip() for c in comps.split(",") if c.strip()]
+        if comp_names:
+            fields["components"] = [{"name": c} for c in comp_names]
+
+        def _post(version: str, description) -> dict:
+            payload = {"fields": {**fields, "description": description}}
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                f"{base}/rest/api/{version}/issue",
+                data=data,
+                method="POST",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": self._jira_auth_header(),
+                    "Accept": "application/json",
+                },
+            )
             with self._urlopen(req, timeout=30) as resp:
-                body = json.loads(resp.read().decode())
+                return json.loads(resp.read().decode())
+
+        try:
+            body = _post(api_ver, fields["description"])
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode(errors="replace")
-            raise RuntimeError(f"Jira create failed ({exc.code}): {detail}") from exc
+            # Auto-fallback: Cloud sometimes rejects wrong shape; try the other format once.
+            if exc.code in {400, 415} and os.environ.get("JIRA_DESCRIPTION_FALLBACK", "1") != "0":
+                alt_fmt = "wiki" if fmt == "adf" else "adf"
+                alt_ver = "2" if alt_fmt == "wiki" else "3"
+                try:
+                    body = _post(alt_ver, self._jira_description_payload(draft, alt_fmt))
+                    fmt, api_ver = alt_fmt, alt_ver
+                except urllib.error.HTTPError as exc2:
+                    detail2 = exc2.read().decode(errors="replace")
+                    raise RuntimeError(
+                        f"Jira create failed ({exc.code} via v{api_ver}/{fmt}): {detail}\n"
+                        f"Fallback ({exc2.code} via v{alt_ver}/{alt_fmt}): {detail2}"
+                    ) from exc2
+            else:
+                raise RuntimeError(f"Jira create failed ({exc.code}): {detail}") from exc
         key = body.get("key", "")
         if key:
             set_milestone_bullet(self.project.milestone_path(draft.work_id), "Jira", "Key", key)
@@ -234,7 +313,10 @@ class IssueSyncService:
                 self.project.milestone_path(draft.work_id), "Jira", "Summary", draft.title
             )
             self.local.repair_links(draft.work_id)
-        return f"Created Jira issue {key} ({base}/browse/{key})"
+        return (
+            f"Created Jira issue {key} ({base}/browse/{key}) "
+            f"[api=v{api_ver} description={fmt}]"
+        )
 
     def pull(self, work_id: str, system: str, *, apply: bool = False) -> str:
         links = collect_links(self.project, work_id)
@@ -290,21 +372,35 @@ class IssueSyncService:
             token = os.environ.get("JIRA_API_TOKEN", "")
             if not (base and email and token):
                 raise RuntimeError("Jira pull requires JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN")
+            api_ver = self._jira_api_version(base)
             req = urllib.request.Request(
-                f"{base}/rest/api/2/issue/{key}?fields=summary,status,labels",
+                f"{base}/rest/api/{api_ver}/issue/{key}?fields=summary,status,labels,description",
                 method="GET",
-                headers={"Authorization": self._jira_auth_header()},
+                headers={
+                    "Authorization": self._jira_auth_header(),
+                    "Accept": "application/json",
+                },
             )
             with self._urlopen(req, timeout=30) as resp:
                 data = json.loads(resp.read().decode())
             fields = data.get("fields", {})
             summary = fields.get("summary", "")
             status = (fields.get("status") or {}).get("name", "")
-            report = f"Jira {key}: {summary} [{status}]\nURL: {base}/browse/{key}\n"
+            desc_raw = fields.get("description")
+            desc_md = adf_to_markdown(desc_raw) if isinstance(desc_raw, dict) else (desc_raw or "")
+            report = (
+                f"Jira {key}: {summary} [{status}]\n"
+                f"URL: {base}/browse/{key}\n"
+                f"description_format: {'adf' if isinstance(desc_raw, dict) else 'text'}\n"
+            )
+            if desc_md:
+                report += "description (markdown):\n" + desc_md.rstrip() + "\n"
             if apply:
                 path = self.project.milestone_path(work_id)
                 set_milestone_bullet(path, "Jira", "Summary", summary)
                 set_milestone_bullet(path, "Jira", "Key", key)
+                if desc_md.strip():
+                    set_milestone_subsection(path, "Jira", "Description", desc_md.strip())
                 self.local.repair_links(work_id)
                 report += "Applied into requirements/milestones + local links.\n"
             else:

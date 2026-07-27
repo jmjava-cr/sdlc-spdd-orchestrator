@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 
@@ -235,13 +236,26 @@ def cmd_issues(args: argparse.Namespace) -> int:
     svc = IssueSyncService(_project(args))
     action = args.issues_cmd
     if action == "draft":
+        fmt = getattr(args, "format", "markdown") or "markdown"
         for draft in svc.draft(args.work_id, system=args.system):
             print(f"=== {draft.system} draft for {draft.work_id} ===")
             print(f"title: {draft.title}")
             print(f"labels: {', '.join(draft.labels) or '-'}")
-            print(f"extra: {draft.extra}")
-            print("body:")
-            print(draft.body)
+            if draft.system == "jira":
+                print(f"description_format: {draft.extra.get('description_format', 'adf')}")
+                if fmt == "adf":
+                    print("body (ADF):")
+                    print(json.dumps(draft.extra.get("description_adf"), indent=2))
+                elif fmt == "wiki":
+                    print("body (wiki markup):")
+                    print(draft.extra.get("description_wiki") or "")
+                else:
+                    print("body (markdown — source for ADF/wiki conversion):")
+                    print(draft.body)
+            else:
+                print(f"extra: {draft.extra}")
+                print("body:")
+                print(draft.body)
             print()
         return 0
     if action == "push":
@@ -394,6 +408,12 @@ def build_parser() -> argparse.ArgumentParser:
         default="both",
         choices=["jira", "github", "both"],
         help="Target system (push/pull require jira|github)",
+    )
+    iss.add_argument(
+        "--format",
+        default="markdown",
+        choices=["markdown", "adf", "wiki"],
+        help="For `issues draft --system jira`: render body as markdown, ADF JSON, or wiki markup",
     )
     iss.add_argument(
         "--apply",

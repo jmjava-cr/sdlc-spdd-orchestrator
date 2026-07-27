@@ -8,7 +8,7 @@ and a stable CLI/API that assistants and tools can call without bash.
 
 ## Status
 
-Alpha (`2.0.0a3`). Core workflow commands are implemented in Python and covered
+Alpha (`2.0.0a4`). Core workflow commands are implemented in Python and covered
 by pytest. Install/upgrade/adapter generation still use the existing shell
 scripts; the engine can shell out to them via `sdlc-engine shell …` when needed.
 
@@ -53,6 +53,7 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `canvas` | Final Status + next-operation inference |
 | `links` / `sync_local` | Milestone↔canvas↔registry drift check/repair + ROADMAP sync |
 | `issues` | Draft/push/pull Jira (`JIRA_*`) or GitHub (`gh`) from milestone sections |
+| `jira_format` | Markdown ↔ ADF / wiki markup for Jira Cloud/Server descriptions |
 | `local_sessions` | `LOCAL-*` offline sessions + promote into documented Work IDs |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
 

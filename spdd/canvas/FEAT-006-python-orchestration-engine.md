@@ -78,7 +78,7 @@ On-disk formats unchanged: `.sdlc/pointer`, `.sdlc/workflows/*.state`,
 ### T05 - Milestone / Jira / GitHub sync usability
 
 - Status: Complete
-- Description: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull`; claim auto-reads Jira/GitHub from milestone requirements; Linked Work status repair.
+- Description: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull`; claim auto-reads Jira/GitHub from milestone requirements; Linked Work status repair; Jira Cloud descriptions via markdown→ADF (`jira_format`).
 
 ### T06 - Local/offline work sessions
 

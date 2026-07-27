@@ -29,10 +29,14 @@ Engine helpers (v2):
 
 ```bash
 SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system jira
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system jira --format adf  # Cloud payload preview
 SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira          # dry-run
-SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira --apply  # needs JIRA_* env
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira --apply  # ADF on Jira Cloud
 SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
 ```
+
+Jira Cloud needs ADF for descriptions — the engine converts this markdown
+automatically on push (see [jira-runbook.md](../../docs/jira-runbook.md)).
 
 See [jira-runbook.md](../../docs/jira-runbook.md) and [engine-v2.md](../../docs/engine-v2.md).
 

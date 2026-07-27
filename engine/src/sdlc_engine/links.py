@@ -105,9 +105,13 @@ def parse_milestone_requirement(path: Path) -> dict[str, str]:
         "jira_summary": _bullet_value(jira, "Summary"),
         "jira_type": _bullet_value(jira, "Issue type") or _bullet_value(jira, "Type"),
         "jira_labels": _bullet_value(jira, "Labels"),
+        "jira_components": _bullet_value(jira, "Components"),
         "jira_description": _subsection(jira, "Description"),
         "jira_acceptance": _subsection(jira, "Acceptance criteria (Given/When/Then)")
         or _subsection(jira, "Acceptance criteria"),
+        "jira_business_value": _subsection(jira, "Business value"),
+        "jira_scope_in": _subsection(jira, "Scope in"),
+        "jira_scope_out": _subsection(jira, "Scope out"),
         "github_number": gh_num,
         "github_title": _bullet_value(github, "Title"),
         "github_url": _bullet_value(github, "URL"),
@@ -130,6 +134,49 @@ def _subsection(section: str, heading: str) -> str:
         if collecting:
             body.append(line)
     return "\n".join(body).strip()
+
+
+def set_milestone_subsection(path: Path, section: str, heading: str, body: str) -> bool:
+    """Replace or create `### heading` body under `## section`. Returns True if changed."""
+    if not path.is_file():
+        return False
+    text = path.read_text(encoding="utf-8")
+    lines = text.splitlines()
+    section_header = f"## {section}"
+    sub_header = f"### {heading}"
+    start = None
+    end = len(lines)
+    for i, line in enumerate(lines):
+        if line.strip() == section_header:
+            start = i
+            continue
+        if start is not None and i > start and line.startswith("## "):
+            end = i
+            break
+    if start is None:
+        addition = ["", section_header, "", sub_header, "", body.rstrip(), ""]
+        path.write_text(text.rstrip() + "\n" + "\n".join(addition), encoding="utf-8")
+        return True
+    sub_start = None
+    sub_end = end
+    for i in range(start + 1, end):
+        if lines[i].strip() == sub_header:
+            sub_start = i
+            continue
+        if sub_start is not None and i > sub_start and lines[i].startswith("### "):
+            sub_end = i
+            break
+    new_block = [sub_header, ""] + (body.rstrip().splitlines() or [""]) + [""]
+    if sub_start is None:
+        # insert before end of section
+        insert_at = end
+        while insert_at > start + 1 and lines[insert_at - 1].strip() == "":
+            insert_at -= 1
+        lines[insert_at:insert_at] = new_block
+    else:
+        lines[sub_start:sub_end] = new_block
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return True
 
 
 def parse_canvas_metadata(path: Path) -> dict[str, str]:

@@ -1,0 +1,279 @@
+"""Tests for Jira markdown ↔ ADF / wiki conversion and push payload shape."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from sdlc_engine.issues import IssueSyncService
+from sdlc_engine.jira_format import (
+    adf_to_markdown,
+    build_jira_markdown,
+    markdown_to_adf,
+    markdown_to_wiki,
+)
+from sdlc_engine.project import Project
+
+
+SAMPLE_MD = """## Summary
+
+Ship formatted Jira descriptions.
+
+## Description
+
+Support **bold**, `code`, and [links](https://example.com).
+
+## Acceptance criteria
+
+- Given a milestone draft
+- When we push to Jira Cloud
+- Then the description renders with headings and lists
+
+## Traceability
+
+- Work ID: `FEAT-400-jira-fmt`
+- Requirement: `requirements/milestones/FEAT-400-jira-fmt.md`
+"""
+
+
+def test_markdown_to_adf_structure() -> None:
+    doc = markdown_to_adf(SAMPLE_MD)
+    assert doc["type"] == "doc"
+    assert doc["version"] == 1
+    types = [n["type"] for n in doc["content"]]
+    assert "heading" in types
+    assert "bulletList" in types
+    assert "paragraph" in types
+    # bold mark present
+    blob = json.dumps(doc)
+    assert "strong" in blob
+    assert "code" in blob
+    assert "link" in blob
+
+
+def test_markdown_to_wiki_headings_and_lists() -> None:
+    wiki = markdown_to_wiki(SAMPLE_MD)
+    assert "h2. Summary" in wiki
+    assert "* Given a milestone draft" in wiki
+    assert "*Ship formatted" in wiki or "Ship formatted" in wiki
+
+
+def test_adf_roundtrip_preserves_headings() -> None:
+    doc = markdown_to_adf(SAMPLE_MD)
+    back = adf_to_markdown(doc)
+    assert "## Summary" in back or "# Summary" in back
+    assert "Given a milestone draft" in back
+    assert "FEAT-400-jira-fmt" in back
+
+
+def test_build_jira_markdown_sections() -> None:
+    md = build_jira_markdown(
+        work_id="FEAT-401",
+        summary="Title",
+        description="Body para",
+        acceptance="- Given x When y Then z",
+        business_value="Saves time",
+        requirement_rel="requirements/milestones/FEAT-401.md",
+    )
+    assert "## Summary" in md
+    assert "## Description" in md
+    assert "## Business value" in md
+    assert "## Acceptance criteria" in md
+    assert "## Traceability" in md
+    assert "`FEAT-401`" in md
+
+
+def test_empty_metadata_adjacent_bullets_still_ok_in_adf() -> None:
+    doc = markdown_to_adf("## Heading\n\n- item one\n- item two\n")
+    assert doc["content"][0]["type"] == "heading"
+    assert doc["content"][1]["type"] == "bulletList"
+    assert len(doc["content"][1]["content"]) == 2
+
+
+def test_jira_push_sends_adf_on_cloud(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+    monkeypatch.setenv("JIRA_PROJECT", "ORCH")
+    work_id = "FEAT-402-adf-push"
+    req = tmp_path / "requirements" / "milestones" / f"{work_id}.md"
+    req.parent.mkdir(parents=True)
+    req.write_text(
+        f"""# Requirement: {work_id}
+
+## Summary
+
+ADF push demo.
+
+## Jira
+
+- Key: TBD
+- Summary: ADF push demo
+- Issue type: Story
+- Labels: sdlc
+
+### Description
+
+Need **formatted** descriptions in Jira Cloud.
+
+### Acceptance criteria (Given/When/Then)
+
+- Given a draft
+- When pushed
+- Then ADF is used
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "spdd" / "canvas").mkdir(parents=True)
+    (tmp_path / "spdd" / "canvas" / f"{work_id}.md").write_text(
+        f"# REASONS Canvas: {work_id}\n\n## Metadata\n\n- Work ID: {work_id}\n"
+        "- Source System:\n- Source Issue:\n\n## Final Status\n\n- Status: Draft\n",
+        encoding="utf-8",
+    )
+
+    seen: dict = {}
+
+    class _Resp:
+        def read(self) -> bytes:
+            return json.dumps({"key": "ORCH-88"}).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return None
+
+    def fake_urlopen(req, timeout=30):  # noqa: ANN001
+        seen["url"] = req.full_url
+        payload = json.loads(req.data.decode())
+        seen["payload"] = payload
+        return _Resp()
+
+    out = IssueSyncService(Project(tmp_path), urlopen=fake_urlopen).push(
+        work_id, "jira", apply=True
+    )
+    assert "ORCH-88" in out
+    assert "/rest/api/3/issue" in seen["url"]
+    desc = seen["payload"]["fields"]["description"]
+    assert isinstance(desc, dict)
+    assert desc["type"] == "doc"
+    assert desc["version"] == 1
+    assert any(n.get("type") == "heading" for n in desc["content"])
+
+
+def test_jira_push_wiki_when_forced(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://jira.corp.example")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+    monkeypatch.setenv("JIRA_PROJECT", "ORCH")
+    monkeypatch.setenv("JIRA_API_VERSION", "2")
+    monkeypatch.setenv("JIRA_DESCRIPTION_FORMAT", "wiki")
+    work_id = "FEAT-403-wiki"
+    req = tmp_path / "requirements" / "milestones" / f"{work_id}.md"
+    req.parent.mkdir(parents=True)
+    req.write_text(
+        f"""# Requirement: {work_id}
+
+## Summary
+
+Wiki demo.
+
+## Jira
+
+- Key: TBD
+- Summary: Wiki demo
+
+### Description
+
+Plain server install.
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "spdd" / "canvas").mkdir(parents=True)
+    (tmp_path / "spdd" / "canvas" / f"{work_id}.md").write_text(
+        f"# C\n\n## Metadata\n\n- Work ID: {work_id}\n- Source Issue:\n\n## Final Status\n\n- Status: Draft\n",
+        encoding="utf-8",
+    )
+    seen: dict = {}
+
+    class _Resp:
+        def read(self) -> bytes:
+            return json.dumps({"key": "ORCH-11"}).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return None
+
+    def fake_urlopen(req, timeout=30):  # noqa: ANN001
+        seen["url"] = req.full_url
+        seen["desc"] = json.loads(req.data.decode())["fields"]["description"]
+        return _Resp()
+
+    IssueSyncService(Project(tmp_path), urlopen=fake_urlopen).push(work_id, "jira", apply=True)
+    assert "/rest/api/2/issue" in seen["url"]
+    assert isinstance(seen["desc"], str)
+    assert "h2." in seen["desc"] or "Wiki demo" in seen["desc"] or "Plain server" in seen["desc"]
+
+
+def test_jira_pull_adf_description_to_milestone(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+    work_id = "FEAT-404-pull-adf"
+    req = tmp_path / "requirements" / "milestones" / f"{work_id}.md"
+    req.parent.mkdir(parents=True)
+    req.write_text(
+        f"""# Requirement: {work_id}
+
+## Summary
+
+Pull me.
+
+## Jira
+
+- Key: ORCH-12
+- Summary: old
+
+### Description
+
+old desc
+""",
+        encoding="utf-8",
+    )
+
+    adf = markdown_to_adf("## From Jira\n\nPulled **ADF** body.\n")
+
+    class _Resp:
+        def read(self) -> bytes:
+            return json.dumps(
+                {
+                    "key": "ORCH-12",
+                    "fields": {
+                        "summary": "Pulled title",
+                        "status": {"name": "To Do"},
+                        "labels": [],
+                        "description": adf,
+                    },
+                }
+            ).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return None
+
+    def fake_urlopen(req, timeout=30):  # noqa: ANN001
+        assert "/rest/api/3/issue/ORCH-12" in req.full_url
+        return _Resp()
+
+    report = IssueSyncService(Project(tmp_path), urlopen=fake_urlopen).pull(
+        work_id, "jira", apply=True
+    )
+    assert "Pulled title" in report
+    text = req.read_text(encoding="utf-8")
+    assert "Summary: Pulled title" in text
+    assert "From Jira" in text or "Pulled" in text
+    assert "ADF" in text

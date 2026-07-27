@@ -99,8 +99,11 @@ def test_jira_push_apply_mocked(tmp_path: Path, monkeypatch) -> None:
     svc = IssueSyncService(Project(tmp_path), urlopen=fake_urlopen)
     out = svc.push(work_id, "jira", apply=True)
     assert "ORCH-99" in out
-    assert seen["url"].endswith("/rest/api/2/issue")
+    assert seen["url"].endswith("/rest/api/3/issue")
     assert seen["method"] == "POST"
+    payload = json.loads(seen["body"].decode())
+    desc = payload["fields"]["description"]
+    assert isinstance(desc, dict) and desc.get("type") == "doc"
     text = (tmp_path / "requirements" / "milestones" / f"{work_id}.md").read_text(
         encoding="utf-8"
     )
@@ -119,6 +122,7 @@ def test_jira_pull_apply_mocked(tmp_path: Path, monkeypatch) -> None:
 
     def fake_urlopen(req, timeout=30):  # noqa: ANN001
         assert "ORCH-7" in req.full_url
+        assert "/rest/api/3/issue/" in req.full_url
         return _FakeResp(
             {
                 "key": "ORCH-7",
@@ -126,6 +130,16 @@ def test_jira_pull_apply_mocked(tmp_path: Path, monkeypatch) -> None:
                     "summary": "Pulled summary from Jira",
                     "status": {"name": "In Progress"},
                     "labels": ["sdlc"],
+                    "description": {
+                        "type": "doc",
+                        "version": 1,
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [{"type": "text", "text": "Hello ADF"}],
+                            }
+                        ],
+                    },
                 },
             },
             code=200,

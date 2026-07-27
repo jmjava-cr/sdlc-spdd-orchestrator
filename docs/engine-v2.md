@@ -44,6 +44,7 @@ engine/
     links.py        # milestone/canvas/registry link parsing
     sync_local.py   # sync-links / sync-roadmap
     issues.py       # Jira/GitHub draft|push|pull
+    jira_format.py  # markdown ↔ ADF / wiki for Jira descriptions
     local_sessions.py  # LOCAL-* offline sessions + promote
   tests/            # pytest
 ```
@@ -83,11 +84,15 @@ SDLC_ENGINE=python ./scripts/sdlc.sh sync-roadmap
 
 # Draft / create remote issues from milestone ## Jira / ## GitHub sections
 SDLC_ENGINE=python ./scripts/sdlc.sh issues draft FEAT-006-python-orchestration-engine
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft FEAT-006-… --system jira --format adf  # ADF preview
 SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system github          # dry-run
 SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system github --apply  # gh issue create
-SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system jira --apply    # needs JIRA_* env
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system jira --apply    # ADF on Jira Cloud
 SDLC_ENGINE=python ./scripts/sdlc.sh issues pull FEAT-006-… --system github --apply
 ```
+
+Jira Cloud descriptions are sent as **ADF** (not raw markdown). See
+[jira-runbook.md](jira-runbook.md#description-formatting-adf).
 
 **Repair does (local, safe):**
 
