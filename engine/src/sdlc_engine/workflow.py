@@ -249,6 +249,10 @@ class WorkflowEngine:
 
     def next_text(self) -> str:
         wid = self.pointer.get()
+        from .local_sessions import LocalSessionService, is_local_id
+
+        if wid and is_local_id(wid):
+            return LocalSessionService(self.project).next_text_for_active(wid)
         if not wid:
             shelved = self.list_shelved()
             lines = [
@@ -261,6 +265,7 @@ class WorkflowEngine:
             ]
             if shelved:
                 lines.append("  ./scripts/sdlc.sh list-shelved         # see parked work")
+            lines.extend(LocalSessionService(self.project).next_hint_lines())
             return "\n".join(lines) + "\n"
         state = self.sync(wid)
         canvas = self.project.canvas_path(wid)

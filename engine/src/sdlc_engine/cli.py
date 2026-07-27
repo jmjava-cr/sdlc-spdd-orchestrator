@@ -9,6 +9,7 @@ import sys
 from . import __version__
 from .archive import ArchiveService
 from .issues import IssueSyncService
+from .local_sessions import LocalSessionService
 from .pointer import PointerError, PointerStore
 from .project import Project
 from .registry import TeamRegistry
@@ -57,7 +58,14 @@ def cmd_skip(args: argparse.Namespace) -> int:
 
 
 def cmd_shelf(args: argparse.Namespace) -> int:
-    state = WorkflowEngine(_project(args)).shelf(reason=args.reason)
+    project = _project(args)
+    eng = WorkflowEngine(project)
+    wid = eng.pointer.get()
+    if wid and wid.upper().startswith("LOCAL-"):
+        session = LocalSessionService(project).shelf(args.reason, session_id=wid)
+        print(f"Shelved local session {session.id}: {args.reason}")
+        return 0
+    state = eng.shelf(reason=args.reason)
     if state is None:
         print("No active pointer to shelf", file=sys.stderr)
         return 1
@@ -251,6 +259,63 @@ def cmd_issues(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_local(args: argparse.Namespace) -> int:
+    svc = LocalSessionService(_project(args))
+    action = args.local_cmd
+    if action == "start":
+        session = svc.start(
+            name=args.name or "",
+            title=args.title or "",
+            intent=args.intent or "",
+            branch=args.branch or "",
+        )
+        print(f"Started local session {session.id}")
+        print(f"Pointer set. Artifacts: .sdlc/local-sessions/{session.id}/")
+        print("This work stays offline until: ./scripts/sdlc.sh local promote --type feature --name \"...\"")
+        return 0
+    if action == "list":
+        print(svc.list_text(include_closed=args.all), end="")
+        return 0
+    if action == "status":
+        print(svc.status_text(args.session), end="")
+        return 0
+    if action == "capture":
+        session = svc.capture(args.summary, session_id=args.session)
+        print(f"Captured into {session.id}")
+        return 0
+    if action == "shelf":
+        session = svc.shelf(args.reason, session_id=args.session)
+        print(f"Shelved local session {session.id}: {args.reason}")
+        return 0
+    if action == "resume":
+        session = svc.resume(args.session_id)
+        print(f"Resumed local session {session.id}")
+        return 0
+    if action == "abandon":
+        session = svc.abandon(session_id=args.session, force=args.force)
+        print(f"Abandoned local session {session.id}")
+        return 0
+    if action == "promote":
+        session, work_id = svc.promote(
+            work_type=args.type,
+            name=args.name or "",
+            session_id=args.session,
+            milestone=args.milestone or "",
+            claim=not args.no_claim,
+            dry_run=args.dry_run,
+        )
+        if args.dry_run:
+            print(f"[dry-run] would promote {session.id} -> {work_id}")
+            return 0
+        print(f"Promoted {session.id} -> {work_id}")
+        print(f"  canvas: spdd/canvas/{work_id}.md")
+        print(f"  requirement: requirements/milestones/{work_id}.md")
+        if not args.no_claim:
+            print(f"Claimed {work_id} — commit agent-context/work-registry.tsv when sharing.")
+        return 0
+    return 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdlc-engine",
@@ -336,6 +401,58 @@ def build_parser() -> argparse.ArgumentParser:
         help="Actually create/update remote issue or write pulled fields (default is dry-run)",
     )
     iss.set_defaults(func=cmd_issues)
+
+    loc = sub.add_parser(
+        "local",
+        help="Local/offline work sessions (machine-private until promoted)",
+    )
+    loc_sub = loc.add_subparsers(dest="local_cmd", required=True)
+
+    ls = loc_sub.add_parser("start", help="Start a LOCAL-* offline session and set pointer")
+    ls.add_argument("--name", help="Slug fragment (default from title/intent)")
+    ls.add_argument("--title", help="Human title")
+    ls.add_argument("--intent", help="One-line why this scratch work exists")
+    ls.add_argument("--branch", help="Optional git branch name note")
+    ls.set_defaults(func=cmd_local)
+
+    ll = loc_sub.add_parser("list", help="List local/offline sessions on this machine")
+    ll.add_argument("--all", action="store_true", help="Include promoted/abandoned")
+    ll.set_defaults(func=cmd_local)
+
+    lst = loc_sub.add_parser("status", help="Show active or named local session")
+    lst.add_argument("--session", help="LOCAL-* id (default: pointer)")
+    lst.set_defaults(func=cmd_local)
+
+    lc = loc_sub.add_parser("capture", help="Append a note into the local session")
+    lc.add_argument("--summary", required=True)
+    lc.add_argument("--session")
+    lc.set_defaults(func=cmd_local)
+
+    lsh = loc_sub.add_parser("shelf", help="Park a local session (clear pointer)")
+    lsh.add_argument("--reason", default="manual shelf")
+    lsh.add_argument("--session")
+    lsh.set_defaults(func=cmd_local)
+
+    lr = loc_sub.add_parser("resume", help="Resume a shelved local session")
+    lr.add_argument("session_id")
+    lr.set_defaults(func=cmd_local)
+
+    la = loc_sub.add_parser("abandon", help="Mark a local session abandoned")
+    la.add_argument("--session")
+    la.add_argument("--force", action="store_true")
+    la.set_defaults(func=cmd_local)
+
+    lp = loc_sub.add_parser(
+        "promote",
+        help="Promote LOCAL session into a documented Work ID (canvas + requirement)",
+    )
+    lp.add_argument("--type", default="feature", help="feature|spike|bug|refactor|chore|...")
+    lp.add_argument("--name", help="Title/slug for the new Work ID (default: session title)")
+    lp.add_argument("--session")
+    lp.add_argument("--milestone", help="Optional milestone-*.md to append Linked Work")
+    lp.add_argument("--no-claim", action="store_true", help="Create artifacts without claiming")
+    lp.add_argument("--dry-run", action="store_true")
+    lp.set_defaults(func=cmd_local)
 
     rel = sub.add_parser("release", help="Release/shelf active claim")
     rel.add_argument("--reason", default="released")

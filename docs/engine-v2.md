@@ -44,6 +44,7 @@ engine/
     links.py        # milestone/canvas/registry link parsing
     sync_local.py   # sync-links / sync-roadmap
     issues.py       # Jira/GitHub draft|push|pull
+    local_sessions.py  # LOCAL-* offline sessions + promote
   tests/            # pytest
 ```
 
@@ -98,6 +99,36 @@ SDLC_ENGINE=python ./scripts/sdlc.sh issues pull FEAT-006-… --system github --
 **Repair does not:** invent issue keys, transition remote workflows, or overwrite
 acceptance criteria without `--apply` on `issues pull`.
 
+## Local / offline work sessions
+
+Detached agents can start coding without a FEAT/SPIKE. That work used to vanish
+from the operating model. v2 adds **machine-private** `LOCAL-NNN-slug` sessions
+under gitignored `.sdlc/local-sessions/`. Keep exploring offline; promote when
+the work deserves a documented feature.
+
+```bash
+# Works even when SDLC_ENGINE=shell — local* always uses the Python engine
+./scripts/sdlc.sh local start --name scratch-sync --intent "Explore without a FEAT yet"
+./scripts/sdlc.sh local capture --summary "Tried approach A"
+./scripts/sdlc.sh local list
+./scripts/sdlc.sh local shelf --reason "pause"
+./scripts/sdlc.sh local resume LOCAL-001-scratch-sync
+
+# When ready to document / share:
+./scripts/sdlc.sh local promote --type feature --name "Detached Agent Capture"
+./scripts/sdlc.sh local promote --type spike --name "..." --milestone milestone-1.md
+```
+
+**Rules:**
+
+- `LOCAL-*` is never written to `work-registry.tsv` (`claim` refuses it)
+- `sdlc.sh next` surfaces open local sessions and promotion commands
+- Promote creates canvas + `requirements/milestones/<WORK-ID>.md` + feature
+  workspace, then claims the new Work ID (unless `--no-claim`)
+- Briefs stay under `.sdlc/` (gitignored). Opt-in committed breadcrumbs:
+  `SDLC_LOCAL_SESSION_NOTES=1` → `session-notes/YYYY-MM-DD.md`;
+  `SDLC_LOCAL_WRITE_SESSION_BRIEF=1` → `agent-context/sessions/`
+
 ## Bridge to remaining shell scripts
 
 Commands not yet ported (init, upgrade, capture-session-memory, adapter
@@ -109,7 +140,7 @@ python3 -m sdlc_engine shell setup-agent-prompts.sh -- --target /tmp/demo --all
 
 ## Migration plan
 
-1. **Now** — engine owns claim/next/shelf/advance/archive/team/list-work + link/issue sync.
+1. **Now** — engine owns claim/next/shelf/advance/archive/team/list-work + link/issue sync + local sessions.
 2. **Next** — port capture + resolve-agent-context helpers into Python modules.
 3. **Later** — optional install of the engine into target projects via
    `upgrade-project.sh` (copy or pip install path).

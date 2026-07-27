@@ -14,6 +14,7 @@ artifact contracts.
 - [x] Pytest coverage for core modules
 - [x] Docs under `docs/engine-v2.md` and `engine/README.md`
 - [x] Milestone↔Jira/GitHub sync: `links`, `sync-links`, `issues draft|push|pull`, claim auto-link
+- [x] Local/offline sessions: `local start|list|capture|shelf|resume|promote|abandon` (`LOCAL-*`)
 - [ ] Later: port capture/resolve helpers; optional install into target projects
 
 ## Jira

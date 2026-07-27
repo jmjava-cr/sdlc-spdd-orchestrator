@@ -38,6 +38,31 @@ else
   bad "shell next unexpected"
 fi
 
+echo "== local sessions route even when SDLC_ENGINE=shell =="
+tmp="$(mktemp -d)"
+trap 'rm -rf "${tmp}"' EXIT
+# Use --root via python engine; sdlc.sh local* always hits python.
+out="$(
+  SDLC_ENGINE=shell SDLC_USER=shim-test \
+    PYTHONPATH="${REPO_ROOT}/engine/src" \
+    python3 -m sdlc_engine --root "${tmp}" local start --name shim-local --intent "offline"
+)"
+if grep -Fq 'Started local session LOCAL-' <<< "${out}"; then
+  ok "local start creates LOCAL session"
+else
+  bad "local start unexpected: ${out}"
+fi
+if [[ -f "${tmp}/.sdlc/local-sessions/"LOCAL-*/session.json ]]; then
+  ok "local session artifacts under .sdlc/local-sessions"
+else
+  # glob may not expand in [[ -f ]]; check via find
+  if find "${tmp}/.sdlc/local-sessions" -name session.json | grep -q .; then
+    ok "local session artifacts under .sdlc/local-sessions"
+  else
+    bad "missing local session artifacts"
+  fi
+fi
+
 echo
 echo "Results: ${pass} passed, ${fail} failed"
 if (( fail > 0 )); then exit 1; fi

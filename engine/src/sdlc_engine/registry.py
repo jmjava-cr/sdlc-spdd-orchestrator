@@ -179,6 +179,14 @@ class TeamRegistry:
     ) -> RegistryRow:
         if not work_id:
             raise ValueError("claim requires a Work ID")
+        from .local_sessions import is_local_id
+
+        if is_local_id(work_id):
+            raise PermissionError(
+                f"claim refused: {work_id} is a local/offline session (machine-private). "
+                "Promote it into a documented Work ID first:\n"
+                f'  ./scripts/sdlc.sh local promote --type feature --name "..."'
+            )
         existing = next((r for r in self.rows() if r.work_id == work_id), None)
         me = self._owner()
         if existing and existing.status == "active" and existing.owner and existing.owner != me and not force:
@@ -229,6 +237,12 @@ class TeamRegistry:
         wid = self.workflow.pointer.get()
         if not wid:
             raise ValueError("release requires an active pointer")
+        from .local_sessions import LocalSessionService, is_local_id
+
+        if is_local_id(wid):
+            # Keep LOCAL sessions out of the committed team registry.
+            LocalSessionService(self.project, self).shelf(reason, session_id=wid)
+            return
         self.workflow.shelf(reason)
         self.upsert(
             RegistryRow(
@@ -269,8 +283,19 @@ class TeamRegistry:
                 "",
                 "Claim: ./scripts/sdlc.sh claim <WORK-ID> [--branch NAME] [--pr #N] [--jira KEY]",
                 "Team:  ./scripts/sdlc.sh team",
+                "Local: ./scripts/sdlc.sh local list   # offline sessions (not in registry)",
             ]
         )
+        try:
+            from .local_sessions import LocalSessionService
+
+            local_rows = LocalSessionService(self.project).list_sessions()
+            if local_rows:
+                lines.extend(["", "Local/offline sessions on this machine:"])
+                for s in local_rows:
+                    lines.append(f"  {s.id:<40} {s.status:<10} {s.title}")
+        except OSError:
+            pass
         return "\n".join(lines) + "\n"
 
     def team_text(self) -> str:

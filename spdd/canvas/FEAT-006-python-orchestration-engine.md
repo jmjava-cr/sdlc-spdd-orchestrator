@@ -79,6 +79,11 @@ On-disk formats unchanged: `.sdlc/pointer`, `.sdlc/workflows/*.state`,
 - Status: Complete
 - Description: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull`; claim auto-reads Jira/GitHub from milestone requirements; Linked Work status repair.
 
+### T06 - Local/offline work sessions
+
+- Status: Complete
+- Description: `LOCAL-*` sessions under `.sdlc/local-sessions/`; `local start|list|capture|shelf|resume|promote|abandon`; claim refuses LOCAL; `next` surfaces offline work until promoted into a documented Work ID.
+
 ## Final Status
 
-- Status: In Progress (T01–T05 complete; capture/resolve port still pending)
+- Status: In Progress (T01–T06 complete; capture/resolve port still pending)

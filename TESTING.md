@@ -125,14 +125,17 @@ PYTHONPATH=engine/src python3 -m pytest -q engine/tests
 python3 -m pip install -e './engine[dev]' && pytest -q engine/tests
 ```
 
-Covers pointer, workflow, registry, archive, canvas parsing, link/issue sync, and CLI.
-`scripts/sdlc.sh` with `SDLC_ENGINE=python` delegates to the engine.
+Covers pointer, workflow, registry, archive, canvas parsing, link/issue sync,
+local/offline sessions, and CLI. `scripts/sdlc.sh` with `SDLC_ENGINE=python`
+delegates to the engine; `local*` commands always use the Python engine.
 
 ```bash
 SDLC_ENGINE=python ./scripts/sdlc.sh sync-links
 SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
 SDLC_ENGINE=python ./scripts/sdlc.sh sync-roadmap --dry-run
 SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system github
+./scripts/sdlc.sh local start --name scratch --intent "offline explore"
+./scripts/sdlc.sh local promote --type feature --name "Documented title" --dry-run
 ```
 
 ### Session memory index + rotation harness

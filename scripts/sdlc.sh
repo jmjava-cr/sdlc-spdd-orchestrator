@@ -44,6 +44,31 @@ if [[ $# -gt 0 ]]; then
   shift
 fi
 
+# Local/offline sessions are Python-engine-only, but must work even when
+# SDLC_ENGINE=shell (default). Normalize local-* aliases to `local <verb>`.
+_local_args=()
+case "${cmd}" in
+  local)
+    _local_args=("local" "$@")
+    ;;
+  local-start) _local_args=("local" "start" "$@") ;;
+  local-list) _local_args=("local" "list" "$@") ;;
+  local-status) _local_args=("local" "status" "$@") ;;
+  local-capture) _local_args=("local" "capture" "$@") ;;
+  local-shelf) _local_args=("local" "shelf" "$@") ;;
+  local-resume) _local_args=("local" "resume" "$@") ;;
+  local-promote) _local_args=("local" "promote" "$@") ;;
+  local-abandon) _local_args=("local" "abandon" "$@") ;;
+esac
+if ((${#_local_args[@]} > 0)); then
+  if ! _python_engine_available; then
+    echo "sdlc: local sessions require the Python engine (engine/sdlc_engine)" >&2
+    echo "Install with: python3 -m pip install -e '${ROOT}/engine'" >&2
+    exit 1
+  fi
+  _run_python_engine "${_local_args[@]}"
+fi
+
 case "${ENGINE_MODE}" in
   python)
     if ! _python_engine_available; then
