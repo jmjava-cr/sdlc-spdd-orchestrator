@@ -1,0 +1,74 @@
+# SDLC Engine (v2)
+
+Python orchestration engine for the SDLC-SPDD operating model.
+
+Shell scripts remain the **v1 compatibility surface**. This package is the
+**v2 reusable core**: pointer, workflow phases/gates, team registry, archive,
+and a stable CLI/API that assistants and tools can call without bash.
+
+## Status
+
+Alpha (`2.0.0a1`). Core workflow commands are implemented in Python and covered
+by pytest. Install/upgrade/adapter generation still use the existing shell
+scripts; the engine can shell out to them via `sdlc-engine shell …` when needed.
+
+## Quick start
+
+From the orchestrator repo:
+
+```bash
+# editable install (optional)
+python3 -m pip install -e './engine[dev]'
+
+# or run without installing
+PYTHONPATH=engine/src python3 -m sdlc_engine next --root .
+
+# CLI entry (after install)
+sdlc-engine next
+sdlc-engine claim FEAT-001-demo
+sdlc-engine archive --all --dry-run
+```
+
+Prefer the engine from the existing wrapper (shell remains the default):
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh next
+SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
+```
+
+## Package layout
+
+| Module | Responsibility |
+|--------|----------------|
+| `project` | Resolve project root and artifact paths |
+| `phases` | Phase order, gates, recommended assistant commands |
+| `pointer` | `.sdlc/pointer` get/set/reset + guarded run |
+| `workflow` | Resume/advance/skip/shelf/sync/next/status |
+| `registry` | `work-registry.tsv` claim/release/team/list-work |
+| `archive` | Move Complete/Cancelled work into `archive/` |
+| `canvas` | Final Status + next-operation inference |
+| `cli` | `sdlc-engine` / `python -m sdlc_engine` |
+
+## Compatibility
+
+- File formats stay identical (`.sdlc/`, `work-registry.tsv`, canvas paths).
+- Shell `sdlc.sh` can delegate to this engine (`SDLC_ENGINE=auto|python|shell`).
+- Target projects can keep using bash until they opt into the engine.
+
+## Tests
+
+```bash
+python3 -m pip install -e './engine[dev]'
+pytest -q engine/tests
+```
+
+Or without install:
+
+```bash
+PYTHONPATH=engine/src python3 -m pytest -q engine/tests
+```
+
+## Design notes
+
+See [docs/engine-v2.md](../docs/engine-v2.md) and
+`spdd/canvas/FEAT-006-python-orchestration-engine.md`.

@@ -85,6 +85,7 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 | Single canonical command spec → generated Cursor/Copilot/Claude adapters | Maintainability (kills drift) |
 | Golden-path regression dogfood (fixed stub → analysis→plan→architect diff) | Maintainability |
 | Session-brief + completed/cancelled work archive (`sdlc.sh archive`; sessions/features/canvas → `archive/`) | Maintainability |
+| Python orchestration engine v2 (`engine/sdlc_engine`) with shell compatibility shim | Maintainability / Extensibility |
 | Code + docs readability pass (consistent structure, naming, examples) | Readability |
 | Extension/hook manifest in `agent-context/extensions/` | Extensibility |
 | Initial `docgen` narrated-docs bundle (`docs/demos/`) | Readability / operator docs (CHORE-001) |

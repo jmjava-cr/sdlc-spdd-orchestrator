@@ -83,6 +83,10 @@ sdlc_init
 
 ## SDLC Workflow (phase + gate tracking)
 
+**Python engine (v2, opt-in):** set `SDLC_ENGINE=python` (or `auto`) on
+`scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh` to use `engine/sdlc_engine`.
+Default remains the bash workflow. See [docs/engine-v2.md](../docs/engine-v2.md).
+
 **Short commands** (installed at `scripts/sdlc-spdd/sdlc.sh`; orchestrator repo: `scripts/sdlc.sh`):
 
 ```bash

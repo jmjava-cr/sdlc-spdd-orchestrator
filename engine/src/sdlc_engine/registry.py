@@ -1,0 +1,283 @@
+"""Team Work ID registry (agent-context/work-registry.tsv)."""
+
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+
+from . import canvas as canvas_mod
+from .project import Project
+from .workflow import WorkflowEngine
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+REGISTRY_HEADER = """# Team Work Registry — tab-separated. Commit updates so teammates see who is on which Work ID.
+# Columns: work_id status phase operation owner updated note
+# status: active | shelved | done | cancelled | archived | available
+# note tokens: branch:<name> pr:<url-or-#> jira:<KEY> <free text>
+work_id\tstatus\tphase\toperation\towner\tupdated\tnote
+"""
+
+
+@dataclass
+class RegistryRow:
+    work_id: str
+    status: str
+    phase: str = ""
+    operation: str = ""
+    owner: str = ""
+    updated: str = ""
+    note: str = ""
+
+    def as_tsv(self) -> str:
+        return "\t".join(
+            [
+                self.work_id,
+                self.status,
+                self.phase,
+                self.operation,
+                self.owner,
+                self.updated,
+                self.note,
+            ]
+        )
+
+
+class TeamRegistry:
+    def __init__(self, project: Project | None = None, workflow: WorkflowEngine | None = None) -> None:
+        self.project = project or Project.resolve()
+        self.workflow = workflow or WorkflowEngine(self.project)
+        self.project.ensure_runtime_dirs()
+
+    @property
+    def path(self) -> Path:
+        return self.project.registry_path
+
+    def _owner(self) -> str:
+        if os.environ.get("SDLC_USER"):
+            return os.environ["SDLC_USER"]
+        try:
+            import subprocess
+
+            name = subprocess.check_output(
+                ["git", "-C", str(self.project.root), "config", "user.name"],
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+            if name:
+                return name
+        except Exception:
+            pass
+        return os.environ.get("USER") or os.environ.get("USERNAME") or "unknown"
+
+    def ensure(self) -> None:
+        if not self.path.is_file():
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.path.write_text(REGISTRY_HEADER, encoding="utf-8")
+
+    def rows(self) -> list[RegistryRow]:
+        self.ensure()
+        out: list[RegistryRow] = []
+        for line in self.path.read_text(encoding="utf-8").splitlines():
+            if not line or line.startswith("#") or line.startswith("work_id"):
+                continue
+            parts = line.split("\t")
+            while len(parts) < 7:
+                parts.append("")
+            out.append(
+                RegistryRow(
+                    work_id=parts[0],
+                    status=parts[1],
+                    phase=parts[2],
+                    operation=parts[3],
+                    owner=parts[4],
+                    updated=parts[5],
+                    note=parts[6],
+                )
+            )
+        return out
+
+    def upsert(self, row: RegistryRow) -> None:
+        self.ensure()
+        rows = self.rows()
+        found = False
+        for i, existing in enumerate(rows):
+            if existing.work_id == row.work_id:
+                if not row.note:
+                    row.note = existing.note
+                rows[i] = row
+                found = True
+                break
+        if not found:
+            rows.append(row)
+        comments = [ln for ln in self.path.read_text(encoding="utf-8").splitlines() if ln.startswith("#")]
+        body = comments + ["work_id\tstatus\tphase\toperation\towner\tupdated\tnote"] + [r.as_tsv() for r in rows]
+        tmp = self.path.with_suffix(".tsv.tmp")
+        tmp.write_text("\n".join(body) + "\n", encoding="utf-8")
+        tmp.replace(self.path)
+
+    def discover_work_ids(self) -> list[str]:
+        seen: set[str] = set()
+        features = self.project.root / "agent-context" / "features"
+        if features.is_dir():
+            for child in features.iterdir():
+                if child.is_dir() and child.name not in {"archive"} and not child.name.startswith("."):
+                    seen.add(child.name)
+        canvas_dir = self.project.root / "spdd" / "canvas"
+        if canvas_dir.is_dir():
+            for child in canvas_dir.glob("*.md"):
+                if child.name != "README.md":
+                    seen.add(child.stem)
+        milestones = self.project.root / "requirements" / "milestones"
+        if milestones.is_dir():
+            for child in milestones.glob("*.md"):
+                if child.name != "README.md":
+                    seen.add(child.stem)
+        return sorted(seen)
+
+    def refresh_done_status(self) -> None:
+        for work_id in self.discover_work_ids():
+            kind = canvas_mod.final_kind(self.project.canvas_path(work_id))
+            if kind == "complete":
+                target, note = "done", "canvas Final Status: Complete"
+            elif kind == "cancelled":
+                target, note = "cancelled", "canvas Final Status: Cancelled"
+            else:
+                continue
+            existing = next((r for r in self.rows() if r.work_id == work_id), None)
+            if existing and existing.status == "archived":
+                continue
+            if existing and existing.status == target:
+                continue
+            self.upsert(
+                RegistryRow(
+                    work_id=work_id,
+                    status=target,
+                    phase=existing.phase if existing else "sync",
+                    operation=existing.operation if existing else "",
+                    owner=self._owner(),
+                    updated=_utc_now(),
+                    note=note,
+                )
+            )
+
+    def claim(
+        self,
+        work_id: str,
+        *,
+        force: bool = False,
+        phase: str | None = None,
+        branch: str = "",
+        pr: str = "",
+        jira: str = "",
+        note: str = "",
+    ) -> RegistryRow:
+        if not work_id:
+            raise ValueError("claim requires a Work ID")
+        existing = next((r for r in self.rows() if r.work_id == work_id), None)
+        me = self._owner()
+        if existing and existing.status == "active" and existing.owner and existing.owner != me and not force:
+            raise PermissionError(
+                f"claim refused: {work_id} is active under {existing.owner}. Use --force after coordinating."
+            )
+        state = self.workflow.resume(work_id, phase=phase, force=force)
+        tokens: list[str] = []
+        if branch:
+            tokens.append(f"branch:{branch}")
+        if pr:
+            tokens.append(f"pr:{pr}")
+        if jira:
+            tokens.append(f"jira:{jira}")
+        if note:
+            tokens.append(note)
+        row = RegistryRow(
+            work_id=work_id,
+            status="active",
+            phase=state.phase,
+            operation=state.operation,
+            owner=me,
+            updated=_utc_now(),
+            note=" ".join(tokens),
+        )
+        self.upsert(row)
+        return row
+
+    def release(self, reason: str = "released") -> None:
+        wid = self.workflow.pointer.get()
+        if not wid:
+            raise ValueError("release requires an active pointer")
+        self.workflow.shelf(reason)
+        self.upsert(
+            RegistryRow(
+                work_id=wid,
+                status="shelved",
+                phase=self.workflow.load_state(wid).phase,
+                owner=self._owner(),
+                updated=_utc_now(),
+                note=reason,
+            )
+        )
+
+    def list_work_text(self) -> str:
+        self.refresh_done_status()
+        rows = {r.work_id: r for r in self.rows()}
+        lines = [
+            "Work IDs in this repository:",
+            "",
+            f"  {'WORK-ID':<40} {'REGISTRY':<12} {'PHASE':<8} {'OWNER':<10} ARTIFACTS",
+        ]
+        for wid in self.discover_work_ids():
+            reg = rows.get(wid)
+            status = reg.status if reg else "available"
+            phase = reg.phase if reg else "-"
+            owner = reg.owner if reg else "-"
+            arts = []
+            if self.project.canvas_path(wid).is_file():
+                arts.append("canvas")
+            if self.project.feature_dir(wid).is_dir():
+                arts.append("feature")
+            if self.project.milestone_path(wid).is_file():
+                arts.append("milestone")
+            lines.append(
+                f"  {wid:<40} {status:<12} {phase or '-':<8} {owner or '-':<10} {','.join(arts) or '-'}"
+            )
+        lines.extend(
+            [
+                "",
+                "Claim: ./scripts/sdlc.sh claim <WORK-ID> [--branch NAME] [--pr #N] [--jira KEY]",
+                "Team:  ./scripts/sdlc.sh team",
+            ]
+        )
+        return "\n".join(lines) + "\n"
+
+    def team_text(self) -> str:
+        self.refresh_done_status()
+        me = self._owner()
+        pointer = self.workflow.pointer.get()
+        lines = [
+            "SDLC Team View",
+            "==============",
+            f"You: {me}",
+            f"Your local pointer: {pointer or '(none)'}",
+            "",
+            "Team registry (commit agent-context/work-registry.tsv to share):",
+        ]
+        rows = self.rows()
+        if not rows:
+            lines.append("  (empty)")
+        else:
+            lines.append(
+                f"  {'WORK-ID':<36} {'STATUS':<14} {'PHASE':<10} {'OP':<6} {'OWNER':<16} NOTE"
+            )
+            for r in rows:
+                mark = " (you)" if r.owner == me and r.work_id == pointer else ""
+                lines.append(
+                    f"  {r.work_id:<36} {r.status:<14} {(r.phase or '-'):<10} {(r.operation or '-'):<6} "
+                    f"{(r.owner or '-'):<16} {r.updated}{mark}"
+                )
+        return "\n".join(lines) + "\n"

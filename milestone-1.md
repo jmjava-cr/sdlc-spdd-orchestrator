@@ -19,18 +19,20 @@ Make it right (do first):
 2. **FEAT-002 — single command spec → generated adapters.** Kills hand-maintained
    adapter drift across Cursor/Copilot/Claude.
 3. **FEAT-003 — extension/hook manifest.** A clean, documented extension point.
-4. **Readability pass — consistent structure, naming, and examples** across code
+4. **FEAT-006 — Python orchestration engine (v2).** Reusable `sdlc_engine`
+   package + `SDLC_ENGINE` shell shim; port remaining helpers gradually.
+5. **Readability pass — consistent structure, naming, and examples** across code
    and docs.
 
 Make it fast (do last, deferred):
 
-5. **FEAT-004 — prompt-optimization ledger + capture metrics.** Already specced;
+6. **FEAT-004 — prompt-optimization ledger + capture metrics.** Already specced;
    parked until the refactors above land. (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`.)
-6. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
+7. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
 
-Work IDs are numbered in execution order. FEAT-001–003 are complete on the
-integration branch; FEAT-004 (deferred) is at Ready For Coding; FEAT-005 remains
-draft until make-it-fast work begins.
+Work IDs are numbered in execution order. FEAT-001–003 are complete on `main`;
+FEAT-006 (Python engine) is in progress; FEAT-004 (deferred) is at Ready For
+Coding; FEAT-005 remains draft until make-it-fast work begins.
 
 ## Constraint
 
@@ -45,6 +47,7 @@ grounding files). This is enforced by `./scripts/check-posture-boundary.sh`.
 | FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Complete (T01–T04) | On integration branch |
 | FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Complete (T01–T05) | On integration branch |
 | FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete (T01–T04) | On integration branch |
+| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | In Progress (T01–T04 scaffold) | Python v2 engine + shell shim |
 | FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Ready For Coding — deferred | Make it fast; runs after refactors |
 | FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Draft — Needs Analysis | Make it fast; do last |
 | CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | requirements/milestones/CHORE-001-docgen-initial-documentation.md | Complete (T01–T07) | Docgen bundle scaffold + initial narration (parallel) |

@@ -1,0 +1,38 @@
+name: Test SDLC Engine (Python v2)
+
+on:
+  pull_request:
+    paths:
+      - 'engine/**'
+      - 'scripts/sdlc.sh'
+      - '.github/workflows/test-sdlc-engine.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'engine/**'
+      - 'scripts/sdlc.sh'
+      - '.github/workflows/test-sdlc-engine.yml'
+
+jobs:
+  test-sdlc-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install engine + pytest
+        run: python3 -m pip install -e './engine[dev]'
+
+      - name: Run pytest
+        run: pytest -q engine/tests
+
+      - name: CLI smoke via sdlc.sh python engine
+        run: |
+          SDLC_ENGINE=python ./scripts/sdlc.sh version
+          SDLC_ENGINE=python ./scripts/sdlc.sh next
+
+      - name: Shim regression harness
+        run: ./tests/test-sdlc-engine-shim.sh
