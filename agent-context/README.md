@@ -99,7 +99,9 @@ sdlc_init
 ./scripts/sdlc.sh list-shelved
 ./scripts/sdlc.sh list-work      # discover Work IDs in the repo
 ./scripts/sdlc.sh capture --summary "finished T02"   # pointer-guarded
-./scripts/sdlc.sh sync-team      # mark done from canvas Final Status
+./scripts/sdlc.sh sync-team      # mark done/cancelled from canvas Final Status
+./scripts/sdlc.sh archive <ID>   # move Complete/Cancelled work into archive/
+./scripts/sdlc.sh archive --all  # archive every eligible Complete/Cancelled Work ID
 ```
 
 In **code** phase, the next canvas operation (`T01`, `T02`, …) is inferred automatically from the REASONS Canvas.
@@ -164,8 +166,19 @@ Set `SDLC_USER="Jane"` to label registry rows. Set `SDLC_NO_TEAM_REGISTRY=1` to 
 `team` / `list-work`. Stale claims warn but do not block; non-stale claims block until
 `claim --force` or `resume --force`.
 
-**Done status:** canvases with `## Final Status` → `Status: Complete` are marked `done` when you run
-`team`, `list-work`, or `sync-team`.
+**Done / cancelled status:** canvases with `## Final Status` → `Status: Complete` are marked `done`,
+and `Status: Cancelled` / `Canceled` are marked `cancelled`, when you run `team`, `list-work`, or
+`sync-team`.
+
+**Archive completed/cancelled work** (keeps milestones in place; moves canvases, feature workspaces,
+analysis/review/sync, and matching session briefs under `archive/`):
+
+```bash
+./scripts/sdlc.sh archive FEAT-001-alpha
+./scripts/sdlc.sh archive --all
+./scripts/sdlc.sh archive FEAT-001-alpha --dry-run
+./scripts/sdlc.sh archive FEAT-001-alpha --force   # non-terminal Final Status
+```
 
 **Branch / PR / Jira linking** (stored in the `note` column):
 

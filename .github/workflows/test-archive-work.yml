@@ -1,0 +1,37 @@
+name: Test Archive Work
+
+on:
+  pull_request:
+    paths:
+      - 'agent-context/sdlc-team-registry.sh'
+      - 'agent-context/sdlc-workflow.sh'
+      - 'agent-context/sdlc-pointer.sh'
+      - 'scripts/sdlc.sh'
+      - 'templates/agent-context/work-registry.tsv'
+      - 'tests/test-archive-work.sh'
+      - '.github/workflows/test-archive-work.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'agent-context/sdlc-team-registry.sh'
+      - 'agent-context/sdlc-workflow.sh'
+      - 'agent-context/sdlc-pointer.sh'
+      - 'scripts/sdlc.sh'
+      - 'templates/agent-context/work-registry.tsv'
+      - 'tests/test-archive-work.sh'
+      - '.github/workflows/test-archive-work.yml'
+
+jobs:
+  test-archive-work:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: |
+          bash -n agent-context/sdlc-team-registry.sh
+          bash -n agent-context/sdlc-workflow.sh
+          bash -n tests/test-archive-work.sh
+
+      - name: Run archive-work regression tests
+        run: ./tests/test-archive-work.sh

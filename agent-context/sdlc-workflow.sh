@@ -550,12 +550,14 @@ SDLC workflow helper — short paths for humans and agents
   ./scripts/sdlc.sh list-work         # all Work IDs in the repo
   ./scripts/sdlc.sh claim <WORK-ID> [--force] [--branch NAME] [--pr #N] [--jira KEY]
   ./scripts/sdlc.sh release --reason "why"
-  ./scripts/sdlc.sh sync-team          # mark done from canvas Final Status
+  ./scripts/sdlc.sh sync-team          # mark done/cancelled from canvas Final Status
+  ./scripts/sdlc.sh archive <WORK-ID>  # move Complete/Cancelled work into archive/
+  ./scripts/sdlc.sh archive --all      # archive every eligible Complete/Cancelled Work ID
 
 In chat: /sdlc-next or /sdlc-spdd-whereami
 Workflow chat: /sdlc-claim, /sdlc-shelf, /sdlc-advance, /sdlc-next, /sdlc-team
 
-Team sharing: commit agent-context/work-registry.tsv after claim/release/shelf.
+Team sharing: commit agent-context/work-registry.tsv after claim/release/shelf/archive.
 Set SDLC_USER to override the owner name. SDLC_NO_TEAM_REGISTRY=1 opts out.
 SDLC_TEAM_STALE_DAYS=7 flags stale active claims. SDLC_TEAM_REGISTRY_HOOK for Slack/Jira.
 Note tokens: branch:... pr:... jira:... (auto branch from git; auto jira Key from requirements/milestones/<WORK-ID>.md on claim).
@@ -1376,6 +1378,35 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" && "${_SDLC_WORKFLOW_LOAD_DEPTH}" -eq 1 ]]; 
         exit 1
       fi
       ;;
+    archive|/sdlc-archive)
+      dry=0
+      force=0
+      all=0
+      work_id=""
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --dry-run) dry=1; shift ;;
+          --force) force=1; shift ;;
+          --all|--all-eligible) all=1; shift ;;
+          --work-id) work_id="${2:-}"; shift 2 ;;
+          *)
+            if [[ -z "${work_id}" && "$1" != -* ]]; then
+              work_id="$1"
+            fi
+            shift
+            ;;
+        esac
+      done
+      if ! declare -F sdlc_team_archive_work >/dev/null 2>&1; then
+        echo "team registry not installed" >&2
+        exit 1
+      fi
+      if [[ "${all}" -eq 1 ]]; then
+        sdlc_team_archive_eligible "${dry}"
+      else
+        sdlc_team_archive_work "${work_id}" "${dry}" "${force}"
+      fi
+      ;;
     release|/sdlc-team-release)
       reason="released"
       while [[ $# -gt 0 ]]; do
@@ -1392,7 +1423,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" && "${_SDLC_WORKFLOW_LOAD_DEPTH}" -eq 1 ]]; 
       fi
       ;;
     *)
-      echo "Usage: $0 {status|next|start|capture|resume|advance|skip|shelf|sync|sync-team|team|list-work|claim|release|list-shelved|help} ..." >&2
+      echo "Usage: $0 {status|next|start|capture|resume|advance|skip|shelf|sync|sync-team|team|list-work|claim|release|archive|list-shelved|help} ..." >&2
       echo "Try: $0 help" >&2
       exit 2
       ;;

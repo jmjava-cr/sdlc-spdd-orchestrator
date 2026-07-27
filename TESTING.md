@@ -22,6 +22,11 @@ In orchestrator repo:
 - `test-adapter-install` (`.github/workflows/test-adapter-install.yml`)
 - `test-sdlc-pointer` (`.github/workflows/test-sdlc-pointer.yml`)
 - `test-sdlc-workflow` (`.github/workflows/test-sdlc-workflow.yml`)
+- `test-archive-work` (`.github/workflows/test-archive-work.yml`)
+- `test-scripts-lib` (`.github/workflows/test-scripts-lib.yml`)
+- `test-extension-manifest` (`.github/workflows/test-extension-manifest.yml`)
+- `validate-command-spec-generation` (`.github/workflows/validate-command-spec-generation.yml`)
+- `test-integration-merge` (`.github/workflows/test-integration-merge.yml`)
 - `test-session-memory` (`.github/workflows/test-session-memory.yml`)
 - `test-index-spdd-analysis` (`.github/workflows/test-index-spdd-analysis.yml`)
 - `test-resolve-agent-context` (`.github/workflows/test-resolve-agent-context.yml`)
@@ -78,6 +83,38 @@ regression harness.
 - Guarded `capture` (pointer must match)
 - Team `claim`/`release`, stale TTL, branch/PR/Jira notes in `work-registry.tsv`
 - Jira Key auto-link from `requirements/milestones/<WORK-ID>.md` on claim
+
+### Archive completed/cancelled work harness
+
+`./tests/test-archive-work.sh` exercises `sdlc.sh archive` / `archive --all`:
+
+- Refuses In Progress work unless `--force`
+- Moves Complete/Cancelled canvases, feature workspaces, analysis/review/sync, and matching session briefs into `archive/` folders
+- Leaves `requirements/milestones/<WORK-ID>.md` in place
+- Clears the local pointer when it matches the archived Work ID
+- Marks `work-registry.tsv` status `archived` (and `sync-team` can mark `cancelled` without moving files)
+- `list-work` ignores `archive/` directories
+
+### Shared scripts/lib harness
+
+`./tests/test-scripts-lib.sh` exercises `scripts/lib/*` helpers and
+`verify-script-lib-duplicates.sh` (FEAT-001).
+
+### Command spec generation harness
+
+`./tests/test-command-spec-generation.sh` asserts adapters match
+`spec/commands/*.spec.md`, that `--check` detects drift, and parity validation still passes (FEAT-002).
+
+### Extension manifest harness
+
+`./tests/test-extension-manifest.sh` covers manifest-driven resolution and
+convention fallback (FEAT-003).
+
+### Integration merge gate
+
+`./tests/test-integration-merge.sh` installs a throwaway `--all` target and
+runs the critical path from `docs/integration-branch.md` (workflow commands,
+shared lib, manifest resolve, claim/next/team/shelf/archive, upgrade).
 
 ### Session memory index + rotation harness
 

@@ -63,6 +63,26 @@ else
   bad "malformed manifest did not fall back"
 fi
 
+echo "== Test 5: planning-agent folder resolves for plan phase via manifest =="
+cp "${REPO_ROOT}/templates/agent-context/extensions/manifest.md" \
+  "${WORK}/agent-context/extensions/manifest.md"
+mkdir -p "${WORK}/agent-context/extensions/planning-agent"
+echo "# Plan ext" > "${WORK}/agent-context/extensions/planning-agent/plan-notes.md"
+plan_out="$("${RESOLVE}" --target "${WORK}" --phase plan --format paths)"
+if grep -Fq "planning-agent/plan-notes.md" <<< "${plan_out}"; then
+  ok "manifest maps plan phase to planning-agent"
+else
+  bad "plan phase missing planning-agent extension"
+fi
+
+echo "== Test 6: review phase does not load coding-agent via manifest =="
+review_out="$("${RESOLVE}" --target "${WORK}" --phase review --format paths)"
+if ! grep -Fq "coding-agent/style.md" <<< "${review_out}"; then
+  ok "review phase excludes coding-agent"
+else
+  bad "review phase incorrectly included coding-agent"
+fi
+
 echo
 echo "Summary: ${pass} passed, ${fail} failed"
 if (( fail > 0 )); then exit 1; fi

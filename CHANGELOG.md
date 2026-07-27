@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Shared `scripts/lib/` helpers + consumer migration (FEAT-001); `verify-script-lib-duplicates.sh`
+- Canonical `spec/commands/*.spec.md` → generated Cursor/Copilot/Claude adapters (FEAT-002)
+- Extension manifest + resolver fallback (FEAT-003)
+- `sdlc.sh archive` / `archive --all`: move Complete/Cancelled Work ID artifacts into `archive/` folders (closes [#29](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/29))
+- Expanded CI/regression harnesses: `test-scripts-lib`, `test-extension-manifest`, `test-command-spec-generation`, `test-archive-work`, `test-integration-merge`
 - SDLC pointer manager (`agent-context/sdlc-pointer.sh`): persistent Work ID in `.sdlc/pointer`, guarded execution wrappers ([#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20), closes [#19](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/19))
 - Workflow CLI (`scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh`): phase/gate tracking, `next`/`advance`/`skip`/`shelf`/`resume`/`sync`, guarded `capture` ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21))
 - Team Work ID registry (`agent-context/work-registry.tsv`, `sdlc-team-registry.sh`): `claim`/`release`/`team`/`list-work`, stale TTL, branch/PR/Jira notes ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21))

@@ -1,9 +1,9 @@
 # Enhancement: Add Agent Commands for Workflow State Management
 
-**Status:** Proposed  
+**Status:** Implemented on integration landing branch (closes via #23 when merge lands)  
 **Date:** 2026-06-30  
 **Author:** John Menke  
-**Related:** Workflow CLI upgrade (PR #20, #21)
+**Related:** Workflow CLI upgrade (PR #20, #21); integration landing PR
 
 ## Summary
 

@@ -9,6 +9,7 @@ on:
       - 'templates/cursor/sdlc-*.md'
       - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/claude/commands/sdlc-*.md'
+      - 'tests/test-command-spec-generation.sh'
       - '.github/workflows/validate-command-spec-generation.yml'
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - 'templates/cursor/sdlc-*.md'
       - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/claude/commands/sdlc-*.md'
+      - 'tests/test-command-spec-generation.sh'
       - '.github/workflows/validate-command-spec-generation.yml'
 
 jobs:
@@ -35,3 +37,6 @@ jobs:
 
       - name: Validate generated adapter parity
         run: ./scripts/validate-command-adapters.sh
+
+      - name: Run command-spec generation regression harness
+        run: ./tests/test-command-spec-generation.sh

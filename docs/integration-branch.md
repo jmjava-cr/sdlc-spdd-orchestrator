@@ -4,11 +4,11 @@ Collect planned merges off `main`, run automated gates and a manual checklist, t
 
 | | |
 |--|--|
-| **PR** | [#27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27) (draft) |
+| **PR** | Landing via `cursor/merge-integration-to-main-0ab2` (supersedes draft [#27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27)) |
 | **Tracking issue** | [#28 — Merge integration branch to main](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) |
-| **Status** | FEAT-001–003 complete — ready for manual sign-off |
+| **Status** | FEAT-001–003 + archive (#29) + expanded regression gates |
 | **Created** | 2026-07-15 |
-| **Base** | `origin/main` @ `3b519cb` (verified 2026-07-15 — `main` has not moved) |
+| **Base** | `origin/main` @ `3b519cb` |
 
 ---
 
@@ -29,6 +29,9 @@ git checkout cursor/integration-981e
 ./tests/test-extension-manifest.sh
 ./tests/test-sdlc-workflow.sh
 ./tests/test-sdlc-pointer.sh
+./tests/test-archive-work.sh
+./tests/test-command-spec-generation.sh
+./tests/test-integration-merge.sh
 ./scripts/check-posture-boundary.sh
 ```
 
