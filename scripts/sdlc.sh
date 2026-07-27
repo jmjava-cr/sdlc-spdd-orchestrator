@@ -44,29 +44,37 @@ if [[ $# -gt 0 ]]; then
   shift
 fi
 
-# Local/offline sessions are Python-engine-only, but must work even when
-# SDLC_ENGINE=shell (default). Normalize local-* aliases to `local <verb>`.
-_local_args=()
+# Python-engine-only commands that must work even when SDLC_ENGINE=shell.
+# Normalize hyphen aliases: local-* → local <verb>, db-* → db <verb>.
+_py_only_args=()
 case "${cmd}" in
   local)
-    _local_args=("local" "$@")
+    _py_only_args=("local" "$@")
     ;;
-  local-start) _local_args=("local" "start" "$@") ;;
-  local-list) _local_args=("local" "list" "$@") ;;
-  local-status) _local_args=("local" "status" "$@") ;;
-  local-capture) _local_args=("local" "capture" "$@") ;;
-  local-shelf) _local_args=("local" "shelf" "$@") ;;
-  local-resume) _local_args=("local" "resume" "$@") ;;
-  local-promote) _local_args=("local" "promote" "$@") ;;
-  local-abandon) _local_args=("local" "abandon" "$@") ;;
+  local-start) _py_only_args=("local" "start" "$@") ;;
+  local-list) _py_only_args=("local" "list" "$@") ;;
+  local-status) _py_only_args=("local" "status" "$@") ;;
+  local-capture) _py_only_args=("local" "capture" "$@") ;;
+  local-shelf) _py_only_args=("local" "shelf" "$@") ;;
+  local-resume) _py_only_args=("local" "resume" "$@") ;;
+  local-promote) _py_only_args=("local" "promote" "$@") ;;
+  local-abandon) _py_only_args=("local" "abandon" "$@") ;;
+  db)
+    _py_only_args=("db" "$@")
+    ;;
+  db-rebuild) _py_only_args=("db" "rebuild" "$@") ;;
+  db-status) _py_only_args=("db" "status" "$@") ;;
+  db-path) _py_only_args=("db" "path" "$@") ;;
+  db-query) _py_only_args=("db" "query" "$@") ;;
+  db-export) _py_only_args=("db" "export" "$@") ;;
 esac
-if ((${#_local_args[@]} > 0)); then
+if ((${#_py_only_args[@]} > 0)); then
   if ! _python_engine_available; then
-    echo "sdlc: local sessions require the Python engine (engine/sdlc_engine)" >&2
+    echo "sdlc: '${_py_only_args[0]}' requires the Python engine (engine/sdlc_engine)" >&2
     echo "Install with: python3 -m pip install -e '${ROOT}/engine'" >&2
     exit 1
   fi
-  _run_python_engine "${_local_args[@]}"
+  _run_python_engine "${_py_only_args[@]}"
 fi
 
 case "${ENGINE_MODE}" in

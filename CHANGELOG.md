@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Local regenerable SQLite index (FEAT-007): `sdlc.sh db rebuild|status|query|export` → `.sdlc/index.sqlite` (gitignored); FTS5 search; JSON/SQL dump; docs in `docs/local-sqlite-index.md`
 - Python orchestration engine v2 (`engine/sdlc_engine`) with CLI + pytest; `scripts/sdlc.sh` supports `SDLC_ENGINE=auto|python|shell` (FEAT-006)
 - Engine milestone sync usability: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull` for Jira/GitHub; claim auto-reads `## Jira` Key and `## GitHub` Number
 - Local/offline work sessions (`LOCAL-*`): `sdlc.sh local start|list|capture|shelf|resume|promote|abandon` — machine-private under `.sdlc/local-sessions/` until promoted into a documented Work ID

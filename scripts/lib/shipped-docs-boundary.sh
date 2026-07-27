@@ -8,6 +8,7 @@ is_orchestrator_only_doc() {
   base="$(basename "$1")"
   case "${base}" in
     README.md | guide-rag-research-and-dogfooding.md | \
+    engine-v2.md | local-sqlite-index.md | jira-runbook.md | \
     integration-branch.md | catch-up.md | \
     contributing-command-specs.md | contributing-extensions.md)
       return 0

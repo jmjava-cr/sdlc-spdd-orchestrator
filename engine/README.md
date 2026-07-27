@@ -8,7 +8,7 @@ and a stable CLI/API that assistants and tools can call without bash.
 
 ## Status
 
-Alpha (`2.0.0a4`). Core workflow commands are implemented in Python and covered
+Alpha (`2.0.0a5`). Core workflow commands are implemented in Python and covered
 by pytest. Install/upgrade/adapter generation still use the existing shell
 scripts; the engine can shell out to them via `sdlc-engine shell …` when needed.
 
@@ -35,9 +35,11 @@ Prefer the engine from the existing wrapper (shell remains the default):
 SDLC_ENGINE=python ./scripts/sdlc.sh next
 SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 
-# Local/offline sessions always use the Python engine (even with SDLC_ENGINE=shell)
+# Local/offline sessions + SQLite index always use the Python engine (even with SDLC_ENGINE=shell)
 ./scripts/sdlc.sh local start --name scratch --intent "explore without a FEAT"
 ./scripts/sdlc.sh local promote --type feature --name "Documented title"
+./scripts/sdlc.sh db rebuild
+./scripts/sdlc.sh db query --search "orchestration"
 ```
 
 ## Package layout
@@ -55,6 +57,7 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `issues` | Draft/push/pull Jira (`JIRA_*`) or GitHub (`gh`) from milestone sections |
 | `jira_format` | Markdown ↔ ADF / wiki markup for Jira Cloud/Server descriptions |
 | `local_sessions` | `LOCAL-*` offline sessions + promote into documented Work IDs |
+| `db` | Regenerable local SQLite index (`.sdlc/index.sqlite`) before GUIDE |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
 
 ## Compatibility

@@ -46,6 +46,7 @@ engine/
     issues.py       # Jira/GitHub draft|push|pull
     jira_format.py  # markdown ↔ ADF / wiki for Jira descriptions
     local_sessions.py  # LOCAL-* offline sessions + promote
+    db.py           # regenerable local SQLite index (.sdlc/index.sqlite)
   tests/            # pytest
 ```
 
@@ -103,6 +104,18 @@ Jira Cloud descriptions are sent as **ADF** (not raw markdown). See
 
 **Repair does not:** invent issue keys, transition remote workflows, or overwrite
 acceptance criteria without `--apply` on `issues pull`.
+
+## Local SQLite index (pre-GUIDE)
+
+Zero-install query cache rebuilt from git artifacts into `.sdlc/index.sqlite`
+(gitignored). Multi-user sync remains git — not the binary DB. See
+[local-sqlite-index.md](local-sqlite-index.md).
+
+```bash
+./scripts/sdlc.sh db rebuild
+./scripts/sdlc.sh db query --search "orchestration"
+./scripts/sdlc.sh db export --format json -o /tmp/sdlc-index.json
+```
 
 ## Local / offline work sessions
 

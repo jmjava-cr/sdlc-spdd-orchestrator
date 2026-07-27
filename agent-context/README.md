@@ -97,6 +97,15 @@ the Python engine, even when `SDLC_ENGINE=shell`):
 ./scripts/sdlc.sh local promote --type feature --name "Documented title"
 ```
 
+**Local SQLite index (pre-GUIDE):** regenerable query cache in `.sdlc/index.sqlite`
+(gitignored). Multi-user sync stays git — rebuild after pull. See
+[docs/local-sqlite-index.md](../docs/local-sqlite-index.md).
+
+```bash
+./scripts/sdlc.sh db rebuild
+./scripts/sdlc.sh db query --search "orchestration"
+```
+
 ```bash
 SDLC_ENGINE=python ./scripts/sdlc.sh links
 SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
