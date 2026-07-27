@@ -33,7 +33,8 @@ assistant adapters or on-disk artifact contracts.
 - Stdlib-first Python package `sdlc_engine`
 - CLI parity for next/claim/shelf/advance/archive/team/list-work/status
 - Shell wrapper `scripts/sdlc.sh` delegates via `SDLC_ENGINE=auto|python|shell`
-- Pytest coverage for pointer/workflow/registry/archive/cli
+- Local/offline `LOCAL-*` sessions + promote into documented Work IDs
+- Pytest coverage for pointer/workflow/registry/archive/cli/local sessions
 - Docs: `docs/engine-v2.md`, `engine/README.md`
 
 ## A - Architecture
