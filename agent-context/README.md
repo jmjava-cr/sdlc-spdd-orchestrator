@@ -87,6 +87,12 @@ sdlc_init
 `scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh` to use `engine/sdlc_engine`.
 Default remains the bash workflow. See [docs/engine-v2.md](../docs/engine-v2.md).
 
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh links
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system github --apply
+```
+
 **Short commands** (installed at `scripts/sdlc-spdd/sdlc.sh`; orchestrator repo: `scripts/sdlc.sh`):
 
 ```bash

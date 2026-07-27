@@ -13,9 +13,17 @@ artifact contracts.
 - [x] `scripts/sdlc.sh` can delegate via `SDLC_ENGINE=auto|python|shell`
 - [x] Pytest coverage for core modules
 - [x] Docs under `docs/engine-v2.md` and `engine/README.md`
+- [x] Milestone↔Jira/GitHub sync: `links`, `sync-links`, `issues draft|push|pull`, claim auto-link
 - [ ] Later: port capture/resolve helpers; optional install into target projects
 
 ## Jira
 
 - Key: TBD
 - Summary: Python orchestration engine v2
+
+## GitHub
+
+- Number: 31
+- Title: FEAT-006: Python orchestration engine v2
+- Labels: feature
+- URL: https://github.com/jmjava/sdlc-spdd-orchestrator/pull/31

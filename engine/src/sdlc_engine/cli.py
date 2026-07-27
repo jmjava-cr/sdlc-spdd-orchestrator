@@ -8,9 +8,11 @@ import sys
 
 from . import __version__
 from .archive import ArchiveService
+from .issues import IssueSyncService
 from .pointer import PointerError, PointerStore
 from .project import Project
 from .registry import TeamRegistry
+from .sync_local import LocalSyncService
 from .workflow import WorkflowEngine
 
 
@@ -172,6 +174,83 @@ def cmd_shell(args: argparse.Namespace) -> int:
     return subprocess.call([str(script), *args.script_args], cwd=root)
 
 
+def cmd_links(args: argparse.Namespace) -> int:
+    print(LocalSyncService(_project(args)).links_report(args.work_id), end="")
+    return 0
+
+
+def cmd_sync_links(args: argparse.Namespace) -> int:
+    svc = LocalSyncService(_project(args))
+    work_id = args.work_id or getattr(args, "work_id_pos", None)
+    if args.repair:
+        actions = svc.repair_links(work_id, dry_run=args.dry_run)
+        if not actions:
+            print("sync-links: nothing to repair")
+        else:
+            for a in actions:
+                print(a)
+        return 0
+    findings = svc.check_links(work_id)
+    if not findings:
+        print("sync-links: no drift detected")
+        return 0
+    repairable = [f for f in findings if f.repairable]
+    manual = [f for f in findings if not f.repairable]
+    for f in findings:
+        flag = "repairable" if f.repairable else "manual"
+        print(f"[{flag}] {f.work_id}: {f.code} — {f.message}")
+    if repairable:
+        print(
+            f"\n{len(findings)} finding(s) ({len(repairable)} repairable). "
+            "Re-run with --repair to apply safe fixes."
+        )
+        return 1
+    print(
+        f"\n{len(manual)} manual finding(s) (TBD keys / planning gaps). "
+        "Use `issues draft|push` or edit milestone ## Jira / ## GitHub."
+    )
+    return 0
+
+
+def cmd_sync_roadmap(args: argparse.Namespace) -> int:
+    block = LocalSyncService(_project(args)).sync_roadmap(
+        roadmap=args.roadmap, dry_run=args.dry_run
+    )
+    if args.dry_run:
+        print(block)
+    else:
+        print(f"Updated {args.roadmap} SDLC-SPDD summary from canvases.")
+    return 0
+
+
+def cmd_issues(args: argparse.Namespace) -> int:
+    svc = IssueSyncService(_project(args))
+    action = args.issues_cmd
+    if action == "draft":
+        for draft in svc.draft(args.work_id, system=args.system):
+            print(f"=== {draft.system} draft for {draft.work_id} ===")
+            print(f"title: {draft.title}")
+            print(f"labels: {', '.join(draft.labels) or '-'}")
+            print(f"extra: {draft.extra}")
+            print("body:")
+            print(draft.body)
+            print()
+        return 0
+    if action == "push":
+        if args.system == "both":
+            print("issues push requires --system jira|github", file=sys.stderr)
+            return 2
+        print(svc.push(args.work_id, args.system, apply=args.apply))
+        return 0
+    if action == "pull":
+        if args.system == "both":
+            print("issues pull requires --system jira|github", file=sys.stderr)
+            return 2
+        print(svc.pull(args.work_id, args.system, apply=args.apply))
+        return 0
+    return 2
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdlc-engine",
@@ -219,9 +298,44 @@ def build_parser() -> argparse.ArgumentParser:
     cl.add_argument("--phase")
     cl.add_argument("--branch")
     cl.add_argument("--pr")
-    cl.add_argument("--jira")
+    cl.add_argument("--jira", help="Override; default auto-reads ## Jira Key from milestone requirement")
     cl.add_argument("--note")
     cl.set_defaults(func=cmd_claim)
+
+    lk = sub.add_parser("links", help="Show Jira/GitHub/registry/canvas link map")
+    lk.add_argument("work_id", nargs="?")
+    lk.set_defaults(func=cmd_links)
+
+    sl = sub.add_parser(
+        "sync-links",
+        help="Check or repair drift across milestones, canvas Metadata, and registry",
+    )
+    sl.add_argument("work_id_pos", nargs="?", help="Optional Work ID (same as --work-id)")
+    sl.add_argument("--work-id")
+    sl.add_argument("--repair", action="store_true")
+    sl.add_argument("--dry-run", action="store_true")
+    sl.set_defaults(func=cmd_sync_links)
+
+    sr = sub.add_parser("sync-roadmap", help="Refresh ROADMAP.md managed summary from canvases")
+    sr.add_argument("--roadmap", default="ROADMAP.md")
+    sr.add_argument("--dry-run", action="store_true")
+    sr.set_defaults(func=cmd_sync_roadmap)
+
+    iss = sub.add_parser("issues", help="Draft/push/pull Jira or GitHub issues from milestone requirements")
+    iss.add_argument("issues_cmd", choices=["draft", "push", "pull"])
+    iss.add_argument("work_id")
+    iss.add_argument(
+        "--system",
+        default="both",
+        choices=["jira", "github", "both"],
+        help="Target system (push/pull require jira|github)",
+    )
+    iss.add_argument(
+        "--apply",
+        action="store_true",
+        help="Actually create/update remote issue or write pulled fields (default is dry-run)",
+    )
+    iss.set_defaults(func=cmd_issues)
 
     rel = sub.add_parser("release", help="Release/shelf active claim")
     rel.add_argument("--reason", default="released")

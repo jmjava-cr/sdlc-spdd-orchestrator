@@ -60,6 +60,15 @@ Prompt:
 
 Create the issue using your team's Jira UI, Jira automation, MCP tool, or approved API workflow.
 
+**Engine v2 (optional):** draft or create from the milestone requirement:
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system jira
+# Requires JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT:
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira --apply
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+```
+
 Minimum required fields:
 
     Project: <PROJECT>

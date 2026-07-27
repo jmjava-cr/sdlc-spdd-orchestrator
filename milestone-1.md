@@ -44,13 +44,13 @@ grounding files). This is enforced by `./scripts/check-posture-boundary.sh`.
 
 | Work ID | Canvas | Requirement | Status | Notes |
 |---------|--------|-------------|--------|-------|
-| FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Complete (T01–T04) | On integration branch |
-| FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Complete (T01–T05) | On integration branch |
-| FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete (T01–T04) | On integration branch |
-| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | In Progress (T01–T04 scaffold) | Python v2 engine + shell shim |
-| FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Ready For Coding — deferred | Make it fast; runs after refactors |
-| FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Draft — Needs Analysis | Make it fast; do last |
-| CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | requirements/milestones/CHORE-001-docgen-initial-documentation.md | Complete (T01–T07) | Docgen bundle scaffold + initial narration (parallel) |
+| FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Complete | On integration branch |
+| FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Complete | On integration branch |
+| FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete | On integration branch |
+| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | In Progress | Python v2 engine + shell shim |
+| FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Draft | Make it fast; runs after refactors |
+| FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Draft | Make it fast; do last |
+| CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | requirements/milestones/CHORE-001-docgen-initial-documentation.md | Complete | Docgen bundle scaffold + initial narration (parallel) |
 | CHORE-002-docgen-video-generation | spdd/canvas/CHORE-002-docgen-video-generation.md | requirements/milestones/CHORE-002-docgen-video-generation.md | Complete | 3 MP4s + Pages deploy; manual video regen (no render CI) |
 
 ## Session Updates

@@ -22,10 +22,38 @@ issue creation. Keep copy-paste-ready fields under `## Jira`:
 
 - **Before create** — fill Summary, Description, acceptance criteria, labels, components
 - **After create** — set `- Key: ABC-123` and commit
-- **On claim** — `./scripts/sdlc.sh claim <WORK-ID>` auto-reads the Key into the team registry
+- **On claim** — `./scripts/sdlc.sh claim <WORK-ID>` (or `SDLC_ENGINE=python`) auto-reads the Key into the team registry
   `jira:` note token (disable with `SDLC_TEAM_AUTO_JIRA=0`)
 
-See [jira-runbook.md](../../docs/jira-runbook.md) for the full create-and-sync flow.
+Engine helpers (v2):
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system jira
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira          # dry-run
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira --apply  # needs JIRA_* env
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+```
+
+See [jira-runbook.md](../../docs/jira-runbook.md) and [engine-v2.md](../../docs/engine-v2.md).
+
+## GitHub issue drafts
+
+Optional `## GitHub` section for teams that track delivery in GitHub Issues:
+
+```markdown
+## GitHub
+
+- Number: TBD
+- Title: …
+- Labels: feature
+- URL:
+```
+
+After create, set `Number` / `URL`. Claim auto-links `github:#N` (disable with `SDLC_TEAM_AUTO_GITHUB=0`).
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system github --apply   # uses gh CLI
+```
 
 ## Relationship to other planning artifacts
 

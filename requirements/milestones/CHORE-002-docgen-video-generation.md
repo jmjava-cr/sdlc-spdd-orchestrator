@@ -76,3 +76,22 @@ Analysis and plan complete. Architect hardened — **Ready For Coding**.
 **Complete:** MVP + 3 recordings + Pages (manual video sync; no render CI).
 
 Run `/sdlc-spdd-sync` to close requirement checkboxes.
+
+## Jira
+
+Draft for issue creation — paste into Jira UI, MCP, or approved API.
+After create, set **Key** and commit.
+
+- Key: TBD
+- Issue type: Story
+- Summary: 
+- Labels:
+
+## GitHub
+
+Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
+
+- Number: TBD
+- Title: 
+- Labels: 
+- URL: 

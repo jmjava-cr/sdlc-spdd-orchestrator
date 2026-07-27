@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Python orchestration engine v2 (`engine/sdlc_engine`) with CLI + pytest; `scripts/sdlc.sh` supports `SDLC_ENGINE=auto|python|shell` (FEAT-006)
+- Engine milestone sync usability: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull` for Jira/GitHub; claim auto-reads `## Jira` Key and `## GitHub` Number
 - Shared `scripts/lib/` helpers + consumer migration (FEAT-001); `verify-script-lib-duplicates.sh`
 - Canonical `spec/commands/*.spec.md` → generated Cursor/Copilot/Claude adapters (FEAT-002)
 - Extension manifest + resolver fallback (FEAT-003)

@@ -17,8 +17,8 @@ fi
 
 echo "== SDLC_ENGINE=python via sdlc.sh =="
 ver="$(SDLC_ENGINE=python "${REPO_ROOT}/scripts/sdlc.sh" version)"
-if [[ "${ver}" == "2.0.0a1" ]]; then
-  ok "sdlc.sh version via python engine"
+if [[ "${ver}" == 2.0.0a* ]]; then
+  ok "sdlc.sh version via python engine (${ver})"
 else
   bad "unexpected version: ${ver}"
 fi

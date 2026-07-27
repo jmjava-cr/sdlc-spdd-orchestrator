@@ -2,6 +2,9 @@
 
 ## Metadata
 
+- Source URL: https://github.com/jmjava/sdlc-spdd-orchestrator/pull/31
+- Source Issue: #31
+- Source System: GitHub
 - Work ID: FEAT-006-python-orchestration-engine
 - Work Type: Feature
 - Status: In Progress
@@ -71,6 +74,11 @@ On-disk formats unchanged: `.sdlc/pointer`, `.sdlc/workflows/*.state`,
 - Status: Complete
 - Description: engine-v2 docs, canvas, milestone/roadmap notes.
 
+### T05 - Milestone / Jira / GitHub sync usability
+
+- Status: Complete
+- Description: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull`; claim auto-reads Jira/GitHub from milestone requirements; Linked Work status repair.
+
 ## Final Status
 
-- Status: In Progress (T01–T04 scaffolding complete; broader script port pending)
+- Status: In Progress (T01–T05 complete; capture/resolve port still pending)

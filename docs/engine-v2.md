@@ -41,6 +41,9 @@ engine/
     registry.py
     archive.py
     canvas.py
+    links.py        # milestone/canvas/registry link parsing
+    sync_local.py   # sync-links / sync-roadmap
+    issues.py       # Jira/GitHub draft|push|pull
   tests/            # pytest
 ```
 
@@ -62,6 +65,39 @@ sdlc-engine team
 sdlc-engine archive --all --dry-run
 ```
 
+## Milestone / Jira / GitHub sync (usability)
+
+Major v2 goal: stop losing track between `requirements/milestones/`, planning
+`milestone-*.md`, canvas Metadata, registry notes, and remote issues.
+
+```bash
+# Map links + drift
+SDLC_ENGINE=python ./scripts/sdlc.sh links
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links              # check (exit 1 if repairable drift)
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links FEAT-006-…   # scoped check
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair     # safe local fixes
+
+# Refresh ROADMAP managed summary from canvases
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-roadmap
+
+# Draft / create remote issues from milestone ## Jira / ## GitHub sections
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft FEAT-006-python-orchestration-engine
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system github          # dry-run
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system github --apply  # gh issue create
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system jira --apply    # needs JIRA_* env
+SDLC_ENGINE=python ./scripts/sdlc.sh issues pull FEAT-006-… --system github --apply
+```
+
+**Repair does (local, safe):**
+
+- Ensure `## Jira` / `## GitHub` sections exist on milestone requirements
+- Copy real Jira Key / GitHub Number into `work-registry.tsv` note tokens
+- Align canvas Metadata `Source System` / `Source Issue` (/ URL when `JIRA_BASE_URL` set)
+- Update `milestone-*.md` Linked Work **Status** from canvas/registry
+
+**Repair does not:** invent issue keys, transition remote workflows, or overwrite
+acceptance criteria without `--apply` on `issues pull`.
+
 ## Bridge to remaining shell scripts
 
 Commands not yet ported (init, upgrade, capture-session-memory, adapter
@@ -73,8 +109,7 @@ python3 -m sdlc_engine shell setup-agent-prompts.sh -- --target /tmp/demo --all
 
 ## Migration plan
 
-1. **Now** — engine owns claim/next/shelf/advance/archive/team/list-work; shell
-   wrapper delegates when importable.
+1. **Now** — engine owns claim/next/shelf/advance/archive/team/list-work + link/issue sync.
 2. **Next** — port capture + resolve-agent-context helpers into Python modules.
 3. **Later** — optional install of the engine into target projects via
    `upgrade-project.sh` (copy or pip install path).

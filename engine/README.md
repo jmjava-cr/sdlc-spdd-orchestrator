@@ -47,6 +47,8 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `registry` | `work-registry.tsv` claim/release/team/list-work |
 | `archive` | Move Complete/Cancelled work into `archive/` |
 | `canvas` | Final Status + next-operation inference |
+| `links` / `sync_local` | Milestone↔canvas↔registry drift check/repair + ROADMAP sync |
+| `issues` | Draft/push/pull Jira (`JIRA_*`) or GitHub (`gh`) from milestone sections |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
 
 ## Compatibility

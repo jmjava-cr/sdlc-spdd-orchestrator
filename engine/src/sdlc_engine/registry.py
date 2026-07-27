@@ -186,15 +186,33 @@ class TeamRegistry:
                 f"claim refused: {work_id} is active under {existing.owner}. Use --force after coordinating."
             )
         state = self.workflow.resume(work_id, phase=phase, force=force)
+        # Auto-read links from requirements/milestones/<WORK-ID>.md (shell parity).
+        from .links import collect_links, upsert_note_token
+
+        auto_jira = jira
+        auto_github = ""
+        if os.environ.get("SDLC_TEAM_AUTO_JIRA", "1") != "0" or os.environ.get(
+            "SDLC_TEAM_AUTO_GITHUB", "1"
+        ) != "0":
+            links = collect_links(self.project, work_id, existing)
+            if not auto_jira and os.environ.get("SDLC_TEAM_AUTO_JIRA", "1") != "0" and links.has_real_jira:
+                auto_jira = links.jira_key
+            if os.environ.get("SDLC_TEAM_AUTO_GITHUB", "1") != "0" and links.has_github:
+                auto_github = links.github_number
         tokens: list[str] = []
+        composed = note or (existing.note if existing else "")
         if branch:
-            tokens.append(f"branch:{branch}")
+            composed = upsert_note_token(composed, "branch", branch)
         if pr:
-            tokens.append(f"pr:{pr}")
-        if jira:
-            tokens.append(f"jira:{jira}")
-        if note:
-            tokens.append(note)
+            composed = upsert_note_token(composed, "pr", pr)
+        if auto_jira:
+            composed = upsert_note_token(composed, "jira", auto_jira)
+        if auto_github:
+            composed = upsert_note_token(composed, "github", f"#{auto_github}")
+        # Preserve leftover free-text tokens not managed above.
+        for tok in (note or "").split():
+            if ":" not in tok and tok not in composed.split():
+                composed = f"{composed} {tok}".strip()
         row = RegistryRow(
             work_id=work_id,
             status="active",
@@ -202,7 +220,7 @@ class TeamRegistry:
             operation=state.operation,
             owner=me,
             updated=_utc_now(),
-            note=" ".join(tokens),
+            note=composed,
         )
         self.upsert(row)
         return row
