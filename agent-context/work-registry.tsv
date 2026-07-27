@@ -6,3 +6,8 @@
 # Override owner label: export SDLC_USER="your-name"
 # Opt out of registry writes: export SDLC_NO_TEAM_REGISTRY=1
 work_id	status	phase	operation	owner	updated	note
+CHORE-001-docgen-initial-documentation	done	sync		Cursor Agent	2026-07-27T01:05:28Z	canvas Final Status: Complete
+CHORE-002-docgen-video-generation	done	sync		Cursor Agent	2026-07-27T01:05:28Z	canvas Final Status: Complete
+FEAT-001-shared-script-library	done	sync		Cursor Agent	2026-07-27T01:05:28Z	canvas Final Status: Complete
+FEAT-002-command-spec-generation	done	sync		Cursor Agent	2026-07-27T01:05:28Z	canvas Final Status: Complete
+FEAT-003-extension-hook-manifest	done	sync		Cursor Agent	2026-07-27T01:05:28Z	canvas Final Status: Complete

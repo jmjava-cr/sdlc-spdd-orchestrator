@@ -60,6 +60,44 @@ Prompt:
 
 Create the issue using your team's Jira UI, Jira automation, MCP tool, or approved API workflow.
 
+**Engine v2 (optional):** draft or create from the milestone requirement:
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system jira
+# Preview the ADF JSON Jira Cloud will receive:
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system jira --format adf
+# Requires JIRA_BASE_URL, JIRA_EMAIL, JIRA_API_TOKEN, JIRA_PROJECT:
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira --apply
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+```
+
+### Description formatting (ADF)
+
+Jira Cloud REST **v3** rejects plain markdown strings for `description` — it needs
+[Atlassian Document Format (ADF)](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
+The engine converts the milestone `## Jira` markdown into structured ADF on push:
+
+| Source section | Jira description |
+|----------------|------------------|
+| Summary / Description / Business value / Scope / Acceptance criteria | Headings + paragraphs / lists |
+| Work ID + requirement path | Traceability section |
+| `**bold**`, `` `code` ``, `[text](url)`, `-` lists, fenced code | ADF marks/nodes |
+
+Env knobs:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `JIRA_API_VERSION` | `3` on `*.atlassian.net`, else `3` | REST API version |
+| `JIRA_DESCRIPTION_FORMAT` | `adf` for v3, `wiki` for v2 | Payload shape |
+| `JIRA_DESCRIPTION_FALLBACK` | `1` | On 400, retry wiki/v2 ↔ ADF/v3 once |
+
+For Jira Server/DC that still wants wiki markup:
+
+```bash
+export JIRA_API_VERSION=2
+export JIRA_DESCRIPTION_FORMAT=wiki
+```
+
 Minimum required fields:
 
     Project: <PROJECT>

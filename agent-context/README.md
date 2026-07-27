@@ -83,6 +83,26 @@ sdlc_init
 
 ## SDLC Workflow (phase + gate tracking)
 
+**Python engine (v2, opt-in):** set `SDLC_ENGINE=python` (or `auto`) on
+`scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh` to use `engine/sdlc_engine`.
+Default remains the bash workflow. See [docs/engine-v2.md](../docs/engine-v2.md).
+
+**Local/offline sessions:** if an agent starts work without a documented FEAT/SPIKE,
+do **not** invent one. Start a machine-private session instead (always routed to
+the Python engine, even when `SDLC_ENGINE=shell`):
+
+```bash
+./scripts/sdlc.sh local start --name <slug> --intent "why this scratch work"
+./scripts/sdlc.sh local capture --summary "interim note"
+./scripts/sdlc.sh local promote --type feature --name "Documented title"
+```
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh links
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system github --apply
+```
+
 **Short commands** (installed at `scripts/sdlc-spdd/sdlc.sh`; orchestrator repo: `scripts/sdlc.sh`):
 
 ```bash

@@ -4,6 +4,13 @@
 # Python venv for docgen (orchestrator dev only — see scripts/setup-docgen-venv.sh)
 .venv/
 
+# Python engine build/test artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+engine/.venv/
+
 # Local secrets (TTS / Whisper for docgen pipeline)
 .env
 

@@ -27,6 +27,7 @@ In orchestrator repo:
 - `test-extension-manifest` (`.github/workflows/test-extension-manifest.yml`)
 - `validate-command-spec-generation` (`.github/workflows/validate-command-spec-generation.yml`)
 - `test-integration-merge` (`.github/workflows/test-integration-merge.yml`)
+- `test-sdlc-engine` (`.github/workflows/test-sdlc-engine.yml`) — Python v2 engine
 - `test-session-memory` (`.github/workflows/test-session-memory.yml`)
 - `test-index-spdd-analysis` (`.github/workflows/test-index-spdd-analysis.yml`)
 - `test-resolve-agent-context` (`.github/workflows/test-resolve-agent-context.yml`)
@@ -115,6 +116,38 @@ convention fallback (FEAT-003).
 `./tests/test-integration-merge.sh` installs a throwaway `--all` target and
 runs the critical path from `docs/integration-branch.md` (workflow commands,
 shared lib, manifest resolve, claim/next/team/shelf/archive, upgrade).
+
+### Python engine harness (v2)
+
+```bash
+PYTHONPATH=engine/src python3 -m pytest -q engine/tests
+# or
+python3 -m pip install -e './engine[dev]' && pytest -q engine/tests
+```
+
+Covers pointer, workflow, registry, archive, canvas parsing, link/issue sync,
+local/offline sessions, and CLI. `scripts/sdlc.sh` with `SDLC_ENGINE=python`
+delegates to the engine; `local*` commands always use the Python engine.
+
+Issue sync confidence:
+
+| Layer | What | How |
+|-------|------|-----|
+| Unit (always) | Milestone draft → Jira/GitHub push/pull write-back | `test_issues_mocked.py` (fake HTTP + fake `gh`) |
+| Integration | Live `gh issue` pull (+ optional create/close) | `test_issues_github_integration.py` via `SDLC_GITHUB_INTEGRATION=1` |
+| CI | Same, with `issues: write` for create/close cleanup | `test-github-issue-sync` job in `test-sdlc-engine.yml` |
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-roadmap --dry-run
+SDLC_ENGINE=python ./scripts/sdlc.sh issues draft <WORK-ID> --system github
+./scripts/sdlc.sh local start --name scratch --intent "offline explore"
+./scripts/sdlc.sh local promote --type feature --name "Documented title" --dry-run
+
+# Live GitHub pull against the current repo (needs gh auth)
+SDLC_GITHUB_INTEGRATION=1 pytest -q engine/tests/test_issues_github_integration.py --run-github-integration
+```
 
 ### Session memory index + rotation harness
 

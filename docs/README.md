@@ -30,6 +30,8 @@ Use roadmap, milestone, and session-note files for project planning and narrativ
 
 **Workflow CLI reference** (pointer, phase tracking, team registry): [agent-context/README.md](../agent-context/README.md#sdlc-pointer-current-choretask) — installed in target projects at `agent-context/README.md`.
 
+**Python engine (v2):** [Engine v2](engine-v2.md) — reusable `sdlc_engine` package; `SDLC_ENGINE=auto|python|shell` on `scripts/sdlc.sh`.
+
 You can treat these six pages as the canonical onboarding path.
 
 ## If You Are Installing or Upgrading

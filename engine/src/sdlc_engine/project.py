@@ -1,0 +1,76 @@
+"""Project root resolution and artifact path helpers."""
+
+from __future__ import annotations
+
+import os
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+
+
+@dataclass(frozen=True)
+class Project:
+    root: Path
+
+    @classmethod
+    def resolve(cls, root: str | Path | None = None) -> "Project":
+        if root is not None:
+            path = Path(root).expanduser().resolve()
+            return cls(path)
+        env = os.environ.get("SDLC_ROOT")
+        if env:
+            return cls(Path(env).expanduser().resolve())
+        try:
+            out = subprocess.check_output(
+                ["git", "rev-parse", "--show-toplevel"],
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+            if out:
+                return cls(Path(out).resolve())
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            pass
+        return cls(Path.cwd().resolve())
+
+    @property
+    def sdlc_dir(self) -> Path:
+        return self.root / ".sdlc"
+
+    @property
+    def workflows_dir(self) -> Path:
+        return self.sdlc_dir / "workflows"
+
+    @property
+    def pointer_path(self) -> Path:
+        return self.sdlc_dir / "pointer"
+
+    @property
+    def registry_path(self) -> Path:
+        return self.root / "agent-context" / "work-registry.tsv"
+
+    def canvas_path(self, work_id: str) -> Path:
+        primary = self.root / "spdd" / "canvas" / f"{work_id}.md"
+        if primary.is_file():
+            return primary
+        alt = self.root / "agent-context" / "features" / work_id / "reasons-canvas.md"
+        return alt if alt.is_file() else primary
+
+    def feature_dir(self, work_id: str) -> Path:
+        return self.root / "agent-context" / "features" / work_id
+
+    def analysis_path(self, work_id: str) -> Path:
+        return self.root / "spdd" / "analysis" / f"{work_id}-analysis.md"
+
+    def review_path(self, work_id: str) -> Path:
+        return self.root / "spdd" / "reviews" / f"{work_id}-review.md"
+
+    def sync_path(self, work_id: str) -> Path:
+        return self.root / "spdd" / "sync" / f"{work_id}-sync.md"
+
+    def milestone_path(self, work_id: str) -> Path:
+        return self.root / "requirements" / "milestones" / f"{work_id}.md"
+
+    def ensure_runtime_dirs(self) -> None:
+        self.sdlc_dir.mkdir(parents=True, exist_ok=True)
+        self.workflows_dir.mkdir(parents=True, exist_ok=True)
+        (self.root / "agent-context").mkdir(parents=True, exist_ok=True)

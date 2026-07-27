@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Short entry point for SDLC pointer + workflow helpers.
 # Installed to scripts/sdlc-spdd/sdlc.sh in target projects; lives at scripts/sdlc.sh in the orchestrator repo.
+#
+# Engine selection (v2):
+#   SDLC_ENGINE=shell   Legacy bash workflow scripts (default — stable)
+#   SDLC_ENGINE=python  Require Python engine
+#   SDLC_ENGINE=auto    Prefer Python engine when importable
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,6 +18,79 @@ else
   ROOT="$(git -C "${PWD}" rev-parse --show-toplevel 2>/dev/null || pwd)"
 fi
 
+export SDLC_ROOT="${ROOT}"
+ENGINE_MODE="${SDLC_ENGINE:-shell}"
+
+_python_engine_available() {
+  if [[ -d "${ROOT}/engine/src/sdlc_engine" ]]; then
+    PYTHONPATH="${ROOT}/engine/src${PYTHONPATH:+:${PYTHONPATH}}" \
+      python3 -c 'import sdlc_engine' 2>/dev/null
+    return $?
+  fi
+  python3 -c 'import sdlc_engine' 2>/dev/null
+}
+
+_run_python_engine() {
+  local args=("$@")
+  if [[ -d "${ROOT}/engine/src/sdlc_engine" ]]; then
+    PYTHONPATH="${ROOT}/engine/src${PYTHONPATH:+:${PYTHONPATH}}" \
+      exec python3 -m sdlc_engine --root "${ROOT}" "${args[@]}"
+  fi
+  exec python3 -m sdlc_engine --root "${ROOT}" "${args[@]}"
+}
+
+cmd="${1:-next}"
+if [[ $# -gt 0 ]]; then
+  shift
+fi
+
+# Local/offline sessions are Python-engine-only, but must work even when
+# SDLC_ENGINE=shell (default). Normalize local-* aliases to `local <verb>`.
+_local_args=()
+case "${cmd}" in
+  local)
+    _local_args=("local" "$@")
+    ;;
+  local-start) _local_args=("local" "start" "$@") ;;
+  local-list) _local_args=("local" "list" "$@") ;;
+  local-status) _local_args=("local" "status" "$@") ;;
+  local-capture) _local_args=("local" "capture" "$@") ;;
+  local-shelf) _local_args=("local" "shelf" "$@") ;;
+  local-resume) _local_args=("local" "resume" "$@") ;;
+  local-promote) _local_args=("local" "promote" "$@") ;;
+  local-abandon) _local_args=("local" "abandon" "$@") ;;
+esac
+if ((${#_local_args[@]} > 0)); then
+  if ! _python_engine_available; then
+    echo "sdlc: local sessions require the Python engine (engine/sdlc_engine)" >&2
+    echo "Install with: python3 -m pip install -e '${ROOT}/engine'" >&2
+    exit 1
+  fi
+  _run_python_engine "${_local_args[@]}"
+fi
+
+case "${ENGINE_MODE}" in
+  python)
+    if ! _python_engine_available; then
+      echo "sdlc: SDLC_ENGINE=python but sdlc_engine is not importable" >&2
+      echo "Install with: python3 -m pip install -e '${ROOT}/engine'" >&2
+      exit 1
+    fi
+    _run_python_engine "${cmd}" "$@"
+    ;;
+  auto)
+    if _python_engine_available; then
+      _run_python_engine "${cmd}" "$@"
+    fi
+    ;;
+  shell)
+    ;;
+  *)
+    echo "sdlc: unknown SDLC_ENGINE='${ENGINE_MODE}' (use auto|python|shell)" >&2
+    exit 2
+    ;;
+esac
+
 WORKFLOW="${ROOT}/agent-context/sdlc-workflow.sh"
 if [[ ! -x "${WORKFLOW}" ]]; then
   echo "sdlc: workflow not installed (${WORKFLOW})" >&2
@@ -20,9 +98,4 @@ if [[ ! -x "${WORKFLOW}" ]]; then
   exit 1
 fi
 
-export SDLC_ROOT="${ROOT}"
-cmd="${1:-next}"
-if [[ $# -gt 0 ]]; then
-  shift
-fi
 exec "${WORKFLOW}" "${cmd}" "$@"

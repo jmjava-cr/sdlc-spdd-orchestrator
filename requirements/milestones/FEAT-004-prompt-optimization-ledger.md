@@ -51,3 +51,22 @@ Resolved Decisions):
 Canvas is `Ready For Coding`. Run:
 
     /sdlc-spdd-code @spdd/canvas/FEAT-004-prompt-optimization-ledger.md operation T01
+
+## Jira
+
+Draft for issue creation — paste into Jira UI, MCP, or approved API.
+After create, set **Key** and commit.
+
+- Key: TBD
+- Issue type: Story
+- Summary: 
+- Labels:
+
+## GitHub
+
+Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
+
+- Number: TBD
+- Title: 
+- Labels: 
+- URL: 
