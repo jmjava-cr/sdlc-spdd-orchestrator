@@ -1,2 +1,0 @@
-[console_scripts]
-sdlc-engine = sdlc_engine.cli:main
