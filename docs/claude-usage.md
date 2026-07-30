@@ -22,7 +22,7 @@ This installs:
 - `.claude/commands/sdlc-spdd-code.md`
 - `.claude/commands/sdlc-spdd-api-test.md`
 - `.claude/commands/sdlc-spdd-review.md`
-- `.claude/commands/sdlc-spdd-diff-comment.md`
+- `.claude/commands/sdlc-spdd-commit-message.md`
 - `.claude/commands/sdlc-spdd-prompt-update.md`
 - `.claude/commands/sdlc-spdd-retro.md`
 - `.claude/commands/sdlc-spdd-sync.md`
@@ -55,7 +55,7 @@ Project-scoped commands installed under `.claude/commands/` are available in any
 | `/sdlc-spdd-code` | Implement one approved operation |
 | `/sdlc-spdd-api-test` | Generate cURL API test script from canvas + implementation |
 | `/sdlc-spdd-review` | Review changes against canvas |
-| `/sdlc-spdd-diff-comment` | Generate a PR comment draft from the current diff vs base (does not post) |
+| `/sdlc-spdd-commit-message` | Generate a commit message from current changes via `sdlc.sh commit-message` (does not commit) |
 | `/sdlc-spdd-prompt-update` | Update canvas first when requirements or behavior intent change |
 | `/sdlc-spdd-retro` | Capture learnings into memory |
 | `/sdlc-spdd-sync` | Reconcile canvas with code |

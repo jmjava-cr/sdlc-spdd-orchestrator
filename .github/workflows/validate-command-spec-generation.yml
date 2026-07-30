@@ -10,7 +10,7 @@ on:
       - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/claude/commands/sdlc-*.md'
       - 'tests/test-command-spec-generation.sh'
-      - 'tests/test-diff-comment-command.sh'
+      - 'tests/test-commit-message-command.sh'
       - '.github/workflows/validate-command-spec-generation.yml'
   push:
     branches: [main]
@@ -22,7 +22,7 @@ on:
       - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/claude/commands/sdlc-*.md'
       - 'tests/test-command-spec-generation.sh'
-      - 'tests/test-diff-comment-command.sh'
+      - 'tests/test-commit-message-command.sh'
       - '.github/workflows/validate-command-spec-generation.yml'
 
 jobs:
@@ -43,5 +43,5 @@ jobs:
       - name: Run command-spec generation regression harness
         run: ./tests/test-command-spec-generation.sh
 
-      - name: Run diff-comment command regression harness
-        run: ./tests/test-diff-comment-command.sh
+      - name: Run commit-message command regression harness
+        run: ./tests/test-commit-message-command.sh

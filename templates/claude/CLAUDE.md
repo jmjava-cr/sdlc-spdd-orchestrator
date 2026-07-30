@@ -20,7 +20,7 @@ The matching slash commands live in `.claude/commands/`:
     /sdlc-spdd-code
     /sdlc-spdd-api-test
     /sdlc-spdd-review
-    /sdlc-spdd-diff-comment
+    /sdlc-spdd-commit-message
     /sdlc-spdd-prompt-update
     /sdlc-spdd-retro
     /sdlc-spdd-sync

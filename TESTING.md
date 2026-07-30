@@ -106,9 +106,11 @@ regression harness.
 `./tests/test-command-spec-generation.sh` asserts adapters match
 `spec/commands/*.spec.md`, that `--check` detects drift, and parity validation still passes (FEAT-002).
 
-`./tests/test-diff-comment-command.sh` asserts `/sdlc-spdd-diff-comment` adapters
-exist with generate-only (no-post) + diff-vs-base contract language, and that
-generator `--check` plus adapter validation still pass (FEAT-008 / #41).
+`./tests/test-commit-message-command.sh` asserts `/sdlc-spdd-commit-message` adapters
+exist with generate-only (no-commit) language, Python engine delegation
+(`sdlc.sh commit-message`), and that generator `--check` plus adapter validation
+still pass (FEAT-008 / #41). Engine coverage lives in
+`engine/tests/test_commit_message.py`.
 
 ### Extension manifest harness
 
