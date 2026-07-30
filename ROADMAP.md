@@ -142,10 +142,10 @@ Milestone 1 feature track is Complete on the integration branch.
 | FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | make it right | Complete |
 | FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | make it right | Complete |
 | FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | make it right | Complete |
-| FEAT-006-analysis-scope-lock | spdd/canvas/FEAT-006-analysis-scope-lock.md | make it right | Complete (2026-07-15) |
-| FEAT-007-jira-compatible-requirements | spdd/canvas/FEAT-007-jira-compatible-requirements.md | make it right | Complete (2026-07-15) |
-| FEAT-008-milestone-subdirectory-layout | spdd/canvas/FEAT-008-milestone-subdirectory-layout.md | make it right | Complete (2026-07-15) |
-| FEAT-009-session-brief-archive | spdd/canvas/FEAT-009-session-brief-archive.md | make it right | Complete (2026-07-15) |
+| FEAT-009-analysis-scope-lock | spdd/canvas/FEAT-009-analysis-scope-lock.md | make it right | Complete (2026-07-15) |
+| FEAT-010-jira-compatible-requirements | spdd/canvas/FEAT-010-jira-compatible-requirements.md | make it right | Complete (2026-07-15) |
+| FEAT-011-milestone-subdirectory-layout | spdd/canvas/FEAT-011-milestone-subdirectory-layout.md | make it right | Complete (2026-07-15) |
+| FEAT-012-session-brief-archive | spdd/canvas/FEAT-012-session-brief-archive.md | make it right | Complete (2026-07-15) |
 | FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | make it fast (measurement) | Complete (T01–T05) |
 | FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | make it fast (measurement) | Complete (T01–T04) |
 | SPIKE-001-guide-rag-context-backend | spdd/canvas/SPIKE-001-guide-rag-context-backend.md | make it fast (spike — DICE hybrid) | Analysis ready — blocked on Guide MCP for A/B |
@@ -180,10 +180,10 @@ Generated: 2026-07-15T23:31:46Z
 | FEAT-003-extension-hook-manifest | Extension/hook manifest | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-003-extension-hook-manifest.md |
 | FEAT-004-prompt-optimization-ledger | Prompt-optimization ledger + capture metrics | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-004-prompt-optimization-ledger.md |
 | FEAT-005-canvas-readiness-indicators | Canvas readiness + leading indicators | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-005-canvas-readiness-indicators.md |
-| FEAT-006-analysis-scope-lock | Analysis Phase Scope Lock-In | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-006-analysis-scope-lock.md |
-| FEAT-007-jira-compatible-requirements | Jira-compatible requirements format | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-007-jira-compatible-requirements.md |
-| FEAT-008-milestone-subdirectory-layout | Milestone files in subdirectories | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-008-milestone-subdirectory-layout.md |
-| FEAT-009-session-brief-archive | Session brief archive / rotation | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-009-session-brief-archive.md |
+| FEAT-009-analysis-scope-lock | Analysis Phase Scope Lock-In | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-009-analysis-scope-lock.md |
+| FEAT-010-jira-compatible-requirements | Jira-compatible requirements format | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-010-jira-compatible-requirements.md |
+| FEAT-011-milestone-subdirectory-layout | Milestone files in subdirectories | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-011-milestone-subdirectory-layout.md |
+| FEAT-012-session-brief-archive | Session brief archive / rotation | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-012-session-brief-archive.md |
 | SPIKE-001-guide-rag-context-backend | Guide as a DICE hybrid context backend | Spike | Shelved — blocked on Guide MCP | TBD | TBD | spdd/canvas/SPIKE-001-guide-rag-context-backend.md |
 | SPIKE-002-local-llm-and-embedding-format | Local models + embedding format for the retrieval backend | Spike | Analysis ready — blocked on Guide MCP | TBD | TBD | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md |
 <!-- SDLC-SPDD-ROADMAP-SUMMARY:END -->

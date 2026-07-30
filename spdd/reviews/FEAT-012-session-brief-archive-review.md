@@ -1,4 +1,4 @@
-# Review: FEAT-007-jira-compatible-requirements
+# Review: FEAT-012-session-brief-archive
 
 ## Result
 
@@ -7,7 +7,7 @@ Approved (backfill)
 ## Summary
 
 Implementation-first Work ID closed 2026-07-15; REASONS canvas backfilled afterward.
-Frontmatter templates + validate-requirements-format.sh. Matches requirement AC and milestone Linked Work.
+start-agent-session.sh rotation + Test 21. Matches requirement AC and milestone Linked Work.
 
 ## Findings
 

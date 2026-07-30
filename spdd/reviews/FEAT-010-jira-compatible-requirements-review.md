@@ -1,4 +1,4 @@
-# Review: FEAT-008-milestone-subdirectory-layout
+# Review: FEAT-010-jira-compatible-requirements
 
 ## Result
 
@@ -7,7 +7,7 @@ Approved (backfill)
 ## Summary
 
 Implementation-first Work ID closed 2026-07-15; REASONS canvas backfilled afterward.
-scripts/lib/milestone.sh prefer subdir + migration doc. Matches requirement AC and milestone Linked Work.
+Frontmatter templates + validate-requirements-format.sh. Matches requirement AC and milestone Linked Work.
 
 ## Findings
 

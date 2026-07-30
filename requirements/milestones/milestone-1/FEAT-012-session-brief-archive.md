@@ -1,5 +1,5 @@
 ---
-work_id: "FEAT-009-session-brief-archive"
+work_id: "FEAT-012-session-brief-archive"
 jira_key: ""
 jira_epic: ""
 jira_type: "Story"
@@ -15,7 +15,7 @@ related: []
 
 # FEAT-009: Session Brief Archive / Rotation
 
-**Work ID:** FEAT-009-session-brief-archive  
+**Work ID:** FEAT-012-session-brief-archive  
 **Milestone:** Milestone 1 (Make it right)  
 **Status:** Complete  
 **Date:** 2026-07-15

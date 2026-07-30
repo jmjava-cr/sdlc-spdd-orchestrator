@@ -1,4 +1,4 @@
-# Sync: FEAT-006-analysis-scope-lock
+# Sync: FEAT-009-analysis-scope-lock
 
 **Date:** 2026-07-15  
 **Review:** Approved (backfill)

@@ -1,5 +1,5 @@
 ---
-work_id: "FEAT-007-jira-compatible-requirements"
+work_id: "FEAT-010-jira-compatible-requirements"
 jira_key: ""
 jira_epic: ""
 jira_type: "Story"
@@ -10,14 +10,14 @@ jira_sprint: ""
 milestone: "milestone-1"
 blocks: []
 depends_on:
-  - "FEAT-006-analysis-scope-lock"
+  - "FEAT-009-analysis-scope-lock"
 related:
-  - "FEAT-008-milestone-subdirectory-layout"
+  - "FEAT-011-milestone-subdirectory-layout"
 ---
 
 # FEAT-007: Jira-Compatible Requirements Format
 
-**Work ID:** FEAT-007-jira-compatible-requirements  
+**Work ID:** FEAT-010-jira-compatible-requirements  
 **Milestone:** Milestone 1 (Make it right)  
 **Status:** Complete  
 **Date:** 2026-07-15
@@ -26,8 +26,8 @@ related:
 
 | Relationship | Work ID | Status | Notes |
 |--------------|---------|--------|-------|
-| Depends On | FEAT-006-analysis-scope-lock | Complete | Analysis reads frontmatter during Scope Lock |
-| Related | FEAT-008-milestone-subdirectory-layout | Complete | Shared milestone-N directory hierarchy |
+| Depends On | FEAT-009-analysis-scope-lock | Complete | Analysis reads frontmatter during Scope Lock |
+| Related | FEAT-011-milestone-subdirectory-layout | Complete | Shared milestone-N directory hierarchy |
 | Source issue | issues/ENHANCEMENT-jira-compatible-requirements-format.md | Implemented | Origin ticket |
 
 ## Summary

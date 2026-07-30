@@ -1,5 +1,5 @@
 ---
-work_id: "FEAT-006-analysis-scope-lock"
+work_id: "FEAT-009-analysis-scope-lock"
 jira_key: ""
 jira_epic: ""
 jira_type: "Story"
@@ -12,12 +12,12 @@ blocks: []
 depends_on:
   - "FEAT-002-command-spec-generation"
 related:
-  - "FEAT-007-jira-compatible-requirements"
+  - "FEAT-010-jira-compatible-requirements"
 ---
 
 # FEAT-006: Analysis Phase Scope Lock-In
 
-**Work ID:** FEAT-006-analysis-scope-lock  
+**Work ID:** FEAT-009-analysis-scope-lock  
 **Milestone:** Milestone 1 (Make it right)  
 **Status:** Complete  
 **Date:** 2026-07-15
@@ -27,7 +27,7 @@ related:
 | Relationship | Work ID | Status | Notes |
 |--------------|---------|--------|-------|
 | Depends On | FEAT-002-command-spec-generation | Complete | Analysis adapters generated from lifecycle spec |
-| Related | FEAT-007-jira-compatible-requirements | Complete | Analysis reads Jira frontmatter during lock-in |
+| Related | FEAT-010-jira-compatible-requirements | Complete | Analysis reads Jira frontmatter during lock-in |
 | Source issue | issues/ENHANCEMENT-analysis-phase-scope-validation.md | Implemented | Origin ticket |
 
 ## Summary

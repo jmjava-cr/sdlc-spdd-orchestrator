@@ -1,4 +1,4 @@
-# Sync: FEAT-008-milestone-subdirectory-layout
+# Sync: FEAT-011-milestone-subdirectory-layout
 
 **Date:** 2026-07-15  
 **Review:** Approved (backfill)

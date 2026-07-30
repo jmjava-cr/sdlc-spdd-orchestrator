@@ -1,4 +1,4 @@
-# Sync: FEAT-009-session-brief-archive
+# Sync: FEAT-010-jira-compatible-requirements
 
 **Date:** 2026-07-15  
 **Review:** Approved (backfill)
@@ -17,4 +17,4 @@
 
 ## What Remains Incomplete
 
-Nothing in scope for Session brief archive.
+Nothing in scope for Jira-compatible requirements.

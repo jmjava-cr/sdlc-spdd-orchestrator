@@ -1,8 +1,8 @@
-# REASONS Canvas: FEAT-006-analysis-scope-lock - Analysis Phase Scope Lock-In
+# REASONS Canvas: FEAT-012-session-brief-archive - Session brief archive / rotation
 
 ## Metadata
 
-- Work ID: FEAT-006-analysis-scope-lock
+- Work ID: FEAT-012-session-brief-archive
 - Work Type: Feature
 - Status: Complete
 - Readiness: Reviewed — Complete (backfilled)
@@ -13,21 +13,22 @@
 - Source System: Roadmap / issues
 - Roadmap: ROADMAP.md
 - Milestone: requirements/milestones/milestone-1/MILESTONE-1.md
-- Delivery stage: make it right (analysis contract)
+- Delivery stage: make it right (session hygiene)
 - Related PR: (local on cursor/integration-981e)
 
 ## R - Requirements
 
 ### User Goal
 
-Lock analysis scope (IN / NOT / Reference-only) before generating analysis prose.
+Rotate older timestamped session briefs into sessions/archive/ while keeping current-session.md.
 
 ### Acceptance Criteria
 
-- [x] Analysis prompt includes Scope Lock-In before Analysis Generation
-- [x] Analysis output requires Scope Lock (In / NOT / Reference-only)
-- [x] Generation steps validate concepts against locked scope
-- [x] Guidance document shipped under docs/
+- [x] New session start creates timestamped brief + updates current-session.md
+- [x] When timestamped briefs exceed the limit, oldest move to sessions/archive/
+- [x] current-session.md is never archived
+- [x] Omitting rotation (--no-session-rotate) preserves previous behavior
+- [x] Test covers archive move (Test 21)
 
 ### Non-Goals
 
@@ -45,11 +46,8 @@ Lock analysis scope (IN / NOT / Reference-only) before generating analysis prose
 
 ### Files Likely Affected
 
-- `spec/commands/lifecycle-analysis.spec.md`
-- `docs/analysis-phase-scope-validation.md`
-- `templates/cursor/sdlc-spdd-analysis.md`
-- `templates/copilot/prompts/sdlc-spdd-analysis.prompt.md`
-- `templates/claude/commands/sdlc-spdd-analysis.md`
+- `scripts/start-agent-session.sh`
+- `tests/test-session-memory-index.sh`
 
 ## A - Approach
 
@@ -64,20 +62,12 @@ Operations below match shipped increments.
 
 ## O - Operations
 
-### T01 - Add Scope Lock to analysis lifecycle spec
+### T01 - Rotate briefs in start-agent-session.sh
 
 - Status: Complete
-- Description: Require Scope Lock section in analysis adapters
-- Files: spec/commands/lifecycle-analysis.spec.md, generated adapters
-- Tests: validate-command-adapters.sh
-- Validation: Shipped
-
-### T02 - Ship guidance doc
-
-- Status: Complete
-- Description: Document Scope Lock pitfalls and workflow
-- Files: docs/analysis-phase-scope-validation.md
-- Tests: Not applicable
+- Description: Default limit 20; --session-limit / --no-session-rotate
+- Files: scripts/start-agent-session.sh
+- Tests: tests/test-session-memory-index.sh Test 21
 - Validation: Shipped
 
 ## N - Norms

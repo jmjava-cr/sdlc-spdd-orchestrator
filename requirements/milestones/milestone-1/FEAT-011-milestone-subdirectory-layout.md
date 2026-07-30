@@ -1,5 +1,5 @@
 ---
-work_id: "FEAT-008-milestone-subdirectory-layout"
+work_id: "FEAT-011-milestone-subdirectory-layout"
 jira_key: ""
 jira_epic: ""
 jira_type: "Story"
@@ -11,12 +11,12 @@ milestone: "milestone-1"
 blocks: []
 depends_on: []
 related:
-  - "FEAT-007-jira-compatible-requirements"
+  - "FEAT-010-jira-compatible-requirements"
 ---
 
 # FEAT-008: Milestone Files in Subdirectories
 
-**Work ID:** FEAT-008-milestone-subdirectory-layout  
+**Work ID:** FEAT-011-milestone-subdirectory-layout  
 **Milestone:** Milestone 1 (Make it right)  
 **Status:** Complete  
 **Date:** 2026-07-15
@@ -25,7 +25,7 @@ related:
 
 | Relationship | Work ID | Status | Notes |
 |--------------|---------|--------|-------|
-| Related | FEAT-007-jira-compatible-requirements | Complete | `_milestone.yml` + nested stubs |
+| Related | FEAT-010-jira-compatible-requirements | Complete | `_milestone.yml` + nested stubs |
 | Source issue | issues/REQUIREMENT-001-milestone-files-in-subdirectories.md | Implemented | Origin ticket |
 
 ## Summary

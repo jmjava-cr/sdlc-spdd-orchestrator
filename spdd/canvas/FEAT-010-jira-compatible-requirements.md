@@ -1,8 +1,8 @@
-# REASONS Canvas: FEAT-009-session-brief-archive - Session brief archive / rotation
+# REASONS Canvas: FEAT-010-jira-compatible-requirements - Jira-compatible requirements format
 
 ## Metadata
 
-- Work ID: FEAT-009-session-brief-archive
+- Work ID: FEAT-010-jira-compatible-requirements
 - Work Type: Feature
 - Status: Complete
 - Readiness: Reviewed — Complete (backfilled)
@@ -13,22 +13,22 @@
 - Source System: Roadmap / issues
 - Roadmap: ROADMAP.md
 - Milestone: requirements/milestones/milestone-1/MILESTONE-1.md
-- Delivery stage: make it right (session hygiene)
+- Delivery stage: make it right (planning artifacts)
 - Related PR: (local on cursor/integration-981e)
 
 ## R - Requirements
 
 ### User Goal
 
-Rotate older timestamped session briefs into sessions/archive/ while keeping current-session.md.
+Embed Jira metadata and dependency links in Markdown requirements with validation.
 
 ### Acceptance Criteria
 
-- [x] New session start creates timestamped brief + updates current-session.md
-- [x] When timestamped briefs exceed the limit, oldest move to sessions/archive/
-- [x] current-session.md is never archived
-- [x] Omitting rotation (--no-session-rotate) preserves previous behavior
-- [x] Test covers archive move (Test 21)
+- [x] Format specification documented
+- [x] Requirement + milestone templates checked in
+- [x] Validation script checks keys, Work ID refs, _milestone.yml presence
+- [x] Analysis prompt extracts Jira context read-only
+- [x] Migration guidance documented
 
 ### Non-Goals
 
@@ -46,8 +46,9 @@ Rotate older timestamped session briefs into sessions/archive/ while keeping cur
 
 ### Files Likely Affected
 
-- `scripts/start-agent-session.sh`
-- `tests/test-session-memory-index.sh`
+- `docs/jira-compatible-requirements-format.md`
+- `scripts/validate-requirements-format.sh`
+- `templates/requirements/`
 
 ## A - Approach
 
@@ -62,12 +63,28 @@ Operations below match shipped increments.
 
 ## O - Operations
 
-### T01 - Rotate briefs in start-agent-session.sh
+### T01 - Document format + templates
 
 - Status: Complete
-- Description: Default limit 20; --session-limit / --no-session-rotate
-- Files: scripts/start-agent-session.sh
-- Tests: tests/test-session-memory-index.sh Test 21
+- Description: Spec + templates under templates/requirements/
+- Files: docs/jira-compatible-requirements-format.md, templates/requirements/
+- Tests: Not applicable
+- Validation: Shipped
+
+### T02 - Ship validate-requirements-format.sh
+
+- Status: Complete
+- Description: Format-only validator on init/upgrade
+- Files: scripts/validate-requirements-format.sh
+- Tests: manual/script smoke
+- Validation: Shipped
+
+### T03 - Wire create-work + analysis read-only
+
+- Status: Complete
+- Description: Frontmatter stubs + analysis extracts metadata
+- Files: scripts/create-work-from-milestone.sh, analysis adapters
+- Tests: validate-requirements-format.sh
 - Validation: Shipped
 
 ## N - Norms

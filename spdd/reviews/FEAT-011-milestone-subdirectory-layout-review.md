@@ -1,4 +1,4 @@
-# Review: FEAT-009-session-brief-archive
+# Review: FEAT-011-milestone-subdirectory-layout
 
 ## Result
 
@@ -7,7 +7,7 @@ Approved (backfill)
 ## Summary
 
 Implementation-first Work ID closed 2026-07-15; REASONS canvas backfilled afterward.
-start-agent-session.sh rotation + Test 21. Matches requirement AC and milestone Linked Work.
+scripts/lib/milestone.sh prefer subdir + migration doc. Matches requirement AC and milestone Linked Work.
 
 ## Findings
 

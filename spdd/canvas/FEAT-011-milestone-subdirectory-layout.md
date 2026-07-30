@@ -1,8 +1,8 @@
-# REASONS Canvas: FEAT-008-milestone-subdirectory-layout - Milestone files in subdirectories
+# REASONS Canvas: FEAT-011-milestone-subdirectory-layout - Milestone files in subdirectories
 
 ## Metadata
 
-- Work ID: FEAT-008-milestone-subdirectory-layout
+- Work ID: FEAT-011-milestone-subdirectory-layout
 - Work Type: Feature
 - Status: Complete
 - Readiness: Reviewed — Complete (backfilled)

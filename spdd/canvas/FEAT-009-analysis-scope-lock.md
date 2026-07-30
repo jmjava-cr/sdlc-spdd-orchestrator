@@ -1,8 +1,8 @@
-# REASONS Canvas: FEAT-007-jira-compatible-requirements - Jira-compatible requirements format
+# REASONS Canvas: FEAT-009-analysis-scope-lock - Analysis Phase Scope Lock-In
 
 ## Metadata
 
-- Work ID: FEAT-007-jira-compatible-requirements
+- Work ID: FEAT-009-analysis-scope-lock
 - Work Type: Feature
 - Status: Complete
 - Readiness: Reviewed — Complete (backfilled)
@@ -13,22 +13,21 @@
 - Source System: Roadmap / issues
 - Roadmap: ROADMAP.md
 - Milestone: requirements/milestones/milestone-1/MILESTONE-1.md
-- Delivery stage: make it right (planning artifacts)
+- Delivery stage: make it right (analysis contract)
 - Related PR: (local on cursor/integration-981e)
 
 ## R - Requirements
 
 ### User Goal
 
-Embed Jira metadata and dependency links in Markdown requirements with validation.
+Lock analysis scope (IN / NOT / Reference-only) before generating analysis prose.
 
 ### Acceptance Criteria
 
-- [x] Format specification documented
-- [x] Requirement + milestone templates checked in
-- [x] Validation script checks keys, Work ID refs, _milestone.yml presence
-- [x] Analysis prompt extracts Jira context read-only
-- [x] Migration guidance documented
+- [x] Analysis prompt includes Scope Lock-In before Analysis Generation
+- [x] Analysis output requires Scope Lock (In / NOT / Reference-only)
+- [x] Generation steps validate concepts against locked scope
+- [x] Guidance document shipped under docs/
 
 ### Non-Goals
 
@@ -46,9 +45,11 @@ Embed Jira metadata and dependency links in Markdown requirements with validatio
 
 ### Files Likely Affected
 
-- `docs/jira-compatible-requirements-format.md`
-- `scripts/validate-requirements-format.sh`
-- `templates/requirements/`
+- `spec/commands/lifecycle-analysis.spec.md`
+- `docs/analysis-phase-scope-validation.md`
+- `templates/cursor/sdlc-spdd-analysis.md`
+- `templates/copilot/prompts/sdlc-spdd-analysis.prompt.md`
+- `templates/claude/commands/sdlc-spdd-analysis.md`
 
 ## A - Approach
 
@@ -63,28 +64,20 @@ Operations below match shipped increments.
 
 ## O - Operations
 
-### T01 - Document format + templates
+### T01 - Add Scope Lock to analysis lifecycle spec
 
 - Status: Complete
-- Description: Spec + templates under templates/requirements/
-- Files: docs/jira-compatible-requirements-format.md, templates/requirements/
+- Description: Require Scope Lock section in analysis adapters
+- Files: spec/commands/lifecycle-analysis.spec.md, generated adapters
+- Tests: validate-command-adapters.sh
+- Validation: Shipped
+
+### T02 - Ship guidance doc
+
+- Status: Complete
+- Description: Document Scope Lock pitfalls and workflow
+- Files: docs/analysis-phase-scope-validation.md
 - Tests: Not applicable
-- Validation: Shipped
-
-### T02 - Ship validate-requirements-format.sh
-
-- Status: Complete
-- Description: Format-only validator on init/upgrade
-- Files: scripts/validate-requirements-format.sh
-- Tests: manual/script smoke
-- Validation: Shipped
-
-### T03 - Wire create-work + analysis read-only
-
-- Status: Complete
-- Description: Frontmatter stubs + analysis extracts metadata
-- Files: scripts/create-work-from-milestone.sh, analysis adapters
-- Tests: validate-requirements-format.sh
 - Validation: Shipped
 
 ## N - Norms
