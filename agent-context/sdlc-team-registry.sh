@@ -54,12 +54,13 @@ _team_canvas_path() {
   [[ -f "${canvas}" ]] && printf '%s' "${canvas}"
 }
 
-_team_canvas_is_complete() {
+# Prints Final Status line text (empty when missing).
+_team_canvas_final_status_text() {
   local work_id="$1"
-  local canvas line
+  local canvas
   canvas="$(_team_canvas_path "${work_id}")"
-  [[ -n "${canvas}" ]] || return 1
-  line="$(awk '
+  [[ -n "${canvas}" ]] || return 0
+  awk '
     /^## Final Status/ { in_final=1; next }
     /^## / { if (in_final) in_final=0 }
     in_final && /^- Status:/ {
@@ -67,10 +68,42 @@ _team_canvas_is_complete() {
       print
       exit
     }
-  ' "${canvas}")"
-  [[ -z "${line}" ]] && return 1
+  ' "${canvas}"
+}
+
+# Prints complete | cancelled | other based on ## Final Status.
+_team_canvas_final_kind() {
+  local work_id="$1"
+  local line
+  line="$(_team_canvas_final_status_text "${work_id}")"
+  [[ -z "${line}" ]] && { printf '%s' "other"; return 0; }
   line="$(printf '%s' "${line}" | tr '[:upper:]' '[:lower:]')"
-  [[ "${line}" == *complete* ]] && [[ "${line}" != *in\ progress* ]]
+  if [[ "${line}" == *cancel* ]]; then
+    printf '%s' "cancelled"
+    return 0
+  fi
+  if [[ "${line}" == *complete* ]] && [[ "${line}" != *in\ progress* ]]; then
+    printf '%s' "complete"
+    return 0
+  fi
+  printf '%s' "other"
+}
+
+_team_canvas_is_complete() {
+  local work_id="$1"
+  [[ "$(_team_canvas_final_kind "${work_id}")" == "complete" ]]
+}
+
+_team_canvas_is_cancelled() {
+  local work_id="$1"
+  [[ "$(_team_canvas_final_kind "${work_id}")" == "cancelled" ]]
+}
+
+_team_canvas_is_archivable() {
+  local work_id="$1"
+  local kind
+  kind="$(_team_canvas_final_kind "${work_id}")"
+  [[ "${kind}" == "complete" || "${kind}" == "cancelled" ]]
 }
 
 _team_registry_note_for() {
@@ -255,22 +288,28 @@ _team_run_hook() {
 }
 
 sdlc_team_refresh_done_status() {
-  local work_id
+  local work_id kind cur_status cur_phase cur_op cur_note target_status note_token
   _team_registry_init
   while IFS= read -r work_id; do
     [[ -z "${work_id}" ]] && continue
-    _team_canvas_is_complete "${work_id}" || continue
-    local cur_status cur_phase cur_op cur_note
+    kind="$(_team_canvas_final_kind "${work_id}")"
+    case "${kind}" in
+      complete) target_status="done"; note_token="canvas Final Status: Complete" ;;
+      cancelled) target_status="cancelled"; note_token="canvas Final Status: Cancelled" ;;
+      *) continue ;;
+    esac
     cur_status="$(awk -F '\t' -v id="${work_id}" '$1 == id { print $2; exit }' "${SDLC_TEAM_REGISTRY}")"
+    # Do not reopen archived rows from canvas sync.
+    [[ "${cur_status}" == "archived" ]] && continue
     if [[ -z "${cur_status}" ]]; then
-      sdlc_team_register "${work_id}" "done" "sync" "" "canvas complete"
+      sdlc_team_register "${work_id}" "${target_status}" "sync" "" "${note_token}"
       continue
     fi
-    [[ "${cur_status}" == "done" ]] && continue
+    [[ "${cur_status}" == "${target_status}" ]] && continue
     cur_phase="$(awk -F '\t' -v id="${work_id}" '$1 == id { print $3; exit }' "${SDLC_TEAM_REGISTRY}")"
     cur_op="$(awk -F '\t' -v id="${work_id}" '$1 == id { print $4; exit }' "${SDLC_TEAM_REGISTRY}")"
-    cur_note="$(_team_compose_note "$(_team_registry_note_for "${work_id}")" "" "" "" "canvas Final Status: Complete")"
-    sdlc_team_register "${work_id}" "done" "${cur_phase}" "${cur_op}" "${cur_note}"
+    cur_note="$(_team_compose_note "$(_team_registry_note_for "${work_id}")" "" "" "" "${note_token}")"
+    sdlc_team_register "${work_id}" "${target_status}" "${cur_phase}" "${cur_op}" "${cur_note}"
   done < <(sdlc_team_discover_work_ids)
 }
 
@@ -299,7 +338,7 @@ _team_registry_init() {
     cat > "${SDLC_TEAM_REGISTRY}" <<'EOF'
 # Team Work Registry — tab-separated. Commit updates so teammates see who is on which Work ID.
 # Columns: work_id status phase operation owner updated note
-# status: active | shelved | done | available
+# status: active | shelved | done | cancelled | archived | available
 # note tokens: branch:<name> pr:<url-or-#> jira:<KEY> <free text>
 work_id	status	phase	operation	owner	updated	note
 EOF
@@ -440,13 +479,130 @@ sdlc_team_discover_work_ids() {
     else
       base="$(basename "${path}" .md)"
     fi
-    [[ "${base}" == "README" ]] && continue
+    [[ "${base}" == "README" || "${base}" == "archive" ]] && continue
     [[ "${base}" == MILESTONE-* || "${base}" == milestone-* ]] && continue
     [[ -n "${base}" ]] || continue
+    # Skip nested archive trees if a glob ever expands into them.
+    [[ "${path}" == */archive/* || "${path}" == */archive ]] && continue
     seen["${base}"]=1
   done
   shopt -u nullglob
   printf '%s\n' "${!seen[@]}" | sort
+}
+
+_team_move_path() {
+  local src="$1"
+  local dest="$2"
+  local dry="${3:-0}"
+  [[ -e "${src}" ]] || return 0
+  if [[ "${dry}" -eq 1 ]]; then
+    echo "[dry-run] would move ${src#${SDLC_ROOT}/} -> ${dest#${SDLC_ROOT}/}"
+    return 0
+  fi
+  mkdir -p "$(dirname "${dest}")"
+  if [[ -e "${dest}" ]]; then
+    echo "archive: destination already exists, skipping ${dest#${SDLC_ROOT}/}" >&2
+    return 1
+  fi
+  mv "${src}" "${dest}"
+  echo "Moved ${src#${SDLC_ROOT}/} -> ${dest#${SDLC_ROOT}/}"
+}
+
+# Move completed/cancelled Work ID artifacts into archive/ folders.
+# Keeps requirements/milestones/<WORK-ID>.md in place as historical requirement source.
+sdlc_team_archive_work() {
+  local work_id="${1:-}"
+  local dry="${2:-0}"
+  local force="${3:-0}"
+  local root="${SDLC_ROOT}"
+  local kind pointer moved=0
+
+  if [[ -z "${work_id}" ]]; then
+    echo "archive: Work ID required" >&2
+    return 2
+  fi
+
+  kind="$(_team_canvas_final_kind "${work_id}")"
+  if [[ "${force}" -ne 1 && "${kind}" != "complete" && "${kind}" != "cancelled" ]]; then
+    echo "archive: ${work_id} is not Complete or Cancelled (Final Status kind=${kind}). Use --force to archive anyway." >&2
+    return 1
+  fi
+
+  pointer="$(sdlc_get_pointer)"
+  if [[ "${pointer}" == "${work_id}" ]]; then
+    if [[ "${dry}" -eq 1 ]]; then
+      echo "[dry-run] would clear pointer for ${work_id}"
+    else
+      sdlc_reset_pointer >/dev/null
+      echo "Cleared local pointer (was ${work_id})"
+    fi
+  fi
+
+  local feature_src="${root}/agent-context/features/${work_id}"
+  local feature_dest="${root}/agent-context/features/archive/${work_id}"
+  if [[ -e "${feature_src}" ]]; then
+    _team_move_path "${feature_src}" "${feature_dest}" "${dry}" && moved=1
+  fi
+
+  local canvas_src review_src analysis_src sync_src
+  canvas_src="${root}/spdd/canvas/${work_id}.md"
+  analysis_src="${root}/spdd/analysis/${work_id}-analysis.md"
+  review_src="${root}/spdd/reviews/${work_id}-review.md"
+  sync_src="${root}/spdd/sync/${work_id}-sync.md"
+  [[ -f "${canvas_src}" ]] && _team_move_path "${canvas_src}" "${root}/spdd/canvas/archive/${work_id}.md" "${dry}" && moved=1
+  [[ -f "${analysis_src}" ]] && _team_move_path "${analysis_src}" "${root}/spdd/analysis/archive/${work_id}-analysis.md" "${dry}" && moved=1
+  [[ -f "${review_src}" ]] && _team_move_path "${review_src}" "${root}/spdd/reviews/archive/${work_id}-review.md" "${dry}" && moved=1
+  [[ -f "${sync_src}" ]] && _team_move_path "${sync_src}" "${root}/spdd/sync/archive/${work_id}-sync.md" "${dry}" && moved=1
+
+  # Session briefs that mention this Work ID (keep current-session.md).
+  local session_dir="${root}/agent-context/sessions"
+  if [[ -d "${session_dir}" ]]; then
+    local sess
+    shopt -s nullglob
+    for sess in "${session_dir}"/*"${work_id}"*; do
+      [[ -f "${sess}" ]] || continue
+      [[ "$(basename "${sess}")" == "current-session.md" ]] && continue
+      _team_move_path "${sess}" "${session_dir}/archive/$(basename "${sess}")" "${dry}" && moved=1
+    done
+    shopt -u nullglob
+  fi
+
+  local state_src="${root}/.sdlc/workflows/${work_id}.state"
+  if [[ -f "${state_src}" ]]; then
+    _team_move_path "${state_src}" "${root}/.sdlc/workflows/archive/${work_id}.state" "${dry}" && moved=1
+  fi
+
+  if [[ "${dry}" -eq 1 ]]; then
+    echo "[dry-run] would mark ${work_id} archived in work-registry.tsv"
+    return 0
+  fi
+
+  local note_token="archived:${kind}"
+  [[ "${force}" -eq 1 && "${kind}" == "other" ]] && note_token="archived:forced"
+  sdlc_team_register "${work_id}" "archived" "archive" "" "${note_token}"
+  if [[ "${moved}" -eq 0 ]]; then
+    echo "archive: ${work_id} marked archived (no movable artifacts found; milestone left in place)"
+  else
+    echo "Archived ${work_id} (${kind}). Commit moved paths + agent-context/work-registry.tsv."
+  fi
+  echo "Left in place: requirements/milestones/${work_id}.md (if present)."
+}
+
+# Archive every Work ID whose canvas Final Status is Complete or Cancelled.
+sdlc_team_archive_eligible() {
+  local dry="${1:-0}"
+  local work_id count=0 cur
+  _team_registry_init
+  while IFS= read -r work_id; do
+    [[ -z "${work_id}" ]] && continue
+    _team_canvas_is_archivable "${work_id}" || continue
+    cur="$(awk -F '\t' -v id="${work_id}" '$1 == id { print $2; exit }' "${SDLC_TEAM_REGISTRY}" 2>/dev/null || true)"
+    [[ "${cur}" == "archived" ]] && continue
+    if sdlc_team_archive_work "${work_id}" "${dry}" 0; then
+      count=$((count + 1))
+    fi
+  done < <(sdlc_team_discover_work_ids)
+  echo "archive: processed ${count} eligible Work ID(s)"
 }
 
 sdlc_team_infer_work_summary() {
@@ -646,8 +802,32 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       done
       sdlc_team_release "${reason}"
       ;;
+    archive)
+      dry=0
+      force=0
+      all=0
+      work_id=""
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --dry-run) dry=1; shift ;;
+          --force) force=1; shift ;;
+          --all|--all-eligible) all=1; shift ;;
+          *)
+            if [[ -z "${work_id}" && "$1" != -* ]]; then
+              work_id="$1"
+            fi
+            shift
+            ;;
+        esac
+      done
+      if [[ "${all}" -eq 1 ]]; then
+        sdlc_team_archive_eligible "${dry}"
+      else
+        sdlc_team_archive_work "${work_id}" "${dry}" "${force}"
+      fi
+      ;;
     *)
-      echo "Usage: $0 {team|list-work|claim|release} ..." >&2
+      echo "Usage: $0 {team|list-work|claim|release|archive} ..." >&2
       exit 2
       ;;
   esac

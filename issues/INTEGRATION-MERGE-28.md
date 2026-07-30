@@ -17,6 +17,8 @@ Use [docs/integration-branch.md](../docs/integration-branch.md) for gates and ma
 | Shared `scripts/lib/` | FEAT-001 | — |
 | Command spec generation | FEAT-002 | — |
 | Extension manifest | FEAT-003 | — |
+| Archive completed/cancelled work | `sdlc.sh archive` | Closes #29 |
+| Instruction/grounding parity | already on branch / main | Closes #7 |
 
 **Not included:** SPIKE-001 (PR #24), demo videos (#22), language playbooks (#18), readability pass.
 
@@ -26,8 +28,9 @@ Use [docs/integration-branch.md](../docs/integration-branch.md) for gates and ma
 
 | Issue | Reason | When |
 |-------|--------|------|
-| [#23](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/23) | Workflow commands on integration | After #27 merges |
-| [#7](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/7) | Instruction parity already on `main` | Anytime (not blocked on #27) |
+| [#23](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/23) | Workflow commands on integration | After landing PR merges |
+| [#7](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/7) | Instruction/grounding parity already enforced | After landing PR merges |
+| [#29](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/29) | Archive completed/cancelled work | After landing PR merges |
 | [#28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) | Integration merged to `main` | After merge completes |
 
 ## PRs to close (do not merge separately)

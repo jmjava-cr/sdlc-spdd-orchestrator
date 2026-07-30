@@ -19,23 +19,26 @@ Make it right (do first):
 2. **FEAT-002 — single command spec → generated adapters.** Kills hand-maintained
    adapter drift across Cursor/Copilot/Claude.
 3. **FEAT-003 — extension/hook manifest.** A clean, documented extension point.
-4. **Readability pass — consistent structure, naming, and examples** across code
+4. **FEAT-006 — Python orchestration engine (v2).** `engine/sdlc_engine` + `SDLC_ENGINE` shim (PR #31).
+5. **FEAT-007 — Local SQLite index (pre-GUIDE).** Regenerable `.sdlc/index.sqlite` (PR #38).
+6. **FEAT-008 — `/sdlc-spdd-commit-message`.** Engine diff report → paste-ready message (PR #42).
+7. **Readability pass — consistent structure, naming, and examples** across code
    and docs.
-5. **FEAT-009 — analysis Scope Lock-In.** Prevent analysis scope creep before generation.
-6. **FEAT-010 — Jira-compatible requirements format.** Frontmatter, templates, validation.
-7. **FEAT-011 — milestone subdirectory layout.** Prefer `requirements/milestones/milestone-N/`.
-8. **FEAT-012 — session-brief archive/rotation.** Keep `agent-context/sessions/` bounded.
+8. **FEAT-009 — analysis Scope Lock-In.** Prevent analysis scope creep before generation.
+9. **FEAT-010 — Jira-compatible requirements format.** Frontmatter, templates, validation.
+10. **FEAT-011 — milestone subdirectory layout.** Prefer `requirements/milestones/milestone-N/`.
+11. **FEAT-012 — session-brief archive/rotation.** Keep `agent-context/sessions/` bounded.
 
 Make it fast (measurement + spikes):
 
-9. **FEAT-004 — prompt-optimization ledger + capture metrics.** **Complete**
+12. **FEAT-004 — prompt-optimization ledger + capture metrics.** **Complete**
    (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`).
-10. **FEAT-005 — canvas `readiness:` / Metadata readiness + leading indicators.** **Complete**
+13. **FEAT-005 — canvas `readiness:` / Metadata readiness + leading indicators.** **Complete**
     (`spdd/canvas/FEAT-005-canvas-readiness-indicators.md`).
-11. **SPIKE-001 / SPIKE-002** — Guide DICE hybrid + local LLM/embedding spikes.
+14. **SPIKE-001 / SPIKE-002** — Guide DICE hybrid + local LLM/embedding spikes.
     Shelved until Guide MCP is available.
 
-Work IDs are numbered in execution order. FEAT-001–009 Milestone 1 feature track is
+Work IDs are numbered in execution order. Local analysis/Jira/milestone/session-archive work was renumbered to FEAT-009–012 so main's FEAT-006–008 (engine/SQLite/commit-message) keep their IDs. FEAT-001–009 Milestone 1 feature track is
 complete on the integration branch; SPIKE-001/002 remain for make-it-fast retrieval/LLM spikes.
 
 ## Constraint
@@ -51,6 +54,9 @@ grounding files). This is enforced by `./scripts/check-posture-boundary.sh`.
 | FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | requirements/milestones/FEAT-001-shared-script-library.md | Complete (T01–T04) | On integration branch |
 | FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | requirements/milestones/FEAT-002-command-spec-generation.md | Complete (T01–T05) | On integration branch |
 | FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete (T01–T04) | On integration branch |
+| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | Complete | Merged PR #31 |
+| FEAT-007-local-sqlite-index | spdd/canvas/FEAT-007-local-sqlite-index.md | requirements/milestones/FEAT-007-local-sqlite-index.md | Complete | Merged PR #38 |
+| FEAT-008-commit-message-command | spdd/canvas/FEAT-008-commit-message-command.md | requirements/milestones/FEAT-008-commit-message-command.md | Complete | Merged PR #42 |
 | FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Complete (T01–T05) | Make it fast; ledger + metrics + rotation + docs |
 | FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Complete (T01–T04) | Make it fast; readiness + cycle metrics |
 | FEAT-009-analysis-scope-lock | spdd/canvas/FEAT-009-analysis-scope-lock.md | requirements/milestones/milestone-1/FEAT-009-analysis-scope-lock.md | Complete | Scope Lock-In in analysis; shipped 2026-07-15 |

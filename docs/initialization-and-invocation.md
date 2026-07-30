@@ -209,6 +209,7 @@ The same `/sdlc-spdd-*` syntax works in Cursor, Copilot, and Claude Code.
 | Architect | `/sdlc-spdd-architect @spdd/canvas/WORK-ID.md` | Harden the canvas before coding |
 | Code | `/sdlc-spdd-code @spdd/canvas/WORK-ID.md operation T01` | Implement one approved operation |
 | Review | `/sdlc-spdd-review @spdd/canvas/WORK-ID.md` | Review changes against the canvas |
+| Commit message | `/sdlc-spdd-commit-message [hint] [WORK-ID]` | Generate a commit message from current changes via the Python engine (does not commit) |
 | Prompt update | `/sdlc-spdd-prompt-update @spdd/canvas/WORK-ID.md` | Update the canvas first when requirements, acceptance criteria, or behavior intent change |
 | Retro | `/sdlc-spdd-retro @spdd/canvas/WORK-ID.md` | Capture reusable learnings |
 | Sync | `/sdlc-spdd-sync @spdd/canvas/WORK-ID.md` | Reconcile implementation reality with the canvas |

@@ -55,6 +55,7 @@ commands=(
   code
   api-test
   review
+  commit-message
   prompt-update
   retro
   sync
@@ -263,6 +264,11 @@ check_pack() {
       require_contains "${path}" "Do not implement code" "api-test no-code guardrail"
       require_contains "${path}" "Operations" "api-test Operations section"
       require_contains "${path}" "spdd/tasks/" "api-test task script path"
+      ;;
+    commit-message)
+      require_contains "${path}" "Do not implement code" "commit-message no-code guardrail"
+      require_contains "${path}" 'Do not run `git commit`' "commit-message no-commit guardrail"
+      require_contains "${path}" "sdlc.sh commit-message" "commit-message engine delegation"
       ;;
     *)
       require_contains "${path}" "Do not implement code" "no-code guardrail"

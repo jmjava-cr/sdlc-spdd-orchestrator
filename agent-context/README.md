@@ -83,6 +83,35 @@ sdlc_init
 
 ## SDLC Workflow (phase + gate tracking)
 
+**Python engine (v2, opt-in):** set `SDLC_ENGINE=python` (or `auto`) on
+`scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh` to use `engine/sdlc_engine`.
+Default remains the bash workflow. See [docs/engine-v2.md](../docs/engine-v2.md).
+
+**Local/offline sessions:** if an agent starts work without a documented FEAT/SPIKE,
+do **not** invent one. Start a machine-private session instead (always routed to
+the Python engine, even when `SDLC_ENGINE=shell`):
+
+```bash
+./scripts/sdlc.sh local start --name <slug> --intent "why this scratch work"
+./scripts/sdlc.sh local capture --summary "interim note"
+./scripts/sdlc.sh local promote --type feature --name "Documented title"
+```
+
+**Local SQLite index (pre-GUIDE):** regenerable query cache in `.sdlc/index.sqlite`
+(gitignored). Multi-user sync stays git — rebuild after pull. See
+[docs/local-sqlite-index.md](../docs/local-sqlite-index.md).
+
+```bash
+./scripts/sdlc.sh db rebuild
+./scripts/sdlc.sh db query --search "orchestration"
+```
+
+```bash
+SDLC_ENGINE=python ./scripts/sdlc.sh links
+SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
+SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system github --apply
+```
+
 **Short commands** (installed at `scripts/sdlc-spdd/sdlc.sh`; orchestrator repo: `scripts/sdlc.sh`):
 
 ```bash
@@ -99,7 +128,9 @@ sdlc_init
 ./scripts/sdlc.sh list-shelved
 ./scripts/sdlc.sh list-work      # discover Work IDs in the repo
 ./scripts/sdlc.sh capture --summary "finished T02"   # pointer-guarded
-./scripts/sdlc.sh sync-team      # mark done from canvas Final Status
+./scripts/sdlc.sh sync-team      # mark done/cancelled from canvas Final Status
+./scripts/sdlc.sh archive <ID>   # move Complete/Cancelled work into archive/
+./scripts/sdlc.sh archive --all  # archive every eligible Complete/Cancelled Work ID
 ```
 
 In **code** phase, the next canvas operation (`T01`, `T02`, …) is inferred automatically from the REASONS Canvas.
@@ -164,8 +195,19 @@ Set `SDLC_USER="Jane"` to label registry rows. Set `SDLC_NO_TEAM_REGISTRY=1` to 
 `team` / `list-work`. Stale claims warn but do not block; non-stale claims block until
 `claim --force` or `resume --force`.
 
-**Done status:** canvases with `## Final Status` → `Status: Complete` are marked `done` when you run
-`team`, `list-work`, or `sync-team`.
+**Done / cancelled status:** canvases with `## Final Status` → `Status: Complete` are marked `done`,
+and `Status: Cancelled` / `Canceled` are marked `cancelled`, when you run `team`, `list-work`, or
+`sync-team`.
+
+**Archive completed/cancelled work** (keeps milestones in place; moves canvases, feature workspaces,
+analysis/review/sync, and matching session briefs under `archive/`):
+
+```bash
+./scripts/sdlc.sh archive FEAT-001-alpha
+./scripts/sdlc.sh archive --all
+./scripts/sdlc.sh archive FEAT-001-alpha --dry-run
+./scripts/sdlc.sh archive FEAT-001-alpha --force   # non-terminal Final Status
+```
 
 **Branch / PR / Jira linking** (stored in the `note` column):
 

@@ -4,12 +4,16 @@ on:
   pull_request:
     paths:
       - 'scripts/lib/**'
+      - 'scripts/verify-script-lib-duplicates.sh'
+      - 'scripts/*.sh'
       - 'tests/test-scripts-lib.sh'
       - '.github/workflows/test-scripts-lib.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/lib/**'
+      - 'scripts/verify-script-lib-duplicates.sh'
+      - 'scripts/*.sh'
       - 'tests/test-scripts-lib.sh'
       - '.github/workflows/test-scripts-lib.yml'
 
@@ -21,8 +25,9 @@ jobs:
 
       - name: Check shell syntax
         run: |
+          bash -n scripts/verify-script-lib-duplicates.sh
           bash -n tests/test-scripts-lib.sh
           for f in scripts/lib/*.sh; do bash -n "$f"; done
 
-      - name: Run scripts/lib smoke tests
+      - name: Run scripts/lib smoke and regression tests
         run: ./tests/test-scripts-lib.sh

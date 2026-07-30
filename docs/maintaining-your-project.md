@@ -169,18 +169,41 @@ Use these boundaries:
 | `session-notes/` | project-owned daily session summaries |
 | `spdd/canvas/` | design contract; update through SDLC-SPDD skills |
 
+## Archive Completed / Cancelled Work
+
+When a Work ID's canvas `## Final Status` is `Complete` or `Cancelled`, move its
+artifacts out of the active tree:
+
+```bash
+./scripts/sdlc-spdd/sdlc.sh archive <WORK-ID>
+./scripts/sdlc-spdd/sdlc.sh archive --all
+./scripts/sdlc-spdd/sdlc.sh archive <WORK-ID> --dry-run
+```
+
+This moves (when present):
+
+- `spdd/canvas/<WORK-ID>.md` → `spdd/canvas/archive/`
+- `agent-context/features/<WORK-ID>/` → `agent-context/features/archive/`
+- matching `spdd/analysis|reviews|sync` artifacts → sibling `archive/` folders
+- matching `agent-context/sessions/*<WORK-ID>*` briefs → `agent-context/sessions/archive/`
+
+Left in place: `requirements/milestones/<WORK-ID>.md` (historical requirement source)
+and `agent-context/sessions/current-session.md`. The registry row becomes `archived`.
+
 ## Archive Old Sessions
 
 Session files accumulate under:
 
     agent-context/sessions/
 
-Keep:
+Prefer `sdlc.sh archive` for Work IDs that are Complete/Cancelled (moves matching
+session briefs automatically). Keep:
 
 - `current-session.md`
 - session files for active or recently completed work
 
-Archive or prune old session files according to team policy. Do not delete `agent-context/memory/session-history.md` unless intentionally resetting durable history.
+Archive or prune remaining old session files according to team policy. Do not delete
+`agent-context/memory/session-history.md` unless intentionally resetting durable history.
 
 ## Validate Before Done
 

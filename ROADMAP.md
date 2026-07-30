@@ -91,6 +91,8 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 | Milestone subdirectory layout (`requirements/milestones/milestone-N/`) | Maintainability (planning layout) — **FEAT-011 Complete** |
 | Session-brief archive/rotation (`agent-context/sessions/` → `archive/`; data is already extracted into memory at capture) | Maintainability — **FEAT-012 Complete** |
 | Golden-path regression dogfood (fixed stub → analysis→plan→architect diff) | Maintainability |
+| Session-brief + completed/cancelled work archive (`sdlc.sh archive`; sessions/features/canvas → `archive/`) | Maintainability |
+| Python orchestration engine v2 (`engine/sdlc_engine`) with shell compatibility shim | Maintainability / Extensibility |
 | Code + docs readability pass (consistent structure, naming, examples) | Readability |
 | Extension/hook manifest in `agent-context/extensions/` | Extensibility |
 | Initial `docgen` narrated-docs bundle (`docs/demos/`) | Readability / operator docs (CHORE-001) |
@@ -142,6 +144,9 @@ Milestone 1 feature track is Complete on the integration branch.
 | FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | make it right | Complete |
 | FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | make it right | Complete |
 | FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | make it right | Complete |
+| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | make it right | Complete (PR #31) |
+| FEAT-007-local-sqlite-index | spdd/canvas/FEAT-007-local-sqlite-index.md | make it right | Complete (PR #38) |
+| FEAT-008-commit-message-command | spdd/canvas/FEAT-008-commit-message-command.md | make it right | Complete (PR #42) |
 | FEAT-009-analysis-scope-lock | spdd/canvas/FEAT-009-analysis-scope-lock.md | make it right | Complete (2026-07-15) |
 | FEAT-010-jira-compatible-requirements | spdd/canvas/FEAT-010-jira-compatible-requirements.md | make it right | Complete (2026-07-15) |
 | FEAT-011-milestone-subdirectory-layout | spdd/canvas/FEAT-011-milestone-subdirectory-layout.md | make it right | Complete (2026-07-15) |
@@ -169,7 +174,7 @@ Refresh the generated summary table from canvases with:
 
 ## SDLC-SPDD Work Summary
 
-Generated: 2026-07-15T23:31:46Z
+Generated: 2026-07-30T12:00:00Z
 
 | Work ID | Title | Type | Status | Milestone | Source | Canvas |
 |---------|-------|------|--------|-----------|--------|--------|
@@ -178,12 +183,11 @@ Generated: 2026-07-15T23:31:46Z
 | FEAT-001-shared-script-library | Shared script library (scripts/lib/) | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-001-shared-script-library.md |
 | FEAT-002-command-spec-generation | Single command spec → generated adapters | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-002-command-spec-generation.md |
 | FEAT-003-extension-hook-manifest | Extension/hook manifest | Feature (refactor) | Complete | milestone-1.md | TBD | spdd/canvas/FEAT-003-extension-hook-manifest.md |
-| FEAT-004-prompt-optimization-ledger | Prompt-optimization ledger + capture metrics | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-004-prompt-optimization-ledger.md |
-| FEAT-005-canvas-readiness-indicators | Canvas readiness + leading indicators | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-005-canvas-readiness-indicators.md |
-| FEAT-009-analysis-scope-lock | Analysis Phase Scope Lock-In | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-009-analysis-scope-lock.md |
-| FEAT-010-jira-compatible-requirements | Jira-compatible requirements format | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-010-jira-compatible-requirements.md |
-| FEAT-011-milestone-subdirectory-layout | Milestone files in subdirectories | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-011-milestone-subdirectory-layout.md |
-| FEAT-012-session-brief-archive | Session brief archive / rotation | Feature | Complete | requirements/milestones/milestone-1/MILESTONE-1.md | TBD | spdd/canvas/FEAT-012-session-brief-archive.md |
-| SPIKE-001-guide-rag-context-backend | Guide as a DICE hybrid context backend | Spike | Shelved — blocked on Guide MCP | TBD | TBD | spdd/canvas/SPIKE-001-guide-rag-context-backend.md |
-| SPIKE-002-local-llm-and-embedding-format | Local models + embedding format for the retrieval backend | Spike | Analysis ready — blocked on Guide MCP | TBD | TBD | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md |
+| FEAT-004-prompt-optimization-ledger | Prompt-optimization ledger + capture metrics | Feature | Draft | milestone-1.md | TBD | spdd/canvas/FEAT-004-prompt-optimization-ledger.md |
+| FEAT-005-canvas-readiness-indicators | Canvas readiness + leading indicators | Feature | Draft | milestone-1.md | TBD | spdd/canvas/FEAT-005-canvas-readiness-indicators.md |
+| FEAT-006-python-orchestration-engine | Python orchestration engine (v2) | Feature | In Progress | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/pull/31 | spdd/canvas/FEAT-006-python-orchestration-engine.md |
+| FEAT-007-local-sqlite-index | Local SQLite index (pre-GUIDE) | Feature | Complete | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/pull/38 | spdd/canvas/FEAT-007-local-sqlite-index.md |
+| FEAT-008-commit-message-command | Slash command: generate commit message from current changes | Feature | Complete | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/issues/41 | spdd/canvas/FEAT-008-commit-message-command.md |
+| SPIKE-001-guide-rag-context-backend | Guide as a DICE hybrid context backend | Spike | Draft | TBD | TBD | spdd/canvas/SPIKE-001-guide-rag-context-backend.md |
+| SPIKE-002-local-llm-and-embedding-format | Local models + embedding format for the retrieval backend | Spike | Draft | TBD | TBD | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md |
 <!-- SDLC-SPDD-ROADMAP-SUMMARY:END -->

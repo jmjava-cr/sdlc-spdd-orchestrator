@@ -1,21 +1,24 @@
 # Team Work Registry — tab-separated. Commit updates so teammates see who is on which Work ID.
 # Columns: work_id status phase operation owner updated note
-# status: active | shelved | done | available
+# status: active | shelved | done | cancelled | archived | available
 #
-# Updated by: ./scripts/sdlc.sh claim|release|resume|shelf
+# Updated by: ./scripts/sdlc.sh claim|release|resume|shelf|archive|sync-team
 # Override owner label: export SDLC_USER="your-name"
 # Opt out of registry writes: export SDLC_NO_TEAM_REGISTRY=1
 work_id	status	phase	operation	owner	updated	note
-CHORE-001-docgen-initial-documentation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
-CHORE-002-docgen-video-generation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
-FEAT-001-shared-script-library	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
-FEAT-002-command-spec-generation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
-FEAT-003-extension-hook-manifest	done	sync		John Menke	2026-07-15T23:04:27Z	canvas complete
+CHORE-001-docgen-initial-documentation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas Final Status: Complete
+CHORE-002-docgen-video-generation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas Final Status: Complete
+FEAT-001-shared-script-library	done	sync		John Menke	2026-07-15T23:04:27Z	canvas Final Status: Complete
+FEAT-002-command-spec-generation	done	sync		John Menke	2026-07-15T23:04:27Z	canvas Final Status: Complete
+FEAT-003-extension-hook-manifest	done	sync		John Menke	2026-07-15T23:04:27Z	canvas Final Status: Complete
 FEAT-004-prompt-optimization-ledger	done	sync		John Menke	2026-07-15T23:22:00Z	FEAT-004 Complete (T01-T05); review Approved With Notes canvas Final Status: Complete
 FEAT-005-canvas-readiness-indicators	done	sync		John Menke	2026-07-15T23:26:07Z	FEAT-005 Complete (T01-T04) canvas Final Status: Complete
-FEAT-009-analysis-scope-lock	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
-FEAT-010-jira-compatible-requirements	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
-FEAT-011-milestone-subdirectory-layout	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
-FEAT-012-session-brief-archive	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete
+FEAT-006-python-orchestration-engine	done	sync		Cursor Agent	2026-07-27T01:05:28Z	Merged via PR #31; present on main
+FEAT-007-local-sqlite-index	done	sync		Cursor Agent	2026-07-27T01:05:28Z	Merged via PR #38
+FEAT-008-commit-message-command	done	sync		Cursor Agent	2026-07-30T00:00:00Z	Merged via PR #42
+FEAT-009-analysis-scope-lock	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete (renumbered from local FEAT-006)
+FEAT-010-jira-compatible-requirements	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete (renumbered from local FEAT-007)
+FEAT-011-milestone-subdirectory-layout	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete (renumbered from local FEAT-008)
+FEAT-012-session-brief-archive	done	sync		John Menke	2026-07-15T23:22:00Z	canvas complete (renumbered from local FEAT-009)
 SPIKE-001-guide-rag-context-backend	shelved	code	T01	John Menke	2026-07-15T23:22:33Z	Blocked: Guide MCP not connected; analysis + entity schema ready; resume T01 when guide is up
 SPIKE-002-local-llm-and-embedding-format	shelved	analysis	T01	John Menke	2026-07-15T23:31:32Z	Blocked: Guide MCP not connected; analysis ready; resume with SPIKE-001 when guide is up

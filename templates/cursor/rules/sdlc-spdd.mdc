@@ -25,6 +25,7 @@ The matching slash commands live in `.cursor/commands/`:
     /sdlc-spdd-code
     /sdlc-spdd-api-test
     /sdlc-spdd-review
+    /sdlc-spdd-commit-message
     /sdlc-spdd-prompt-update
     /sdlc-spdd-retro
     /sdlc-spdd-sync
@@ -40,7 +41,16 @@ Manage your Work ID and lifecycle phase without leaving chat:
     /sdlc-next                   Show next action for current work
     /sdlc-team                   See team work registry
 
+If there is no documented Work ID yet (detached / exploratory agent work), do **not**
+invent a FEAT/SPIKE. Start a machine-private local session and keep work offline
+until the human asks to document it:
+
+    ./scripts/sdlc.sh local start --name <slug> --intent "why"
+    ./scripts/sdlc.sh local capture --summary "..."
+    ./scripts/sdlc.sh local promote --type feature --name "..."
+
 Workflow state is tracked in `.sdlc/` (local, private) and `agent-context/work-registry.tsv` (shared).
+Local sessions live under `.sdlc/local-sessions/` until promoted.
 
 Preserve context by reading relevant artifacts before answering:
 

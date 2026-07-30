@@ -1,0 +1,645 @@
+"""CLI entrypoint: sdlc-engine / python -m sdlc_engine."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+from . import __version__
+from .archive import ArchiveService
+from .commit_message import CommitMessageError, CommitMessageService
+from .db import LocalIndex, format_rows
+from .issues import IssueSyncService
+from .local_sessions import LocalSessionService
+from .pointer import PointerError, PointerStore
+from .project import Project
+from .registry import TeamRegistry
+from .sync_local import LocalSyncService
+from .workflow import WorkflowEngine
+
+
+def _project(args: argparse.Namespace) -> Project:
+    return Project.resolve(getattr(args, "root", None))
+
+
+def cmd_next(args: argparse.Namespace) -> int:
+    print(WorkflowEngine(_project(args)).next_text(), end="")
+    return 0
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    eng = WorkflowEngine(_project(args))
+    if args.json:
+        print(eng.status_json(args.work_id))
+    else:
+        wid = args.work_id or eng.pointer.get() or "(none)"
+        print(f"Pointer: {eng.pointer.get() or '(none)'}")
+        print(f"Work ID: {wid}")
+        if eng.pointer.get() or args.work_id:
+            print(eng.status_json(args.work_id))
+    return 0
+
+
+def cmd_resume(args: argparse.Namespace) -> int:
+    state = WorkflowEngine(_project(args)).resume(args.work_id, phase=args.phase, force=args.force)
+    print(f"Resumed {state.work_id} at phase: {state.phase}")
+    return 0
+
+
+def cmd_advance(args: argparse.Namespace) -> int:
+    state = WorkflowEngine(_project(args)).advance(to=args.to)
+    print(f"Advanced to phase: {state.phase}")
+    return 0
+
+
+def cmd_skip(args: argparse.Namespace) -> int:
+    state = WorkflowEngine(_project(args)).skip(args.phase, reason=args.reason)
+    print(f"Skipped {args.phase}; now at {state.phase}")
+    return 0
+
+
+def cmd_shelf(args: argparse.Namespace) -> int:
+    project = _project(args)
+    eng = WorkflowEngine(project)
+    wid = eng.pointer.get()
+    if wid and wid.upper().startswith("LOCAL-"):
+        session = LocalSessionService(project).shelf(args.reason, session_id=wid)
+        print(f"Shelved local session {session.id}: {args.reason}")
+        return 0
+    state = eng.shelf(reason=args.reason)
+    if state is None:
+        print("No active pointer to shelf", file=sys.stderr)
+        return 1
+    print(f"Shelved {state.work_id}: {args.reason}")
+    return 0
+
+
+def cmd_sync(args: argparse.Namespace) -> int:
+    state = WorkflowEngine(_project(args)).sync(args.work_id)
+    print(f"Synced {state.work_id} -> phase {state.phase}")
+    return 0
+
+
+def cmd_list_shelved(args: argparse.Namespace) -> int:
+    rows = WorkflowEngine(_project(args)).list_shelved()
+    if not rows:
+        print("(no shelved work)")
+        return 0
+    for wid, phase, at, reason in rows:
+        print(f"{wid}\t{phase}\t{at}\t{reason}")
+    return 0
+
+
+def cmd_claim(args: argparse.Namespace) -> int:
+    reg = TeamRegistry(_project(args))
+    try:
+        row = reg.claim(
+            args.work_id,
+            force=args.force,
+            phase=args.phase,
+            branch=args.branch or "",
+            pr=args.pr or "",
+            jira=args.jira or "",
+            note=args.note or "",
+        )
+    except PermissionError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(f"Claimed {row.work_id} as {row.owner} (phase={row.phase})")
+    print("Team registry updated — commit agent-context/work-registry.tsv to share with teammates.")
+    return 0
+
+
+def cmd_release(args: argparse.Namespace) -> int:
+    TeamRegistry(_project(args)).release(reason=args.reason)
+    print("Released / shelved active work")
+    return 0
+
+
+def cmd_team(args: argparse.Namespace) -> int:
+    print(TeamRegistry(_project(args)).team_text(), end="")
+    return 0
+
+
+def cmd_list_work(args: argparse.Namespace) -> int:
+    print(TeamRegistry(_project(args)).list_work_text(), end="")
+    return 0
+
+
+def cmd_sync_team(args: argparse.Namespace) -> int:
+    TeamRegistry(_project(args)).refresh_done_status()
+    print("Team registry refreshed from canvas Final Status.")
+    return 0
+
+
+def cmd_archive(args: argparse.Namespace) -> int:
+    svc = ArchiveService(_project(args))
+    try:
+        if args.all:
+            svc.archive_eligible(dry_run=args.dry_run)
+        else:
+            svc.archive_work(args.work_id, dry_run=args.dry_run, force=args.force)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    return 0
+
+
+def cmd_pointer(args: argparse.Namespace) -> int:
+    store = PointerStore(_project(args))
+    try:
+        if args.pointer_cmd == "get":
+            print(store.get())
+        elif args.pointer_cmd == "set":
+            store.set(args.work_id)
+            print(f"pointer set to: {args.work_id}")
+        elif args.pointer_cmd == "reset":
+            store.reset()
+            print("pointer cleared")
+        else:
+            return 2
+    except PointerError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    return 0
+
+
+def cmd_version(_: argparse.Namespace) -> int:
+    print(__version__)
+    return 0
+
+
+def cmd_shell(args: argparse.Namespace) -> int:
+    """Bridge to remaining v1 shell scripts under scripts/."""
+    root = _project(args).root
+    script = root / "scripts" / args.script
+    if not script.is_file():
+        # also allow bare names that live in scripts/
+        candidate = root / "scripts" / f"{args.script}.sh"
+        script = candidate if candidate.is_file() else script
+    if not script.is_file():
+        print(f"shell bridge: script not found: {args.script}", file=sys.stderr)
+        return 1
+    return subprocess.call([str(script), *args.script_args], cwd=root)
+
+
+def cmd_links(args: argparse.Namespace) -> int:
+    print(LocalSyncService(_project(args)).links_report(args.work_id), end="")
+    return 0
+
+
+def cmd_sync_links(args: argparse.Namespace) -> int:
+    svc = LocalSyncService(_project(args))
+    work_id = args.work_id or getattr(args, "work_id_pos", None)
+    if args.repair:
+        actions = svc.repair_links(work_id, dry_run=args.dry_run)
+        if not actions:
+            print("sync-links: nothing to repair")
+        else:
+            for a in actions:
+                print(a)
+        return 0
+    findings = svc.check_links(work_id)
+    if not findings:
+        print("sync-links: no drift detected")
+        return 0
+    repairable = [f for f in findings if f.repairable]
+    manual = [f for f in findings if not f.repairable]
+    for f in findings:
+        flag = "repairable" if f.repairable else "manual"
+        print(f"[{flag}] {f.work_id}: {f.code} — {f.message}")
+    if repairable:
+        print(
+            f"\n{len(findings)} finding(s) ({len(repairable)} repairable). "
+            "Re-run with --repair to apply safe fixes."
+        )
+        return 1
+    print(
+        f"\n{len(manual)} manual finding(s) (TBD keys / planning gaps). "
+        "Use `issues draft|push` or edit milestone ## Jira / ## GitHub."
+    )
+    return 0
+
+
+def cmd_sync_roadmap(args: argparse.Namespace) -> int:
+    block = LocalSyncService(_project(args)).sync_roadmap(
+        roadmap=args.roadmap, dry_run=args.dry_run
+    )
+    if args.dry_run:
+        print(block)
+    else:
+        print(f"Updated {args.roadmap} SDLC-SPDD summary from canvases.")
+    return 0
+
+
+def cmd_issues(args: argparse.Namespace) -> int:
+    svc = IssueSyncService(_project(args))
+    action = args.issues_cmd
+    if action == "draft":
+        fmt = getattr(args, "format", "markdown") or "markdown"
+        for draft in svc.draft(args.work_id, system=args.system):
+            print(f"=== {draft.system} draft for {draft.work_id} ===")
+            print(f"title: {draft.title}")
+            print(f"labels: {', '.join(draft.labels) or '-'}")
+            if draft.system == "jira":
+                print(f"description_format: {draft.extra.get('description_format', 'adf')}")
+                if fmt == "adf":
+                    print("body (ADF):")
+                    print(json.dumps(draft.extra.get("description_adf"), indent=2))
+                elif fmt == "wiki":
+                    print("body (wiki markup):")
+                    print(draft.extra.get("description_wiki") or "")
+                else:
+                    print("body (markdown — source for ADF/wiki conversion):")
+                    print(draft.body)
+            else:
+                print(f"extra: {draft.extra}")
+                print("body:")
+                print(draft.body)
+            print()
+        return 0
+    if action == "push":
+        if args.system == "both":
+            print("issues push requires --system jira|github", file=sys.stderr)
+            return 2
+        print(svc.push(args.work_id, args.system, apply=args.apply))
+        return 0
+    if action == "pull":
+        if args.system == "both":
+            print("issues pull requires --system jira|github", file=sys.stderr)
+            return 2
+        print(svc.pull(args.work_id, args.system, apply=args.apply))
+        return 0
+    return 2
+
+
+def cmd_commit_message(args: argparse.Namespace) -> int:
+    svc = CommitMessageService(_project(args))
+    try:
+        if args.json:
+            print(
+                svc.report_json(
+                    base=args.base,
+                    work_id=args.work_id or "",
+                    hint=args.hint or "",
+                    max_diff_chars=args.max_diff,
+                ),
+                end="",
+            )
+        else:
+            print(
+                svc.report_text(
+                    base=args.base,
+                    work_id=args.work_id or "",
+                    hint=args.hint or "",
+                    max_diff_chars=args.max_diff,
+                ),
+                end="",
+            )
+    except CommitMessageError as exc:
+        print(f"commit-message: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def cmd_db(args: argparse.Namespace) -> int:
+    idx = LocalIndex(_project(args))
+    action = args.db_cmd
+    if action == "rebuild":
+        print(idx.rebuild().as_text(), end="")
+        return 0
+    if action == "status":
+        print(idx.status_text(), end="")
+        return 0
+    if action == "path":
+        print(idx.db_path)
+        return 0
+    if action == "query":
+        if args.sql:
+            rows = idx.query_sql(args.sql)
+        else:
+            rows = idx.find(
+                work_id=args.work_id or "",
+                status=args.status or "",
+                search=args.search or "",
+                limit=args.limit,
+            )
+        cols = args.columns.split(",") if args.columns else None
+        if cols:
+            cols = [c.strip() for c in cols if c.strip()]
+        if args.json:
+            print(json.dumps(rows, indent=2))
+        else:
+            print(format_rows(rows, cols), end="")
+        return 0
+    if action == "export":
+        out = Path(args.output) if args.output else None
+        if args.format == "sql":
+            text = idx.export_sql(out)
+        else:
+            text = idx.export_json(out)
+        if out:
+            print(f"Wrote {args.format} export to {out}")
+        else:
+            print(text, end="")
+        return 0
+    return 2
+
+
+def cmd_local(args: argparse.Namespace) -> int:
+    svc = LocalSessionService(_project(args))
+    action = args.local_cmd
+    if action == "start":
+        session = svc.start(
+            name=args.name or "",
+            title=args.title or "",
+            intent=args.intent or "",
+            branch=args.branch or "",
+        )
+        print(f"Started local session {session.id}")
+        print(f"Pointer set. Artifacts: .sdlc/local-sessions/{session.id}/")
+        print("This work stays offline until: ./scripts/sdlc.sh local promote --type feature --name \"...\"")
+        return 0
+    if action == "list":
+        print(svc.list_text(include_closed=args.all), end="")
+        return 0
+    if action == "status":
+        print(svc.status_text(args.session), end="")
+        return 0
+    if action == "capture":
+        session = svc.capture(args.summary, session_id=args.session)
+        print(f"Captured into {session.id}")
+        return 0
+    if action == "shelf":
+        session = svc.shelf(args.reason, session_id=args.session)
+        print(f"Shelved local session {session.id}: {args.reason}")
+        return 0
+    if action == "resume":
+        session = svc.resume(args.session_id)
+        print(f"Resumed local session {session.id}")
+        return 0
+    if action == "abandon":
+        session = svc.abandon(session_id=args.session, force=args.force)
+        print(f"Abandoned local session {session.id}")
+        return 0
+    if action == "promote":
+        session, work_id = svc.promote(
+            work_type=args.type,
+            name=args.name or "",
+            session_id=args.session,
+            milestone=args.milestone or "",
+            claim=not args.no_claim,
+            dry_run=args.dry_run,
+        )
+        if args.dry_run:
+            print(f"[dry-run] would promote {session.id} -> {work_id}")
+            return 0
+        print(f"Promoted {session.id} -> {work_id}")
+        print(f"  canvas: spdd/canvas/{work_id}.md")
+        print(f"  requirement: requirements/milestones/{work_id}.md")
+        if not args.no_claim:
+            print(f"Claimed {work_id} — commit agent-context/work-registry.tsv when sharing.")
+        return 0
+    return 2
+
+
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="sdlc-engine",
+        description="SDLC-SPDD Python orchestration engine (v2)",
+    )
+    p.add_argument("--root", help="Project root (default: SDLC_ROOT or git toplevel)")
+    p.add_argument("--version", action="store_true", help="Print engine version")
+    sub = p.add_subparsers(dest="command")
+
+    sub.add_parser("next", help="Show what to do now").set_defaults(func=cmd_next)
+
+    st = sub.add_parser("status", help="Show workflow status")
+    st.add_argument("--json", action="store_true")
+    st.add_argument("--work-id")
+    st.set_defaults(func=cmd_status)
+
+    rs = sub.add_parser("resume", help="Resume a Work ID")
+    rs.add_argument("work_id")
+    rs.add_argument("--phase")
+    rs.add_argument("--force", action="store_true")
+    rs.set_defaults(func=cmd_resume)
+
+    adv = sub.add_parser("advance", help="Advance workflow phase")
+    adv.add_argument("--to")
+    adv.set_defaults(func=cmd_advance)
+
+    sk = sub.add_parser("skip", help="Skip a phase")
+    sk.add_argument("phase")
+    sk.add_argument("--reason", default="manual skip")
+    sk.set_defaults(func=cmd_skip)
+
+    sh = sub.add_parser("shelf", help="Shelf active work")
+    sh.add_argument("--reason", default="manual shelf")
+    sh.set_defaults(func=cmd_shelf)
+
+    sy = sub.add_parser("sync", help="Sync workflow state from artifacts")
+    sy.add_argument("--work-id")
+    sy.set_defaults(func=cmd_sync)
+
+    sub.add_parser("list-shelved", help="List shelved work").set_defaults(func=cmd_list_shelved)
+
+    cl = sub.add_parser("claim", help="Claim a Work ID")
+    cl.add_argument("work_id")
+    cl.add_argument("--force", action="store_true")
+    cl.add_argument("--phase")
+    cl.add_argument("--branch")
+    cl.add_argument("--pr")
+    cl.add_argument("--jira", help="Override; default auto-reads ## Jira Key from milestone requirement")
+    cl.add_argument("--note")
+    cl.set_defaults(func=cmd_claim)
+
+    lk = sub.add_parser("links", help="Show Jira/GitHub/registry/canvas link map")
+    lk.add_argument("work_id", nargs="?")
+    lk.set_defaults(func=cmd_links)
+
+    sl = sub.add_parser(
+        "sync-links",
+        help="Check or repair drift across milestones, canvas Metadata, and registry",
+    )
+    sl.add_argument("work_id_pos", nargs="?", help="Optional Work ID (same as --work-id)")
+    sl.add_argument("--work-id")
+    sl.add_argument("--repair", action="store_true")
+    sl.add_argument("--dry-run", action="store_true")
+    sl.set_defaults(func=cmd_sync_links)
+
+    sr = sub.add_parser("sync-roadmap", help="Refresh ROADMAP.md managed summary from canvases")
+    sr.add_argument("--roadmap", default="ROADMAP.md")
+    sr.add_argument("--dry-run", action="store_true")
+    sr.set_defaults(func=cmd_sync_roadmap)
+
+    iss = sub.add_parser("issues", help="Draft/push/pull Jira or GitHub issues from milestone requirements")
+    iss.add_argument("issues_cmd", choices=["draft", "push", "pull"])
+    iss.add_argument("work_id")
+    iss.add_argument(
+        "--system",
+        default="both",
+        choices=["jira", "github", "both"],
+        help="Target system (push/pull require jira|github)",
+    )
+    iss.add_argument(
+        "--format",
+        default="markdown",
+        choices=["markdown", "adf", "wiki"],
+        help="For `issues draft --system jira`: render body as markdown, ADF JSON, or wiki markup",
+    )
+    iss.add_argument(
+        "--apply",
+        action="store_true",
+        help="Actually create/update remote issue or write pulled fields (default is dry-run)",
+    )
+    iss.set_defaults(func=cmd_issues)
+
+    loc = sub.add_parser(
+        "local",
+        help="Local/offline work sessions (machine-private until promoted)",
+    )
+    loc_sub = loc.add_subparsers(dest="local_cmd", required=True)
+
+    ls = loc_sub.add_parser("start", help="Start a LOCAL-* offline session and set pointer")
+    ls.add_argument("--name", help="Slug fragment (default from title/intent)")
+    ls.add_argument("--title", help="Human title")
+    ls.add_argument("--intent", help="One-line why this scratch work exists")
+    ls.add_argument("--branch", help="Optional git branch name note")
+    ls.set_defaults(func=cmd_local)
+
+    ll = loc_sub.add_parser("list", help="List local/offline sessions on this machine")
+    ll.add_argument("--all", action="store_true", help="Include promoted/abandoned")
+    ll.set_defaults(func=cmd_local)
+
+    lst = loc_sub.add_parser("status", help="Show active or named local session")
+    lst.add_argument("--session", help="LOCAL-* id (default: pointer)")
+    lst.set_defaults(func=cmd_local)
+
+    lc = loc_sub.add_parser("capture", help="Append a note into the local session")
+    lc.add_argument("--summary", required=True)
+    lc.add_argument("--session")
+    lc.set_defaults(func=cmd_local)
+
+    lsh = loc_sub.add_parser("shelf", help="Park a local session (clear pointer)")
+    lsh.add_argument("--reason", default="manual shelf")
+    lsh.add_argument("--session")
+    lsh.set_defaults(func=cmd_local)
+
+    lr = loc_sub.add_parser("resume", help="Resume a shelved local session")
+    lr.add_argument("session_id")
+    lr.set_defaults(func=cmd_local)
+
+    la = loc_sub.add_parser("abandon", help="Mark a local session abandoned")
+    la.add_argument("--session")
+    la.add_argument("--force", action="store_true")
+    la.set_defaults(func=cmd_local)
+
+    lp = loc_sub.add_parser(
+        "promote",
+        help="Promote LOCAL session into a documented Work ID (canvas + requirement)",
+    )
+    lp.add_argument("--type", default="feature", help="feature|spike|bug|refactor|chore|...")
+    lp.add_argument("--name", help="Title/slug for the new Work ID (default: session title)")
+    lp.add_argument("--session")
+    lp.add_argument("--milestone", help="Optional milestone-*.md to append Linked Work")
+    lp.add_argument("--no-claim", action="store_true", help="Create artifacts without claiming")
+    lp.add_argument("--dry-run", action="store_true")
+    lp.set_defaults(func=cmd_local)
+
+    cm = sub.add_parser(
+        "commit-message",
+        help="Collect staged/unstaged/ahead-of-base diff for drafting a commit message (does not commit)",
+    )
+    cm.add_argument("--hint", help="Optional short intent for the draft")
+    cm.add_argument("--work-id", help="Optional Work ID (default: active pointer)")
+    cm.add_argument("--base", help="Preferred base ref (default: origin/main)")
+    cm.add_argument(
+        "--max-diff",
+        type=int,
+        default=80_000,
+        help="Truncate unified diff text to this many characters (default: 80000)",
+    )
+    cm.add_argument("--json", action="store_true", help="Emit DiffSnapshot JSON")
+    cm.set_defaults(func=cmd_commit_message)
+
+    db = sub.add_parser(
+        "db",
+        help="Local regenerable SQLite index (query cache before GUIDE/Neo4j)",
+    )
+    db_sub = db.add_subparsers(dest="db_cmd", required=True)
+
+    db_sub.add_parser("rebuild", help="Rebuild .sdlc/index.sqlite from repo artifacts").set_defaults(
+        func=cmd_db
+    )
+    db_sub.add_parser("status", help="Show index path, counts, rebuild metadata").set_defaults(
+        func=cmd_db
+    )
+    db_sub.add_parser("path", help="Print absolute path to the SQLite file").set_defaults(func=cmd_db)
+
+    dq = db_sub.add_parser("query", help="Query work_items (filters or read-only SQL SELECT)")
+    dq.add_argument("sql", nargs="?", help="Optional SELECT … (read-only)")
+    dq.add_argument("--work-id")
+    dq.add_argument("--status", help="Match registry_status, canvas_status, or final_status")
+    dq.add_argument("--search", help="Full-text (FTS5) or LIKE search")
+    dq.add_argument("--limit", type=int, default=50)
+    dq.add_argument("--columns", help="Comma-separated columns for table output")
+    dq.add_argument("--json", action="store_true")
+    dq.set_defaults(func=cmd_db)
+
+    de = db_sub.add_parser("export", help="Export index as JSON or SQL dump (not for live multi-user sync)")
+    de.add_argument("--format", choices=["json", "sql"], default="json")
+    de.add_argument("--output", "-o", help="Write to file (default: stdout)")
+    de.set_defaults(func=cmd_db)
+
+    rel = sub.add_parser("release", help="Release/shelf active claim")
+    rel.add_argument("--reason", default="released")
+    rel.set_defaults(func=cmd_release)
+
+    sub.add_parser("team", help="Show team registry").set_defaults(func=cmd_team)
+    sub.add_parser("list-work", help="List Work IDs").set_defaults(func=cmd_list_work)
+    sub.add_parser("sync-team", help="Refresh done/cancelled from canvases").set_defaults(func=cmd_sync_team)
+
+    ar = sub.add_parser("archive", help="Archive completed/cancelled work")
+    ar.add_argument("work_id", nargs="?")
+    ar.add_argument("--all", action="store_true")
+    ar.add_argument("--dry-run", action="store_true")
+    ar.add_argument("--force", action="store_true")
+    ar.set_defaults(func=cmd_archive)
+
+    ptr = sub.add_parser("pointer", help="Pointer get/set/reset")
+    ptr.add_argument("pointer_cmd", choices=["get", "set", "reset"])
+    ptr.add_argument("work_id", nargs="?")
+    ptr.set_defaults(func=cmd_pointer)
+
+    shell = sub.add_parser("shell", help="Run a v1 scripts/*.sh via bridge")
+    shell.add_argument("script")
+    shell.add_argument("script_args", nargs=argparse.REMAINDER)
+    shell.set_defaults(func=cmd_shell)
+
+    sub.add_parser("version", help="Print version").set_defaults(func=cmd_version)
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if getattr(args, "version", False) and not getattr(args, "command", None):
+        return cmd_version(args)
+    if not getattr(args, "command", None):
+        # default to next for parity with sdlc.sh
+        args.command = "next"
+        args.func = cmd_next
+    try:
+        return int(args.func(args))
+    except Exception as exc:  # noqa: BLE001 - CLI boundary
+        print(f"sdlc-engine: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -71,3 +71,22 @@ config before committing. The output is a **decision**, not production wiring.
 When its turn comes (make it fast):
 
     /sdlc-spdd-architect @spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md
+
+## Jira
+
+Draft for issue creation — paste into Jira UI, MCP, or approved API.
+After create, set **Key** and commit.
+
+- Key: TBD
+- Issue type: Story
+- Summary: 
+- Labels:
+
+## GitHub
+
+Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
+
+- Number: TBD
+- Title: 
+- Labels: 
+- URL: 

@@ -154,3 +154,22 @@ Sync: `spdd/sync/CHORE-001-docgen-initial-documentation-sync.md`.
 Follow-up: **CHORE-002** — TTS, Manim, compose, `generate-all`, optional CI/Pages.
 
 Capture session memory; open PR when ready.
+
+## Jira
+
+Draft for issue creation — paste into Jira UI, MCP, or approved API.
+After create, set **Key** and commit.
+
+- Key: TBD
+- Issue type: Story
+- Summary: 
+- Labels:
+
+## GitHub
+
+Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
+
+- Number: TBD
+- Title: 
+- Labels: 
+- URL: 

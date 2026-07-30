@@ -20,14 +20,17 @@ on:
       - 'templates/cursor/rules/sdlc-spdd.mdc'
       - 'templates/copilot/copilot-instructions.md'
       - 'templates/claude/CLAUDE.md'
+      - 'agent-context/sdlc-team-registry.sh'
       - 'tests/test-sdlc-workflow.sh'
       - 'tests/test-sdlc-pointer.sh'
+      - 'tests/test-archive-work.sh'
       - '.github/workflows/test-sdlc-workflow.yml'
   push:
     branches: [main]
     paths:
       - 'agent-context/sdlc-workflow.sh'
       - 'agent-context/sdlc-pointer.sh'
+      - 'agent-context/sdlc-team-registry.sh'
       - 'agent-context/README.md'
       - 'scripts/start-agent-session.sh'
       - 'scripts/capture-session-memory.sh'
@@ -45,6 +48,7 @@ on:
       - 'templates/claude/CLAUDE.md'
       - 'tests/test-sdlc-workflow.sh'
       - 'tests/test-sdlc-pointer.sh'
+      - 'tests/test-archive-work.sh'
       - '.github/workflows/test-sdlc-workflow.yml'
 
 jobs:
@@ -69,3 +73,6 @@ jobs:
 
       - name: Run SDLC workflow regression tests
         run: ./tests/test-sdlc-workflow.sh
+
+      - name: Run archive-work regression tests
+        run: ./tests/test-archive-work.sh

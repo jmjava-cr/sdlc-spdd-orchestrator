@@ -63,3 +63,22 @@ before committing. The output is a **decision**, not production code.
 When its turn comes (make it fast):
 
     /sdlc-spdd-architect @spdd/canvas/SPIKE-001-guide-rag-context-backend.md
+
+## Jira
+
+Draft for issue creation — paste into Jira UI, MCP, or approved API.
+After create, set **Key** and commit.
+
+- Key: TBD
+- Issue type: Story
+- Summary: 
+- Labels:
+
+## GitHub
+
+Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
+
+- Number: TBD
+- Title: 
+- Labels: 
+- URL: 

@@ -1,0 +1,64 @@
+name: Test SDLC Engine (Python v2)
+
+on:
+  pull_request:
+    paths:
+      - 'engine/**'
+      - 'scripts/sdlc.sh'
+      - '.github/workflows/test-sdlc-engine.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'engine/**'
+      - 'scripts/sdlc.sh'
+      - '.github/workflows/test-sdlc-engine.yml'
+
+jobs:
+  test-sdlc-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install engine + pytest
+        run: python3 -m pip install -e './engine[dev]'
+
+      - name: Run pytest (unit + mocked issue sync)
+        run: pytest -q engine/tests
+
+      - name: CLI smoke via sdlc.sh python engine
+        run: |
+          SDLC_ENGINE=python ./scripts/sdlc.sh version
+          SDLC_ENGINE=python ./scripts/sdlc.sh next
+
+      - name: Shim regression harness
+        run: ./tests/test-sdlc-engine-shim.sh
+
+  # Live GitHub Issues sync: pull always; create+close when permissions allow.
+  test-github-issue-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install engine + pytest
+        run: python3 -m pip install -e './engine[dev]'
+
+      - name: GitHub Issues integration (pull + create round-trip)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SDLC_GITHUB_INTEGRATION: "1"
+          SDLC_GITHUB_ISSUE_CREATE: "1"
+          SDLC_GITHUB_REPO: ${{ github.repository }}
+        run: |
+          pytest -q engine/tests/test_issues_github_integration.py \
+            --run-github-integration -m github_integration

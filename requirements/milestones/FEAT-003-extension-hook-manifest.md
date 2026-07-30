@@ -54,3 +54,22 @@ Run:
 
     /sdlc-spdd-analysis @requirements/milestones/FEAT-003-extension-hook-manifest.md
     /sdlc-spdd-plan @spdd/analysis/FEAT-003-extension-hook-manifest-analysis.md
+
+## Jira
+
+Draft for issue creation — paste into Jira UI, MCP, or approved API.
+After create, set **Key** and commit.
+
+- Key: TBD
+- Issue type: Story
+- Summary: 
+- Labels:
+
+## GitHub
+
+Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
+
+- Number: TBD
+- Title: 
+- Labels: 
+- URL: 

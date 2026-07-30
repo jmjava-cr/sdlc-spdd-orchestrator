@@ -7,21 +7,33 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Analysis Scope Lock-In: `/sdlc-spdd-analysis` locks IN/NOT scope before generation;
-  guidance in `docs/analysis-phase-scope-validation.md` (FEAT-006)
+  guidance in `docs/analysis-phase-scope-validation.md` (FEAT-009)
 - Jira-compatible requirements format: YAML frontmatter schema, CHORE/feature templates,
   `_milestone.yml`, `scripts/validate-requirements-format.sh`,
-  `docs/jira-compatible-requirements-format.md` (FEAT-007)
+  `docs/jira-compatible-requirements-format.md` (FEAT-010)
 - Milestone subdirectory layout: preferred
   `requirements/milestones/milestone-N/MILESTONE-N.md` with root `milestone-*.md`
-  still supported; migration guide `docs/MIGRATION-root-to-subdirectories.md` (FEAT-008)
+  still supported; migration guide `docs/MIGRATION-root-to-subdirectories.md` (FEAT-011)
 - Session-brief archive/rotation in `start-agent-session.sh` (`--session-limit`,
-  `--no-session-rotate`) → `agent-context/sessions/archive/` (FEAT-009)
+  `--no-session-rotate`) → `agent-context/sessions/archive/` (FEAT-012)
 - Prompt-optimization ledger + capture metrics (`--readiness`, `--review-result`,
   `--rework`, `--context-files`); ledger rotation; Kind: `metric` (FEAT-004)
 - Canvas readiness vocabulary in `validate-reasons-canvas.sh` + leading indicators
   `--validate-cycles` / `--review-cycles`; plan/architect/create-work aligned (FEAT-005)
 - CI: `test-canvas-readiness.yml`, `test-scripts-lib.yml`, `validate-requirements-format.yml`;
   dogfood `spdd/canvas` in `validate-canvas.yml`
+- `/sdlc-spdd-commit-message` lifecycle command + Python engine `commit-message` diff report (FEAT-008): `sdlc.sh commit-message` collects staged/unstaged/ahead-of-base diffs; slash command drafts a paste-ready commit message (does not commit); Cursor/Copilot/Claude adapters + docs/tests (closes [#41](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/41))
+- Local regenerable SQLite index (FEAT-007): `sdlc.sh db rebuild|status|query|export` → `.sdlc/index.sqlite` (gitignored); FTS5 search; JSON/SQL dump; docs in `docs/local-sqlite-index.md`
+- Python orchestration engine v2 (`engine/sdlc_engine`) with CLI + pytest; `scripts/sdlc.sh` supports `SDLC_ENGINE=auto|python|shell` (FEAT-006)
+- Engine milestone sync usability: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull` for Jira/GitHub; claim auto-reads `## Jira` Key and `## GitHub` Number
+- Local/offline work sessions (`LOCAL-*`): `sdlc.sh local start|list|capture|shelf|resume|promote|abandon` — machine-private under `.sdlc/local-sessions/` until promoted into a documented Work ID
+- Issue sync test harness: mocked Jira HTTP + fake `gh` write-back tests; live GitHub Issues integration (`SDLC_GITHUB_INTEGRATION=1`) and CI job with `issues: write`
+- Jira description formatting: markdown → ADF (Cloud v3) / wiki (Server v2), structured sections from milestone `## Jira`, `issues draft --format adf|wiki`, pull ADF→markdown
+- Shared `scripts/lib/` helpers + consumer migration (FEAT-001); `verify-script-lib-duplicates.sh`
+- Canonical `spec/commands/*.spec.md` → generated Cursor/Copilot/Claude adapters (FEAT-002)
+- Extension manifest + resolver fallback (FEAT-003)
+- `sdlc.sh archive` / `archive --all`: move Complete/Cancelled Work ID artifacts into `archive/` folders (closes [#29](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/29))
+- Expanded CI/regression harnesses: `test-scripts-lib`, `test-extension-manifest`, `test-command-spec-generation`, `test-archive-work`, `test-integration-merge`
 
 ### Fixed
 
@@ -29,6 +41,7 @@ All notable changes to this project will be documented in this file.
   quantifiers that never matched; use `[0-9][0-9]` (Test 12)
 - Empty Final Status `- Status:` no longer keeps the last T## incomplete (Test 12b)
 - Architect readiness vocabulary aligned with FEAT-005 (`needs-redesign`, `blocked`, …)
+
 - SDLC pointer manager (`agent-context/sdlc-pointer.sh`): persistent Work ID in `.sdlc/pointer`, guarded execution wrappers ([#20](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/20), closes [#19](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/19))
 - Workflow CLI (`scripts/sdlc.sh` / `scripts/sdlc-spdd/sdlc.sh`): phase/gate tracking, `next`/`advance`/`skip`/`shelf`/`resume`/`sync`, guarded `capture` ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21))
 - Team Work ID registry (`agent-context/work-registry.tsv`, `sdlc-team-registry.sh`): `claim`/`release`/`team`/`list-work`, stale TTL, branch/PR/Jira notes ([#21](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/21))

@@ -511,7 +511,15 @@ assert_contains "${fw_dry}" "[dry-run] would mkdir -p" "framework_ensure_dir dry
 assert_false "framework_ensure_dir dry-run skips create" test -d "${fw}/c"
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+echo "== verify-script-lib-duplicates.sh =="
+if "${REPO_ROOT}/scripts/verify-script-lib-duplicates.sh" >/dev/null; then
+  ok "no stray lib helper duplicates in scripts/"
+else
+  bad "verify-script-lib-duplicates reported issues"
+fi
+
+
 echo
 echo "Summary: ${pass} passed, ${fail} failed"
 if (( fail > 0 )); then exit 1; fi
-echo "All scripts/lib tests passed."

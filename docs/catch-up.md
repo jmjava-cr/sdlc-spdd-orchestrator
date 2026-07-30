@@ -2,15 +2,15 @@
 
 Use this when returning after time away or reconciling remote branches offline.
 
-**Current path:** land work through the **integration branch** — do not merge draft PRs #25/#26 directly.
+**Current path:** land work through **`cursor/merge-integration-to-main-0ab2`** (contains `cursor/integration-981e` plus archive #29 and expanded tests). Do not merge draft PRs #25/#26/#27 separately.
 
 ```bash
-git fetch origin cursor/integration-981e
-git checkout cursor/integration-981e
+git fetch origin cursor/merge-integration-to-main-0ab2
+git checkout cursor/merge-integration-to-main-0ab2
 ```
 
 Full gates, manual checklist, and merge procedure: [integration-branch.md](integration-branch.md)  
-Tracking: [PR #27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27) · [Issue #28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28)
+Tracking: [Issue #28](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/28) · supersedes draft [PR #27](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/27)
 
 ---
 

@@ -1,0 +1,31 @@
+name: Test Integration Merge
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'agent-context/**'
+      - 'templates/**'
+      - 'spec/commands/**'
+      - 'tests/**'
+      - 'docs/integration-branch.md'
+      - '.github/workflows/test-integration-merge.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'agent-context/**'
+      - 'templates/**'
+      - 'spec/commands/**'
+      - 'tests/**'
+      - 'docs/integration-branch.md'
+      - '.github/workflows/test-integration-merge.yml'
+
+jobs:
+  test-integration-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run integration merge gate
+        run: ./tests/test-integration-merge.sh
