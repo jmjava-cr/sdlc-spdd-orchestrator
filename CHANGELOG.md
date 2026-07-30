@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `/sdlc-spdd-diff-comment` lifecycle command (FEAT-008): generate a paste-ready PR review comment from the current diff vs base (does not post); Cursor/Copilot/Claude adapters + docs/tests (closes [#41](https://github.com/jmjava/sdlc-spdd-orchestrator/issues/41))
 - Local regenerable SQLite index (FEAT-007): `sdlc.sh db rebuild|status|query|export` → `.sdlc/index.sqlite` (gitignored); FTS5 search; JSON/SQL dump; docs in `docs/local-sqlite-index.md`
 - Python orchestration engine v2 (`engine/sdlc_engine`) with CLI + pytest; `scripts/sdlc.sh` supports `SDLC_ENGINE=auto|python|shell` (FEAT-006)
 - Engine milestone sync usability: `links`, `sync-links --repair`, `sync-roadmap`, `issues draft|push|pull` for Jira/GitHub; claim auto-reads `## Jira` Key and `## GitHub` Number

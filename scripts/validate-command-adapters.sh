@@ -55,6 +55,7 @@ commands=(
   code
   api-test
   review
+  diff-comment
   prompt-update
   retro
   sync
@@ -196,6 +197,9 @@ check_pack() {
     require_contains "${path}" "Implement only that task." "single-operation scope guardrail"
   elif [[ "${cmd}" == "review" ]]; then
     require_contains "${path}" "Do not make code changes unless explicitly asked." "review guardrail"
+  elif [[ "${cmd}" == "diff-comment" ]]; then
+    require_contains "${path}" "Do not implement code" "diff-comment no-code guardrail"
+    require_contains "${path}" "Do not post" "diff-comment no-post guardrail"
   elif [[ "${cmd}" == "sync" ]]; then
     require_contains "${path}" "Do not implement code unless explicitly asked." "sync guardrail"
   elif [[ "${cmd}" == "whereami" ]]; then

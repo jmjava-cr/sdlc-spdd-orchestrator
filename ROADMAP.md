@@ -167,7 +167,8 @@ Generated: 2026-07-27T04:57:02Z
 | FEAT-004-prompt-optimization-ledger | Prompt-optimization ledger + capture metrics | Feature | Draft | milestone-1.md | TBD | spdd/canvas/FEAT-004-prompt-optimization-ledger.md |
 | FEAT-005-canvas-readiness-indicators | Canvas readiness + leading indicators | Feature | Draft | milestone-1.md | TBD | spdd/canvas/FEAT-005-canvas-readiness-indicators.md |
 | FEAT-006-python-orchestration-engine | Python orchestration engine (v2) | Feature | In Progress | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/pull/31 | spdd/canvas/FEAT-006-python-orchestration-engine.md |
-| FEAT-007-local-sqlite-index | Local SQLite index (pre-GUIDE) | Feature | Ready For Coding | milestone-1.md | TBD | spdd/canvas/FEAT-007-local-sqlite-index.md |
+| FEAT-007-local-sqlite-index | Local SQLite index (pre-GUIDE) | Feature | Complete | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/pull/38 | spdd/canvas/FEAT-007-local-sqlite-index.md |
+| FEAT-008-diff-comment-command | Slash command: generate PR comment from current diff | Feature | Complete | milestone-1.md | https://github.com/jmjava/sdlc-spdd-orchestrator/issues/41 | spdd/canvas/FEAT-008-diff-comment-command.md |
 | SPIKE-001-guide-rag-context-backend | Guide as a DICE hybrid context backend | Spike | Draft | TBD | TBD | spdd/canvas/SPIKE-001-guide-rag-context-backend.md |
 | SPIKE-002-local-llm-and-embedding-format | Local models + embedding format for the retrieval backend | Spike | Draft | TBD | TBD | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md |
 <!-- SDLC-SPDD-ROADMAP-SUMMARY:END -->

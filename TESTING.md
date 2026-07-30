@@ -106,6 +106,10 @@ regression harness.
 `./tests/test-command-spec-generation.sh` asserts adapters match
 `spec/commands/*.spec.md`, that `--check` detects drift, and parity validation still passes (FEAT-002).
 
+`./tests/test-diff-comment-command.sh` asserts `/sdlc-spdd-diff-comment` adapters
+exist with generate-only (no-post) + diff-vs-base contract language, and that
+generator `--check` plus adapter validation still pass (FEAT-008 / #41).
+
 ### Extension manifest harness
 
 `./tests/test-extension-manifest.sh` covers manifest-driven resolution and

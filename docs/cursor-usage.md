@@ -34,6 +34,7 @@ Open the **target project** in Cursor. Open **Chat** or **Agent**. Type `/` and 
 | `/sdlc-spdd-code` | Implement one approved operation |
 | `/sdlc-spdd-api-test` | Generate cURL API test script from canvas + implementation |
 | `/sdlc-spdd-review` | Review changes against canvas |
+| `/sdlc-spdd-diff-comment` | Generate a PR comment draft from the current diff vs base (does not post) |
 | `/sdlc-spdd-prompt-update` | Update canvas first when requirements or behavior intent change |
 | `/sdlc-spdd-retro` | Capture learnings into memory |
 | `/sdlc-spdd-sync` | Reconcile canvas with code |

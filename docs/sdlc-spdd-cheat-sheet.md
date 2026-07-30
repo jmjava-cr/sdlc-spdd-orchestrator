@@ -191,6 +191,7 @@ and continue to planning:
 | Implement one operation | `/sdlc-spdd-code @spdd/canvas/WORK-ID.md operation T01` |
 | Verify with API tests | `/sdlc-spdd-api-test @spdd/canvas/WORK-ID.md` |
 | Review implementation | `/sdlc-spdd-review @spdd/canvas/WORK-ID.md` |
+| Draft PR comment from current diff | `/sdlc-spdd-diff-comment [message] [WORK-ID]` |
 | Update changed intent | `/sdlc-spdd-prompt-update @spdd/canvas/WORK-ID.md` |
 | Capture learnings | `/sdlc-spdd-retro @spdd/canvas/WORK-ID.md` |
 | Reconcile drift | `/sdlc-spdd-sync @spdd/canvas/WORK-ID.md` |
