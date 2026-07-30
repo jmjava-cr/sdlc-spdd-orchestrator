@@ -86,7 +86,7 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 |------|---------|
 | Shared script library (`scripts/lib/`) for capture/resolve/verify | Maintainability |
 | Single canonical command spec → generated Cursor/Copilot/Claude adapters | Maintainability (kills drift) |
-| Analysis Scope Lock-In (`/sdlc-spdd-analysis`) | Maintainability (clearer analysis contract) — **FEAT-012 Complete** |
+| Analysis Scope Lock-In (`/sdlc-spdd-analysis`) | Maintainability (clearer analysis contract) — **FEAT-009 Complete** |
 | Jira-compatible requirements format + validator | Maintainability (planning / tracker alignment) — **FEAT-010 Complete** |
 | Milestone subdirectory layout (`requirements/milestones/milestone-N/`) | Maintainability (planning layout) — **FEAT-011 Complete** |
 | Session-brief archive/rotation (`agent-context/sessions/` → `archive/`; data is already extracted into memory at capture) | Maintainability — **FEAT-012 Complete** |
