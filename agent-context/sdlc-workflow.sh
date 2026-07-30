@@ -325,8 +325,18 @@ _wf_pass_gates_for_phase() {
   local work_id="$1"
   local phase="$2"
   local gate
+  local readiness=""
   while IFS= read -r gate; do
     [[ -z "${gate}" ]] && continue
+    # Leaving architect: do not auto-pass architect_review when readiness blocks coding.
+    # Absent readiness stays backward-compatible (gate may still pass).
+    if [[ "${phase}" == "architect" && "${gate}" == "architect_review" ]]; then
+      readiness="$(_wf_work_readiness "${work_id}")"
+      if [[ -n "${readiness}" ]] && declare -F readiness_allows_coding >/dev/null 2>&1 \
+        && ! readiness_allows_coding "${readiness}"; then
+        continue
+      fi
+    fi
     local current
     current="$(_wf_read_state_var "$(_wf_state_file "${work_id}")" "gate_${gate}" pending)"
     if [[ "${current}" != "skipped" ]]; then
@@ -369,15 +379,24 @@ sdlc_workflow_brief_markdown() {
   fi
 
   _wf_ensure_state "${work_id}"
-  local file phase operation active pending op_title
+  local file phase operation active pending op_title readiness
   file="$(_wf_state_file "${work_id}")"
   phase="$(_wf_read_state_var "${file}" phase init)"
   operation="$(_wf_read_state_var "${file}" operation)"
   active="$(_wf_read_state_var "${file}" active 1)"
   pending="$(_wf_pending_gates "${file}")"
+  readiness="$(_wf_work_readiness "${work_id}")"
   op_title=""
   if [[ -n "${operation}" ]]; then
     op_title="$(_wf_operation_title "${work_id}" "${operation}")"
+  fi
+
+  local jira_status="" jira_ask=""
+  if declare -F sdlc_team_jira_status >/dev/null 2>&1; then
+    jira_status="$(sdlc_team_jira_status "${work_id}")"
+  fi
+  if declare -F sdlc_team_jira_ask_prompt >/dev/null 2>&1; then
+    jira_ask="$(sdlc_team_jira_ask_prompt "${work_id}")"
   fi
 
   cat <<EOF
@@ -386,6 +405,8 @@ sdlc_workflow_brief_markdown() {
 | Work ID | ${work_id} |
 | Workflow status | $([[ "${active}" == "1" ]] && echo active || echo shelved) |
 | Phase | ${phase} ($(( $(_wf_phase_index "${phase}") + 1 ))/${#SDLC_PHASE_ORDER[@]}) |
+| Readiness | ${readiness:-absent} |
+| Jira | ${jira_status:-unknown} |
 | Next operation | ${op_title:-${operation:-none}} |
 | Assistant command | $(sdlc_workflow_recommended_command "${phase}" "${work_id}" "${operation}") |
 | After this phase | \`./scripts/sdlc.sh advance\` |
@@ -398,6 +419,11 @@ $(if [[ -n "${pending}" ]]; then
     [[ -z "${line}" ]] && continue
     echo "- ${line}"
   done <<< "${pending}"
+fi)
+$(if [[ -n "${jira_ask}" ]]; then
+  echo
+  echo "Tracker follow-up:"
+  echo "- ${jira_ask}"
 fi)
 EOF
 }
@@ -422,13 +448,15 @@ sdlc_workflow_next() {
   sdlc_workflow_sync "${work_id}" >/dev/null
   _wf_ensure_state "${work_id}"
 
-  local file phase operation pending next_phase op_title
+  local file phase operation pending next_phase op_title readiness jira_status jira_ask
   file="$(_wf_state_file "${work_id}")"
   phase="$(_wf_read_state_var "${file}" phase init)"
   operation="$(_wf_read_state_var "${file}" operation)"
   pending="$(_wf_pending_gates "${file}")"
   next_phase="$(_wf_next_phase "${phase}")"
   op_title=""
+  jira_status=""
+  jira_ask=""
   if [[ -n "${operation}" ]]; then
     op_title="$(_wf_operation_title "${work_id}" "${operation}")"
   fi
@@ -436,6 +464,17 @@ sdlc_workflow_next() {
   echo "== SDLC: what to do now =="
   echo "Work ID: ${work_id}"
   echo "Phase: ${phase} ($(( $(_wf_phase_index "${phase}") + 1 ))/${#SDLC_PHASE_ORDER[@]})"
+  readiness="$(_wf_work_readiness "${work_id}")"
+  if [[ -n "${readiness}" ]]; then
+    echo "Readiness: ${readiness}"
+  fi
+  if declare -F sdlc_team_jira_status >/dev/null 2>&1; then
+    jira_status="$(sdlc_team_jira_status "${work_id}")"
+    echo "Jira: ${jira_status}"
+  fi
+  if declare -F sdlc_team_jira_ask_prompt >/dev/null 2>&1; then
+    jira_ask="$(sdlc_team_jira_ask_prompt "${work_id}")"
+  fi
   if [[ -n "${operation}" ]]; then
     echo "Next operation: ${op_title}"
   elif [[ "${phase}" == "code" ]]; then
@@ -445,13 +484,16 @@ sdlc_workflow_next() {
   echo "Do now (assistant):"
   echo "  $(sdlc_workflow_recommended_command "${phase}" "${work_id}" "${operation}")"
   if [[ "${phase}" == "code" ]]; then
-    local readiness
-    readiness="$(_wf_work_readiness "${work_id}")"
     if [[ -n "${readiness}" ]] && declare -F readiness_allows_coding >/dev/null 2>&1 \
       && ! readiness_allows_coding "${readiness}"; then
       echo
       echo "Note: canvas readiness is '${readiness}' — run architect (or prompt-update) before coding."
     fi
+  fi
+  if [[ -n "${jira_ask}" ]]; then
+    echo
+    echo "Tracker follow-up:"
+    echo "  ${jira_ask}"
   fi
   echo
   echo "Or run in terminal:"
@@ -585,7 +627,7 @@ SDLC workflow helper — short paths for humans and agents
   ./scripts/sdlc.sh status --json
 
   ./scripts/sdlc.sh resume <WORK-ID> [--phase PHASE] [--force]
-  ./scripts/sdlc.sh advance [--to PHASE]
+  ./scripts/sdlc.sh advance [--to PHASE] [--force]
   ./scripts/sdlc.sh skip <PHASE> --reason "why"
   ./scripts/sdlc.sh shelf --reason "why"
   ./scripts/sdlc.sh sync [--work-id ID]
@@ -629,7 +671,10 @@ _wf_requirement_path() {
   done
   shopt -u nullglob
   path="${root}/requirements/milestones/${work_id}.md"
-  [[ -f "${path}" ]] && printf '%s' "${path}"
+  if [[ -f "${path}" ]]; then
+    printf '%s' "${path}"
+  fi
+  return 0
 }
 
 _wf_infer_phase_from_artifacts() {
@@ -694,6 +739,7 @@ _wf_infer_gates_from_artifacts() {
   local work_id="$1"
   local root="${SDLC_ROOT}"
   local req feature_req analysis canvas review retro sync_log progress
+  local readiness=""
 
   feature_req="${root}/agent-context/features/${work_id}/requirement.md"
   req="$(_wf_requirement_path "${work_id}")"
@@ -704,9 +750,25 @@ _wf_infer_gates_from_artifacts() {
   sync_log="${root}/spdd/sync/${work_id}-sync.md"
   progress="${root}/agent-context/features/${work_id}/progress-log.md"
 
-  [[ -n "${req}" || -f "${feature_req}" ]] && echo "requirement_documented=passed"
-  [[ -f "${canvas}" || -f "${root}/agent-context/features/${work_id}/reasons-canvas.md" ]] && echo "canvas_exists=passed"
-  if [[ -f "${canvas}" ]] && grep -Eqi 'ready[[:space:]]+for[[:space:]]+coding' "${canvas}" 2>/dev/null; then
+  if [[ -n "${req}" || -f "${feature_req}" ]]; then
+    echo "requirement_documented=passed"
+  fi
+  if [[ -f "${canvas}" || -f "${root}/agent-context/features/${work_id}/reasons-canvas.md" ]]; then
+    echo "canvas_exists=passed"
+  fi
+  if [[ -f "${canvas}" ]] && declare -F canvas_readiness >/dev/null 2>&1; then
+    readiness="$(canvas_readiness "${canvas}")"
+  fi
+  # Architect review gate: only when readiness is an explicit post-architect value.
+  case "${readiness}" in
+    ready-for-coding|reviewed|complete)
+      echo "architect_review=passed"
+      echo "operations_task_sized=passed"
+      ;;
+  esac
+  # Fallback for canvases that only embed the phrase without Metadata readiness.
+  if [[ -z "${readiness}" && -f "${canvas}" ]] \
+    && grep -Eqi 'ready[[:space:]]+for[[:space:]]+coding' "${canvas}" 2>/dev/null; then
     echo "architect_review=passed"
     echo "operations_task_sized=passed"
   fi
@@ -717,15 +779,20 @@ _wf_infer_gates_from_artifacts() {
     echo "code_maps_to_ops=passed"
     echo "tests_updated=passed"
   fi
-  [[ -f "${review}" ]] && echo "review_completed=passed" && echo "safeguards_checked=passed"
-  [[ -f "${retro}" ]] && echo "retro_completed=passed"
+  if [[ -f "${review}" ]]; then
+    echo "review_completed=passed"
+    echo "safeguards_checked=passed"
+  fi
+  if [[ -f "${retro}" ]]; then
+    echo "retro_completed=passed"
+  fi
   if [[ -f "${sync_log}" ]]; then
     echo "canvas_synced=passed"
   elif [[ -f "${canvas}" && -f "${root}/agent-context/features/${work_id}/reasons-canvas.md" ]] \
     && cmp -s "${canvas}" "${root}/agent-context/features/${work_id}/reasons-canvas.md" 2>/dev/null; then
     echo "canvas_synced=passed"
   fi
-  [[ -f "${analysis}" ]] && true
+  return 0
 }
 
 _wf_resolve_phase() {
@@ -756,6 +823,7 @@ _wf_canvas_path() {
   if [[ -f "${canvas}" ]]; then
     printf '%s' "${canvas}"
   fi
+  return 0
 }
 
 _wf_infer_next_operation() {
@@ -907,7 +975,9 @@ _wf_touch_session_impl() {
   _wf_set_state_var "${work_id}" shelved_at ""
   _wf_set_state_var "${work_id}" shelved_reason ""
   _wf_set_state_var "${work_id}" last_session_at "$(_wf_now)"
-  [[ -n "${milestone}" ]] && _wf_set_state_var "${work_id}" milestone "${milestone}"
+  if [[ -n "${milestone}" ]]; then
+    _wf_set_state_var "${work_id}" milestone "${milestone}"
+  fi
   _wf_log_history "${work_id}" session "phase=${phase}"
 }
 
@@ -923,7 +993,9 @@ _wf_record_capture_impl() {
   local phase="${2:-resume}"
   _wf_ensure_state "${work_id}"
   _wf_set_state_var "${work_id}" last_capture_at "$(_wf_now)"
-  [[ "${phase}" != "resume" ]] && _wf_set_state_var "${work_id}" phase "${phase}"
+  if [[ "${phase}" != "resume" ]]; then
+    _wf_set_state_var "${work_id}" phase "${phase}"
+  fi
   _wf_log_history "${work_id}" capture "phase=${phase}"
 }
 
@@ -1038,6 +1110,14 @@ sdlc_workflow_resume() {
   resolved_phase="$(_wf_read_state_var "$(_wf_state_file "${work_id}")" phase init)"
   echo "Resumed ${work_id} at phase: ${resolved_phase}"
   echo "Recommended command: $(sdlc_workflow_recommended_command "${resolved_phase}" "${work_id}")"
+  if [[ "${resolved_phase}" == "code" ]]; then
+    local readiness
+    readiness="$(_wf_work_readiness "${work_id}")"
+    if [[ -n "${readiness}" ]] && declare -F readiness_allows_coding >/dev/null 2>&1 \
+      && ! readiness_allows_coding "${readiness}"; then
+      echo "Note: canvas readiness is '${readiness}' — not Ready For Coding; prefer /sdlc-spdd-architect before coding."
+    fi
+  fi
   echo "Quick check: ./scripts/sdlc.sh next"
   echo "Start session: $(sdlc_workflow_shell_start "${work_id}" "${resolved_phase}")"
   if declare -F sdlc_team_sync_from_workflow >/dev/null 2>&1; then
@@ -1048,6 +1128,7 @@ sdlc_workflow_resume() {
 
 sdlc_workflow_advance() {
   local to_phase="${1:-}"
+  local force="${2:-0}"
   local work_id
   work_id="$(sdlc_get_pointer)"
   if [[ -z "${work_id}" ]]; then
@@ -1056,7 +1137,7 @@ sdlc_workflow_advance() {
   fi
 
   _wf_ensure_state "${work_id}"
-  local file current next
+  local file current next readiness
   file="$(_wf_state_file "${work_id}")"
   current="$(_wf_read_state_var "${file}" phase init)"
 
@@ -1078,6 +1159,17 @@ sdlc_workflow_advance() {
     if [[ -z "${next}" ]]; then
       echo "Already at final phase (sync). Capture memory and refresh roadmap." >&2
       return 0
+    fi
+  fi
+
+  # Architecture-first: refuse entering code when canvas readiness blocks coding.
+  if [[ "${next}" == "code" && "${force}" != "1" ]]; then
+    readiness="$(_wf_work_readiness "${work_id}")"
+    if [[ -n "${readiness}" ]] && declare -F readiness_allows_coding >/dev/null 2>&1 \
+      && ! readiness_allows_coding "${readiness}"; then
+      echo "sdlc_workflow_advance: canvas readiness is '${readiness}' — not Ready For Coding." >&2
+      echo "Run /sdlc-spdd-architect (or prompt-update), then retry. Override: advance --force" >&2
+      return 3
     fi
   fi
 
@@ -1198,7 +1290,9 @@ sdlc_workflow_status() {
     if sdlc_workflow_list_shelved | grep -q .; then
       sdlc_workflow_list_shelved | while IFS=$'\t' read -r wid ph at rs; do
         echo "  - ${wid} (phase: ${ph}, shelved: ${at})"
-        [[ -n "${rs}" ]] && echo "    reason: ${rs}"
+        if [[ -n "${rs}" ]]; then
+          echo "    reason: ${rs}"
+        fi
       done
     else
       echo "  (none)"
@@ -1234,9 +1328,15 @@ sdlc_workflow_status() {
   if [[ -n "${operation}" ]]; then
     echo "Operation in flight: ${operation}"
   fi
-  [[ -n "${milestone}" ]] && echo "Milestone: ${milestone}"
-  [[ -n "${last_session}" ]] && echo "Last session: ${last_session}"
-  [[ -n "${last_capture}" ]] && echo "Last capture: ${last_capture}"
+  if [[ -n "${milestone}" ]]; then
+    echo "Milestone: ${milestone}"
+  fi
+  if [[ -n "${last_session}" ]]; then
+    echo "Last session: ${last_session}"
+  fi
+  if [[ -n "${last_capture}" ]]; then
+    echo "Last capture: ${last_capture}"
+  fi
 
   echo
   echo "Phase track:"
@@ -1357,13 +1457,15 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" && "${_SDLC_WORKFLOW_LOAD_DEPTH}" -eq 1 ]]; 
       ;;
     advance|/sdlc-workflow-advance)
       to=""
+      force_advance=0
       while [[ $# -gt 0 ]]; do
         case "$1" in
           --to) to="${2:-}"; shift 2 ;;
+          --force) force_advance=1; shift ;;
           *) to="${1}"; shift ;;
         esac
       done
-      sdlc_workflow_advance "${to}"
+      sdlc_workflow_advance "${to}" "${force_advance}"
       ;;
     skip|/sdlc-workflow-skip)
       phase="${1:-}"; shift || true

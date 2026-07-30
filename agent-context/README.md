@@ -178,6 +178,11 @@ Set `SDLC_USER="Jane"` to label registry rows. Set `SDLC_NO_TEAM_REGISTRY=1` to 
 Jira **draft syntax** for issue creation lives in `requirements/milestones/<WORK-ID>.md` under
 `## Jira`. Set `- Key: ABC-123` after create; `list-work` shows `jira:ABC-123` or `jira draft`.
 
+**Session / orientation prompts:** `start-agent-session.sh`, `sdlc.sh next`, and `/sdlc-spdd-whereami`
+resolve Jira via `sdlc_team_jira_status`. When the key is `missing` or `draft`, the Resume Prompt and
+`next` output instruct the agent to ask the user for a key (then `claim --jira KEY`). Disable with
+`SDLC_SESSION_ASK_JIRA=0`.
+
 **Notifications:** copy `agent-context/hooks/notify-team-registry.example.sh` and set:
 
 ```bash

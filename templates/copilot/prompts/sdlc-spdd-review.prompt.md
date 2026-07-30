@@ -31,8 +31,10 @@ Review code changes against the REASONS Canvas. Do not make code changes unless 
 14. Check for unexplained dependencies.
 15. Produce a review report.
 16. Classify findings as implementation mismatch, canvas/intent mismatch, or non-behavioral refactor.
-17. Recommend `/sdlc-spdd-prompt-update` for behavior or requirement changes before additional code changes.
-18. Recommend `/sdlc-spdd-sync` for accepted non-behavioral refactors after review.
+17. When the review result is Approved or Approved With Notes, set Metadata `- Readiness:` (or YAML
+   `readiness:`) to **Reviewed** (or **Complete** if Final Status is also Complete).
+18. Recommend `/sdlc-spdd-prompt-update` for behavior or requirement changes before additional code changes.
+19. Recommend `/sdlc-spdd-sync` for accepted non-behavioral refactors after review.
 
 ## Output
 
@@ -58,4 +60,5 @@ Include:
 - Test gaps
 - Drift from canvas
 - Readiness at review time (and whether coding proceeded without Ready For Coding)
+- Readiness after review (Reviewed / Complete when approved)
 - Recommended next prompt

@@ -26,11 +26,14 @@ Make it right (do first):
 7. **FEAT-008 — milestone subdirectory layout.** Prefer `requirements/milestones/milestone-N/`.
 8. **FEAT-009 — session-brief archive/rotation.** Keep `agent-context/sessions/` bounded.
 
-Make it fast (do last, deferred):
+Make it fast (measurement + spikes):
 
-9. **FEAT-004 — prompt-optimization ledger + capture metrics.** Already specced;
-   parked until the refactors above land. (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`.)
-10. **FEAT-005 — canvas `readiness:` front matter + leading indicators.**
+9. **FEAT-004 — prompt-optimization ledger + capture metrics.** **Complete**
+   (`spdd/canvas/FEAT-004-prompt-optimization-ledger.md`).
+10. **FEAT-005 — canvas `readiness:` / Metadata readiness + leading indicators.** **Complete**
+    (`spdd/canvas/FEAT-005-canvas-readiness-indicators.md`).
+11. **SPIKE-001 / SPIKE-002** — Guide DICE hybrid + local LLM/embedding spikes.
+    Shelved until Guide MCP is available.
 
 Work IDs are numbered in execution order. FEAT-001–009 Milestone 1 feature track is
 complete on the integration branch; SPIKE-001/002 remain for make-it-fast retrieval/LLM spikes.

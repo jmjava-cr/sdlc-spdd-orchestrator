@@ -4,4 +4,4 @@ start_date: "2026-06-01"
 end_date: ""
 status: "in_progress"
 related_epics: []
-notes: "Framework readability/maintainability/extensibility. Prompt optimization deferred to make-it-fast."
+notes: "Make-it-right FEAT-001–003/006–009 complete. Make-it-fast measurement FEAT-004/005 complete. SPIKE-001/002 shelved pending Guide MCP."

@@ -205,8 +205,9 @@ At session end, `capture-session-memory.sh` runs a **session-driven category flo
      (`pass|fail|mixed|blocked`), `--rework` (non-negative int),
      `--context-files`, and leading indicators `--validate-cycles` /
      `--review-cycles` (non-negative ints) → Kind: `metric` (scoped to
-     resolved areas; omitted flags leave capture behavior unchanged; unknown
-     `--review-result` warns and skips)
+     resolved areas; omitted flags leave capture behavior unchanged except
+     `--readiness`, which auto-fills from canvas Metadata/YAML when present;
+     unknown `--review-result` warns and skips)
    - memory entries without resolved areas are written but **not** indexed
 7. Rotate `session-history.md` and `prompt-optimization-log.md` (when present)
    with the same `--history-limit` / `--no-history-rotate` controls; older

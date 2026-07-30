@@ -202,6 +202,9 @@ Optional capture metrics (Kind: `metric` in `context-index.md` when areas resolv
       --validate-cycles 1 \
       --review-cycles 1
 
+When `--readiness` is omitted, capture auto-fills from the canvas Metadata
+`- Readiness:` or YAML `readiness:` value when present.
+
 `--history-limit` / `--no-history-rotate` bound `session-history.md` and, when
 present, `prompt-optimization-log.md` (older `###` sections →
 `agent-context/memory/archive/`).
@@ -250,6 +253,7 @@ Invoke the SDLC-SPDD skill:
 After completing a phase step:
 
     ./scripts/sdlc-spdd/sdlc.sh advance
+    ./scripts/sdlc-spdd/sdlc.sh advance --force   # override Ready For Coding gate into code
 
 Review and sync:
 

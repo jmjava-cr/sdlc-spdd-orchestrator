@@ -185,6 +185,62 @@ _team_auto_jira() {
   _team_jira_from_milestone "${work_id}"
 }
 
+_team_jira_from_note() {
+  local note="${1:-}"
+  local token
+  for token in ${note}; do
+    if [[ "${token}" == jira:* ]]; then
+      printf '%s' "${token#jira:}"
+      return 0
+    fi
+  done
+}
+
+# Resolve tracker key for a Work ID.
+# Prints: <KEY> | draft | missing
+# Prefer claim-note jira:TOKEN, then requirement Key, else draft if ## Jira exists.
+sdlc_team_jira_status() {
+  local work_id="${1:-}"
+  [[ -n "${work_id}" ]] || { printf 'missing'; return 0; }
+  local note="" key=""
+  if [[ -f "${SDLC_TEAM_REGISTRY}" ]]; then
+    note="$(_team_registry_note_for "${work_id}" || true)"
+    key="$(_team_jira_from_note "${note}")"
+  fi
+  if [[ -n "${key}" ]]; then
+    printf '%s' "${key}"
+    return 0
+  fi
+  key="$(_team_jira_from_milestone "${work_id}" || true)"
+  if [[ -n "${key}" ]]; then
+    printf '%s' "${key}"
+    return 0
+  fi
+  if _team_milestone_has_jira_draft "${work_id}"; then
+    printf 'draft'
+    return 0
+  fi
+  printf 'missing'
+}
+
+# Agent-facing instruction when Jira is unset. Empty when a key is known or
+# SDLC_SESSION_ASK_JIRA=0. Use in Resume Prompt / next / whereami.
+sdlc_team_jira_ask_prompt() {
+  local work_id="${1:-}"
+  [[ -n "${work_id}" ]] || return 0
+  [[ "${SDLC_SESSION_ASK_JIRA:-1}" == "1" ]] || return 0
+  local status
+  status="$(sdlc_team_jira_status "${work_id}")"
+  case "${status}" in
+    missing)
+      printf '%s\n' "Tracker link: Jira key is missing for ${work_id}. Ask the user for the issue key (or confirm none applies) before coding or claiming tracker progress. Then run \`./scripts/sdlc.sh claim ${work_id} --jira KEY\` (or set \`- Key:\` under \`## Jira\` on the requirement and re-claim). Do not invent a key."
+      ;;
+    draft)
+      printf '%s\n' "Tracker link: Jira draft exists for ${work_id} but \`- Key:\` is unset. Ask the user for the issue key (or confirm none applies) before coding or claiming tracker progress. Then run \`./scripts/sdlc.sh claim ${work_id} --jira KEY\` (or set \`- Key:\` under \`## Jira\` and re-claim). Do not invent a key."
+      ;;
+  esac
+}
+
 _team_run_hook() {
   local work_id="$1"
   local status="$2"

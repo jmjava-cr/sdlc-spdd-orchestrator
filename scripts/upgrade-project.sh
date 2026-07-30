@@ -367,7 +367,6 @@ for file in \
   known-pitfalls.md \
   reusable-patterns.md \
   session-history.md \
-  prompt-optimization-log.md \
   phase-index.md; do
   create_missing_memory_file \
     "${REPO_ROOT}/agent-context/memory/${file}" \
@@ -377,6 +376,10 @@ done
 create_missing_memory_file \
   "${REPO_ROOT}/templates/agent-context/memory/domain-index.md" \
   "${TARGET}/agent-context/memory/domain-index.md"
+
+create_missing_memory_file \
+  "${REPO_ROOT}/templates/agent-context/memory/prompt-optimization-log.md" \
+  "${TARGET}/agent-context/memory/prompt-optimization-log.md"
 
 # Framework-owned playbooks and harness files are upgraded, with backups.
 for file in "${REPO_ROOT}"/agent-context/playbooks/*.md; do

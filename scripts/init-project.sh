@@ -181,6 +181,15 @@ copy_if_missing \
   "${REPO_ROOT}/templates/requirements/milestones/README.md" \
   "${TARGET}/requirements/milestones/README.md"
 
+# Empty memory scaffolds — do not seed orchestrator dogfood rows into targets.
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/memory/domain-index.md" \
+  "${TARGET}/agent-context/memory/domain-index.md"
+
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/memory/prompt-optimization-log.md" \
+  "${TARGET}/agent-context/memory/prompt-optimization-log.md"
+
 # Copy memory and harness templates
 for file in \
   project-memory.md \
@@ -188,17 +197,11 @@ for file in \
   known-pitfalls.md \
   reusable-patterns.md \
   session-history.md \
-  prompt-optimization-log.md \
   phase-index.md; do
   copy_if_missing \
     "${REPO_ROOT}/agent-context/memory/${file}" \
     "${TARGET}/agent-context/memory/${file}"
 done
-
-# Empty index scaffold — do not seed orchestrator dogfood rows into targets.
-copy_if_missing \
-  "${REPO_ROOT}/templates/agent-context/memory/domain-index.md" \
-  "${TARGET}/agent-context/memory/domain-index.md"
 
 # Copy playbooks for SDLC Agents-style handoffs and repeatable workflows
 for file in "${REPO_ROOT}"/agent-context/playbooks/*.md; do

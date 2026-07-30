@@ -5,6 +5,7 @@
 - Work ID:
 - Work Type: Bugfix
 - Status: Draft
+- Readiness: Needs Analysis
 - Created:
 - Updated:
 - Owner:

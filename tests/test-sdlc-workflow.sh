@@ -292,6 +292,266 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+echo "== Test 12d: advance to code refused when readiness blocks coding =="
+T="${WORK}/advance-readiness"
+work_id="FEAT-012d-advance"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012d-advance
+
+## Metadata
+- Work ID: FEAT-012d-advance
+- Status: In Progress
+- Readiness: Needs Clarification
+
+## O - Operations
+
+### T01 - First
+
+- Status: Not Started
+
+## Final Status
+
+- Status:
+EOF
+wf "${T}" resume "${work_id}" --phase architect >/dev/null
+if wf "${T}" advance >/dev/null 2>"${WORK}/advance-err.txt"; then
+  bad "advance architect→code should fail when Needs Clarification"
+else
+  if grep -q "not Ready For Coding" "${WORK}/advance-err.txt"; then
+    ok "advance refuses code when readiness blocks"
+  else
+    bad "advance error missing readiness message: $(cat "${WORK}/advance-err.txt")"
+  fi
+fi
+phase="$(grep '^phase=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2)"
+if [[ "${phase}" == "architect" ]]; then
+  ok "phase stays architect after refused advance"
+else
+  bad "expected phase architect, got ${phase}"
+fi
+if wf "${T}" advance --force >/dev/null; then
+  ok "advance --force overrides readiness gate"
+else
+  bad "advance --force should succeed"
+fi
+phase="$(grep '^phase=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2)"
+if [[ "${phase}" == "code" ]]; then
+  ok "force advance reaches code"
+else
+  bad "expected phase code after --force, got ${phase}"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12e: resume --phase code warns when readiness blocks =="
+T="${WORK}/resume-readiness"
+work_id="FEAT-012e-resume"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012e-resume
+
+## Metadata
+- Work ID: FEAT-012e-resume
+- Readiness: Blocked
+
+## O - Operations
+
+### T01 - First
+- Status: Not Started
+EOF
+out="$(wf "${T}" resume "${work_id}" --phase code)"
+if grep -q 'not Ready For Coding' <<< "${out}" && grep -q 'sdlc-spdd-architect' <<< "${out}"; then
+  ok "resume warns and recommends architect when blocked"
+else
+  bad "resume missing readiness warning: ${out}"
+fi
+out="$(wf "${T}" next)"
+if grep -q 'Readiness: blocked' <<< "${out}"; then
+  ok "next prints Readiness line"
+else
+  bad "next missing Readiness line: ${out}"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12f: advance to code succeeds when Ready For Coding =="
+T="${WORK}/advance-ok"
+work_id="FEAT-012f-ok"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012f-ok
+
+## Metadata
+- Work ID: FEAT-012f-ok
+- Readiness: Ready For Coding
+
+## O - Operations
+
+### T01 - First
+- Status: Not Started
+EOF
+wf "${T}" resume "${work_id}" --phase architect >/dev/null
+if wf "${T}" advance >/dev/null; then
+  ok "advance architect→code when Ready For Coding"
+else
+  bad "advance should succeed when Ready For Coding"
+fi
+phase="$(grep '^phase=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2)"
+if [[ "${phase}" == "code" ]]; then ok "phase is code after ready advance"; else bad "expected code, got ${phase}"; fi
+out="$(wf "${T}" next)"
+if grep -q 'sdlc-spdd-code' <<< "${out}"; then ok "next recommends code when ready"; else bad "next should recommend code: ${out}"; fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12g: absent readiness still allows advance to code (compat) =="
+T="${WORK}/advance-absent"
+work_id="FEAT-012g-absent"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012g-absent
+
+## Metadata
+- Work ID: FEAT-012g-absent
+- Status: In Progress
+
+## O - Operations
+
+### T01 - First
+- Status: Not Started
+EOF
+wf "${T}" resume "${work_id}" --phase architect >/dev/null
+if wf "${T}" advance >/dev/null; then
+  ok "advance allowed when readiness absent"
+else
+  bad "absent readiness should not block advance"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12h: YAML readiness + brief Readiness row + gate inference =="
+T="${WORK}/yaml-ready"
+work_id="FEAT-012h-yaml"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+---
+readiness: needs-redesign
+---
+# REASONS Canvas: FEAT-012h-yaml
+
+## Metadata
+- Work ID: FEAT-012h-yaml
+
+## O - Operations
+
+### T01 - First
+- Status: Not Started
+EOF
+wf "${T}" resume "${work_id}" --phase code >/dev/null
+wf "${T}" sync "${work_id}" >/dev/null
+json="$(wf "${T}" status --json)"
+if grep -q '"readiness":"needs-redesign"' <<< "${json}"; then
+  ok "json reads YAML readiness"
+else
+  bad "json YAML readiness: ${json}"
+fi
+brief="$(SDLC_ROOT="${T}" bash -c "source '${T}/agent-context/sdlc-workflow.sh'; sdlc_workflow_brief_markdown '${work_id}'")"
+if grep -q '| Readiness | needs-redesign |' <<< "${brief}"; then
+  ok "brief includes Readiness row"
+else
+  bad "brief missing Readiness: ${brief}"
+fi
+# Sync should not mark architect_review passed for needs-redesign
+gate="$(grep '^gate_architect_review=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2 || true)"
+if [[ "${gate}" != "passed" ]]; then
+  ok "architect_review not auto-passed for needs-redesign"
+else
+  bad "architect_review should not be passed for needs-redesign (got ${gate})"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12i: start-agent-session recommends architect when code blocked =="
+T="${WORK}/start-ready"
+work_id="FEAT-012i-start"
+setup_feature "${T}" "${work_id}"
+mkdir -p "${T}/scripts/lib"
+cp "${REPO_ROOT}/scripts/lib/"*.sh "${T}/scripts/lib/"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012i-start
+
+## Metadata
+- Work ID: FEAT-012i-start
+- Readiness: Needs Analysis
+
+## O - Operations
+### T01 - First
+- Status: Not Started
+EOF
+# Point SDLC_ROOT at T so workflow readiness lib resolves; start uses TARGET workflow copy
+out="$("${START}" --target "${T}" --work-id "${work_id}" --phase code 2>&1)"
+brief="${T}/agent-context/sessions/current-session.md"
+if grep -q 'sdlc-spdd-architect' "${brief}" && grep -q 'Readiness | needs-analysis' "${brief}"; then
+  ok "session brief readiness-gates code recommendation"
+else
+  bad "brief should recommend architect + show readiness: $(grep -E 'Recommended|Readiness' "${brief}" || true)"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 12j: advance --to code from plan refused when blocked =="
+T="${WORK}/advance-to"
+work_id="FEAT-012j-to"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012j-to
+
+## Metadata
+- Work ID: FEAT-012j-to
+- Readiness: Blocked
+
+## O - Operations
+### T01 - First
+- Status: Not Started
+EOF
+wf "${T}" resume "${work_id}" --phase plan >/dev/null
+if wf "${T}" advance --to code >/dev/null 2>"${WORK}/advance-to-err.txt"; then
+  bad "advance --to code should refuse when Blocked"
+else
+  if grep -q "not Ready For Coding" "${WORK}/advance-to-err.txt"; then
+    ok "advance --to code refuses when Blocked"
+  else
+    bad "missing readiness error: $(cat "${WORK}/advance-to-err.txt")"
+  fi
+fi
+phase="$(grep '^phase=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2)"
+if [[ "${phase}" == "plan" ]]; then ok "phase stays plan after refused --to code"; else bad "expected plan, got ${phase}"; fi
+
+# Ready For Coding Metadata passes architect_review on sync (no analysis file required)
+T="${WORK}/gate-meta"
+work_id="FEAT-012j-gate"
+setup_feature "${T}" "${work_id}"
+cat > "${T}/spdd/canvas/${work_id}.md" <<'EOF'
+# REASONS Canvas: FEAT-012j-gate
+
+## Metadata
+- Work ID: FEAT-012j-gate
+- Readiness: Ready For Coding
+
+## O - Operations
+### T01 - First
+- Status: Not Started
+EOF
+wf "${T}" resume "${work_id}" --phase architect >/dev/null
+wf "${T}" sync "${work_id}" >/dev/null
+gate="$(grep '^gate_architect_review=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2 || true)"
+if [[ "${gate}" == "passed" ]]; then
+  ok "sync passes architect_review from Metadata Ready For Coding"
+else
+  bad "expected architect_review=passed, got '${gate}'"
+fi
+gate_c="$(grep '^gate_canvas_exists=' "${T}/.sdlc/workflows/${work_id}.state" | cut -d= -f2 || true)"
+if [[ "${gate_c}" == "passed" ]]; then
+  ok "sync passes canvas_exists without analysis artifact"
+else
+  bad "expected canvas_exists=passed without analysis, got '${gate_c}'"
+fi
+
+# ---------------------------------------------------------------------------
 echo "== Test 13: capture wrapper guards pointer =="
 T="${WORK}/capture-guard"
 work_id="FEAT-008-cap"
@@ -456,6 +716,100 @@ if grep -q 'jira:ORCH-42' <<< "${out}"; then
   ok "list-work shows milestone jira key"
 else
   bad "list-work missing jira key"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 21: agent-driven Jira ask on missing / draft / present =="
+T="${WORK}/jira-ask-missing"
+work_id="FEAT-014-jira-ask"
+setup_feature "${T}" "${work_id}"
+wf "${T}" resume "${work_id}" >/dev/null
+out="$(SDLC_ROOT="${T}" wf "${T}" next)"
+if grep -q 'Jira: missing' <<< "${out}" && grep -q 'Tracker follow-up:' <<< "${out}" \
+  && grep -q 'Ask the user for the issue key' <<< "${out}"; then
+  ok "next asks when Jira missing"
+else
+  bad "next should ask when Jira missing"
+fi
+"${START}" --target "${T}" --work-id "${work_id}" --phase plan >/dev/null
+current="${T}/agent-context/sessions/current-session.md"
+if grep -q '^- Jira: missing$' "${current}" \
+  && grep -A20 '## Resume Prompt' "${current}" | grep -q 'Tracker link: Jira key is missing'; then
+  ok "session brief Resume Prompt asks when Jira missing"
+else
+  bad "session brief should ask when Jira missing"
+fi
+
+T="${WORK}/jira-ask-draft"
+work_id="FEAT-015-jira-draft"
+setup_feature "${T}" "${work_id}"
+mkdir -p "${T}/requirements/milestones"
+cat > "${T}/requirements/milestones/${work_id}.md" <<'EOF'
+# Requirement: FEAT-015-jira-draft
+
+## Jira
+
+- Summary: draft without key yet
+EOF
+wf "${T}" resume "${work_id}" >/dev/null
+out="$(SDLC_ROOT="${T}" wf "${T}" next)"
+if grep -q 'Jira: draft' <<< "${out}" && grep -q 'Jira draft exists' <<< "${out}"; then
+  ok "next asks when Jira draft"
+else
+  bad "next should ask when Jira draft"
+fi
+"${START}" --target "${T}" --work-id "${work_id}" --phase plan >/dev/null
+current="${T}/agent-context/sessions/current-session.md"
+if grep -A20 '## Resume Prompt' "${current}" | grep -q 'Jira draft exists'; then
+  ok "session brief asks when Jira draft"
+else
+  bad "session brief should ask when Jira draft"
+fi
+
+T="${WORK}/jira-ask-present"
+work_id="FEAT-016-jira-present"
+setup_feature "${T}" "${work_id}"
+mkdir -p "${T}/requirements/milestones"
+cat > "${T}/requirements/milestones/${work_id}.md" <<'EOF'
+# Requirement: FEAT-016-jira-present
+
+## Jira
+
+- Key: ORCH-99
+EOF
+wf "${T}" resume "${work_id}" >/dev/null
+out="$(SDLC_ROOT="${T}" wf "${T}" next)"
+if grep -q 'Jira: ORCH-99' <<< "${out}" && ! grep -q 'Tracker follow-up:' <<< "${out}"; then
+  ok "next shows key and skips ask when present"
+else
+  bad "next should not ask when Jira key present"
+fi
+"${START}" --target "${T}" --work-id "${work_id}" --phase plan >/dev/null
+current="${T}/agent-context/sessions/current-session.md"
+if grep -q '^- Jira: ORCH-99$' "${current}" \
+  && grep -A20 '## Resume Prompt' "${current}" | grep -q 'Jira: ORCH-99' \
+  && ! grep -A20 '## Resume Prompt' "${current}" | grep -q 'Ask the user for the issue key'; then
+  ok "session brief records key without ask"
+else
+  bad "session brief should record key without ask"
+fi
+
+T="${WORK}/jira-ask-disabled"
+work_id="FEAT-017-jira-off"
+setup_feature "${T}" "${work_id}"
+wf "${T}" resume "${work_id}" >/dev/null
+out="$(SDLC_SESSION_ASK_JIRA=0 SDLC_ROOT="${T}" wf "${T}" next)"
+if grep -q 'Jira: missing' <<< "${out}" && ! grep -q 'Tracker follow-up:' <<< "${out}"; then
+  ok "SDLC_SESSION_ASK_JIRA=0 suppresses ask"
+else
+  bad "SDLC_SESSION_ASK_JIRA=0 should suppress ask"
+fi
+SDLC_SESSION_ASK_JIRA=0 "${START}" --target "${T}" --work-id "${work_id}" --phase plan >/dev/null
+current="${T}/agent-context/sessions/current-session.md"
+if ! grep -A20 '## Resume Prompt' "${current}" | grep -q 'Ask the user for the issue key'; then
+  ok "start respects SDLC_SESSION_ASK_JIRA=0"
+else
+  bad "start should honor SDLC_SESSION_ASK_JIRA=0"
 fi
 
 # ---------------------------------------------------------------------------

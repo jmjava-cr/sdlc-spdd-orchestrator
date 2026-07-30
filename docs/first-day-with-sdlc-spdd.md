@@ -180,6 +180,8 @@ Do not code until readiness is:
     Ready For Coding
 
 If readiness is blocked or unclear, update the canvas first.
+`./scripts/sdlc-spdd/sdlc.sh advance` into `code` also refuses when readiness is
+not Ready For Coding (override only with explicit `advance --force`).
 
 ## 9. Code One Operation
 

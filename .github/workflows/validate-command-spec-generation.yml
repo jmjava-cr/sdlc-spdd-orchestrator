@@ -6,6 +6,8 @@ on:
       - 'spec/commands/**'
       - 'scripts/generate-command-adapters.sh'
       - 'scripts/extract-command-specs.sh'
+      - 'scripts/validate-command-adapters.sh'
+      - 'tests/test-command-specs.sh'
       - 'templates/cursor/sdlc-*.md'
       - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/claude/commands/sdlc-*.md'
@@ -16,6 +18,8 @@ on:
       - 'spec/commands/**'
       - 'scripts/generate-command-adapters.sh'
       - 'scripts/extract-command-specs.sh'
+      - 'scripts/validate-command-adapters.sh'
+      - 'tests/test-command-specs.sh'
       - 'templates/cursor/sdlc-*.md'
       - 'templates/copilot/prompts/sdlc-*.prompt.md'
       - 'templates/claude/commands/sdlc-*.md'
@@ -35,3 +39,6 @@ jobs:
 
       - name: Validate generated adapter parity
         run: ./scripts/validate-command-adapters.sh
+
+      - name: Command-spec edge / semantic contracts
+        run: ./tests/test-command-specs.sh

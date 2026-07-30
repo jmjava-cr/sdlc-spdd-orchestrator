@@ -24,8 +24,7 @@ Capture reusable learnings after a feature, bugfix, refactor, or spike. Do not i
 9. **Append a prompt-optimization ledger entry** to
    `agent-context/memory/prompt-optimization-log.md` with Date, Work ID, Change
    (what you learned about prompts/process), Hypothesis (what you expected),
-   Signal (what happened), and Outcome (`improved` / `neutral` / `worse` /
-   `unknown`).
+   Signal (what happened), and Outcome (`improved` / `neutral` / `worse` / `unknown`).
 
 ## Output
 

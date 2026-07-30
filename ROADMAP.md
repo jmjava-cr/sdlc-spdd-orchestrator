@@ -72,12 +72,13 @@ See [requirements/milestones/milestone-1/MILESTONE-1.md](requirements/milestones
 (root [milestone-1.md](milestone-1.md) is a compatibility stub). Goal: take the
 framework from its current working state to "right" — refactor the existing code
 and docs for readability, maintainability, and extensibility, and ship each
-refactor as working code. Prompt optimization is deferred to "make it fast" and
-comes last.
+refactor as working code. Prompt-optimization *measurement* (FEAT-004/005) is
+complete under "make it fast"; remaining make-it-fast work is spikes and acting
+on metrics.
 
 ## Post-MVP backlog
 
-Each item names the Beck stage it serves (see [Delivery posture](#delivery-posture-kent-beck-make-it-work--make-it-right--make-it-fast)). Near-term work is **make it right** (refactors); **make it fast** (prompt optimization and its measurement) comes last.
+Each item names the Beck stage it serves (see [Delivery posture](#delivery-posture-kent-beck-make-it-work--make-it-right--make-it-fast)). Near-term make-it-right refactors and make-it-fast measurement (FEAT-004/005) are largely complete; remaining make-it-fast work is spikes and acting on metrics.
 
 ### Make it right — refactor the existing framework (do first)
 
@@ -98,9 +99,9 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 
 | Item | Concern |
 |------|---------|
-| Prompt-optimization ledger (`agent-context/memory/prompt-optimization-log.md`) | Measurement for optimization |
-| Capture metric flags (`--readiness`, `--review-result`, `--rework`, `--context-files`) → indexed rows (Kind: `metric`) | Measurement for optimization |
-| Canvas `readiness:` front matter + leading indicators (validate/review counts) | Measurement for optimization |
+| Prompt-optimization ledger (`agent-context/memory/prompt-optimization-log.md`) | Measurement — **FEAT-004 Complete** |
+| Capture metric flags (`--readiness`, `--review-result`, `--rework`, `--context-files`) → indexed rows (Kind: `metric`) | Measurement — **FEAT-004 Complete** |
+| Canvas `readiness:` / Metadata readiness + leading indicators (validate/review counts) | Measurement — **FEAT-005 Complete** |
 | `spdd --metrics` surface over the ledger and indexes | Optimization |
 | Act on metrics: prompt + context optimization | Optimization |
 | Context-budget telemetry and enforcement | Optimization |

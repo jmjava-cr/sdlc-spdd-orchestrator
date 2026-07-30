@@ -10,6 +10,8 @@ source "${_SCRIPT_DIR}/lib/areas.sh"
 source "${_SCRIPT_DIR}/lib/context-index.sh"
 # shellcheck source=/dev/null
 source "${_SCRIPT_DIR}/lib/milestone.sh"
+# shellcheck source=/dev/null
+source "${_SCRIPT_DIR}/lib/readiness.sh"
 
 usage() {
   cat <<'EOF'
@@ -42,7 +44,9 @@ Options:
   --history-limit <n>   Keep at most n recent entries inline in session-history.md;
                         older entries move to agent-context/memory/archive/ (default 20)
   --no-history-rotate   Keep session-history.md append-only (do not rotate/archive)
-  --readiness <text>    Optional capture metric: canvas readiness value
+  --readiness <text>    Optional capture metric: canvas readiness value.
+                        When omitted, auto-fills from canvas Metadata/YAML
+                        readiness if present (FEAT-005).
   --review-result <v>   Optional capture metric: pass|fail|mixed|blocked
                         (unknown values warn and are skipped; capture continues)
   --rework <n>          Optional capture metric: non-negative integer (corrective
@@ -627,6 +631,17 @@ if [[ -n "${METRIC_REVIEW_CYCLES}" ]]; then
     echo "Warning: --review-cycles '${METRIC_REVIEW_CYCLES}' must be a non-negative integer; skipping." >&2
     METRIC_REVIEW_CYCLES=""
   fi
+fi
+# Auto-fill readiness from canvas when the caller did not pass --readiness.
+if [[ -z "${METRIC_READINESS}" ]]; then
+  _canvas_for_metric="${TARGET}/spdd/canvas/${WORK_ID}.md"
+  if [[ ! -f "${_canvas_for_metric}" ]]; then
+    _canvas_for_metric="${TARGET}/agent-context/features/${WORK_ID}/reasons-canvas.md"
+  fi
+  if [[ -f "${_canvas_for_metric}" ]]; then
+    METRIC_READINESS="$(canvas_readiness "${_canvas_for_metric}" || true)"
+  fi
+  unset _canvas_for_metric
 fi
 [[ -n "${METRIC_READINESS}" ]] && METRIC_PARTS+=("readiness=$(sdlc_oneline "${METRIC_READINESS}" 80)")
 [[ -n "${METRIC_REVIEW_RESULT}" ]] && METRIC_PARTS+=("review-result=${METRIC_REVIEW_RESULT}")

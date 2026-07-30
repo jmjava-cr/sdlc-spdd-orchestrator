@@ -110,6 +110,64 @@ else
   bad "missing cycles in ${idx}"
 fi
 
+echo "== Test 7: directory validate reports readiness per file =="
+T="${WORK}/dir"; mkdir -p "${T}"
+cat > "${T}/FEAT-A.md" <<'EOF'
+# A
+## Metadata
+- Readiness: Ready For Coding
+## R - Requirements
+## E - Entities
+## A - Approach
+## S - Structure
+## O - Operations
+## N - Norms
+## S - Safeguards
+## Review Checklist
+## Sync Notes
+## Final Status
+EOF
+cat > "${T}/FEAT-B.md" <<'EOF'
+# B
+## Metadata
+- Readiness: Blocked
+## R - Requirements
+## E - Entities
+## A - Approach
+## S - Structure
+## O - Operations
+## N - Norms
+## S - Safeguards
+## Review Checklist
+## Sync Notes
+## Final Status
+EOF
+out="$("${VALIDATE}" "${T}" 2>&1)"
+if grep -q 'ready-for-coding' <<<"${out}" && grep -q 'blocked' <<<"${out}"; then
+  ok "directory validate reports both readiness values"
+else
+  bad "dir validate: ${out}"
+fi
+
+echo "== Test 8: complete / done aliases normalize =="
+cat > "${WORK}/done.md" <<'EOF'
+# D
+## Metadata
+- Readiness: Done
+## R - Requirements
+## E - Entities
+## A - Approach
+## S - Structure
+## O - Operations
+## N - Norms
+## S - Safeguards
+## Review Checklist
+## Sync Notes
+## Final Status
+EOF
+out="$("${VALIDATE}" "${WORK}/done.md" 2>&1)"
+if grep -q 'readiness: complete' <<<"${out}"; then ok "Done → complete"; else bad "done alias: ${out}"; fi
+
 echo
 echo "Summary: ${pass} passed, ${fail} failed"
 [[ "${fail}" -eq 0 ]]

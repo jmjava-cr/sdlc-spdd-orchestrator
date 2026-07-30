@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/validate-reasons-canvas.sh'
       - 'scripts/capture-session-memory.sh'
+      - 'scripts/lib/readiness.sh'
       - 'tests/test-canvas-readiness.sh'
       - '.github/workflows/test-canvas-readiness.yml'
   push:
@@ -12,6 +13,7 @@ on:
     paths:
       - 'scripts/validate-reasons-canvas.sh'
       - 'scripts/capture-session-memory.sh'
+      - 'scripts/lib/readiness.sh'
       - 'tests/test-canvas-readiness.sh'
       - '.github/workflows/test-canvas-readiness.yml'
 
@@ -22,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check shell syntax
-        run: bash -n scripts/validate-reasons-canvas.sh scripts/capture-session-memory.sh tests/test-canvas-readiness.sh
+        run: bash -n scripts/validate-reasons-canvas.sh scripts/capture-session-memory.sh scripts/lib/readiness.sh tests/test-canvas-readiness.sh
 
       - name: Run canvas readiness + leading-indicator tests
         run: ./tests/test-canvas-readiness.sh

@@ -44,5 +44,8 @@ alongside runtime scripts under `scripts/sdlc-spdd/`.
 
 ## Verification
 
+Run `./tests/test-scripts-lib.sh` for unit/edge coverage of every shipped and
+orchestrator-only lib.
+
 Run `./scripts/verify-script-lib-duplicates.sh` to confirm extracted helpers are not
 redefined outside `scripts/lib/`. Included in the integration branch gate list.

@@ -75,6 +75,7 @@ Claim and resume:
 Phase transitions:
 
     ./scripts/sdlc-spdd/sdlc.sh advance
+    ./scripts/sdlc-spdd/sdlc.sh advance --force   # override Ready For Coding gate into code
     /sdlc-advance
     ./scripts/sdlc-spdd/sdlc.sh skip <phase> --reason "..."
     ./scripts/sdlc-spdd/sdlc.sh shelf --reason "..."

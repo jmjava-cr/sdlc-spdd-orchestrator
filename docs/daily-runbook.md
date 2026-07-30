@@ -57,7 +57,7 @@ If you already have an active pointer, resume or switch:
 
 4. **Paste the Resume Prompt** from `agent-context/sessions/current-session.md`. That generated prompt is the source of truth — it directs the agent to load only the files listed under **Resolved Context** in the same brief (phase extensions, Work ID artifacts, and area-filtered index rows).
 
-5. After completing a phase step: `./scripts/sdlc-spdd/sdlc.sh advance` (or `/sdlc-advance` in chat). To pause: `/sdlc-shelf` or `sdlc.sh shelf --reason "..."`.
+5. After completing a phase step: `./scripts/sdlc-spdd/sdlc.sh advance` (or `/sdlc-advance` in chat). Advance into `code` refuses when canvas readiness is not Ready For Coding (`advance --force` to override). To pause: `/sdlc-shelf` or `sdlc.sh shelf --reason "..."`.
 
 Optional — ask for a status summary after pasting the resume prompt:
 

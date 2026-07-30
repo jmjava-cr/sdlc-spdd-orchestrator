@@ -99,7 +99,10 @@ if [[ -f "${pointer_script}" && -n "${WORK_ID}" ]]; then
 fi
 
 workflow_script="${TARGET}/agent-context/sdlc-workflow.sh"
+team_script="${TARGET}/agent-context/sdlc-team-registry.sh"
 workflow_brief_md="Workflow tools not installed."
+jira_status=""
+jira_ask_prompt=""
 if [[ -f "${workflow_script}" && -n "${WORK_ID}" ]]; then
   SDLC_ROOT="${TARGET}"
   # shellcheck source=/dev/null
@@ -107,6 +110,16 @@ if [[ -f "${workflow_script}" && -n "${WORK_ID}" ]]; then
   sdlc_workflow_touch_session "${WORK_ID}" "${PHASE}" "${MILESTONE}"
   sdlc_workflow_sync "${WORK_ID}" >/dev/null 2>&1 || true
   workflow_brief_md="$(sdlc_workflow_brief_markdown "${WORK_ID}")"
+elif [[ -f "${team_script}" && -n "${WORK_ID}" ]]; then
+  SDLC_ROOT="${TARGET}"
+  # shellcheck source=/dev/null
+  source "${team_script}"
+fi
+if [[ -n "${WORK_ID}" ]] && declare -F sdlc_team_jira_status >/dev/null 2>&1; then
+  jira_status="$(sdlc_team_jira_status "${WORK_ID}")"
+fi
+if [[ -n "${WORK_ID}" ]] && declare -F sdlc_team_jira_ask_prompt >/dev/null 2>&1; then
+  jira_ask_prompt="$(sdlc_team_jira_ask_prompt "${WORK_ID}")"
 fi
 
 timestamp="$(sdlc_timestamp_iso)"
@@ -204,6 +217,11 @@ case "${PHASE}" in
     ;;
 esac
 
+# Prefer workflow helper when installed — honors Ready For Coding gate for code phase.
+if declare -F sdlc_workflow_recommended_command >/dev/null 2>&1 && [[ -n "${WORK_ID}" ]]; then
+  recommended_command="$(sdlc_workflow_recommended_command "${PHASE}" "${WORK_ID}")"
+fi
+
 git_status="not a git repository"
 if git -C "${TARGET}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git_status="$(git -C "${TARGET}" status --short)"
@@ -280,6 +298,11 @@ fi
 
 resume_prompt+=$'\n\n'"Continue in the ${PHASE} phase using the hybrid SDLC Agents + SPDD workflow."
 resume_prompt+=$'\n'"Recommended command: ${recommended_command}"
+if [[ -n "${jira_ask_prompt}" ]]; then
+  resume_prompt+=$'\n\n'"${jira_ask_prompt}"
+elif [[ -n "${jira_status}" && "${jira_status}" != "missing" && "${jira_status}" != "draft" ]]; then
+  resume_prompt+=$'\n'"Jira: ${jira_status}"
+fi
 
 resume_prompt_indented="$(printf '%s\n' "${resume_prompt}" | sed 's/^/    /')"
 
@@ -292,6 +315,7 @@ cat > "${session_file}" <<EOF
 - Target: ${TARGET}
 - Work ID: ${WORK_ID:-none}
 - Phase: ${PHASE}
+- Jira: ${jira_status:-unknown}
 - Active milestone: ${active_milestone:-none}
 - Recommended command: ${recommended_command}
 - Canvas sync state: ${canvas_sync_state}

@@ -319,6 +319,55 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+echo "== Test 22b: capture auto-fills readiness from canvas when --readiness omitted =="
+T="${WORK}/metrics-auto"; mkdir -p "${T}/spdd/canvas" "${T}/scripts/lib"
+cp "${REPO_ROOT}/scripts/lib/"*.sh "${T}/scripts/lib/" 2>/dev/null || true
+# Capture script sources lib from its own install path (orchestrator scripts/lib) —
+# auto-readiness uses TARGET canvas.
+cat > "${T}/spdd/canvas/FEAT-004-auto.md" <<'EOF'
+# REASONS Canvas: FEAT-004-auto
+
+## Metadata
+- Work ID: FEAT-004-auto
+- Readiness: Ready For Coding
+
+## O - Operations
+EOF
+cap --work-id FEAT-004-auto --phase code --summary "Auto readiness" --areas "scripts/capture-session-memory.sh"
+assert_contains "$(mem context-index.md)" "readiness=ready-for-coding" "auto readiness from canvas"
+assert_contains "$(mem session-history.md)" "Metrics: readiness=ready-for-coding" "session history auto readiness"
+
+# Explicit --readiness overrides canvas value
+T="${WORK}/metrics-override"; mkdir -p "${T}/spdd/canvas"
+cat > "${T}/spdd/canvas/FEAT-004-over.md" <<'EOF'
+# REASONS Canvas
+## Metadata
+- Readiness: Needs Analysis
+EOF
+cap --work-id FEAT-004-over --phase code --summary "Override" \
+  --areas "scripts/capture-session-memory.sh" --readiness "Blocked"
+assert_contains "$(mem context-index.md)" "readiness=Blocked" "explicit --readiness overrides canvas"
+if grep -q 'needs-analysis' "$(mem context-index.md)" 2>/dev/null; then
+  bad "canvas readiness should not win over --readiness"
+else
+  ok "canvas value not used when --readiness set"
+fi
+
+# YAML frontmatter auto-fill + reasons-canvas.md fallback
+T="${WORK}/metrics-yaml"; mkdir -p "${T}/agent-context/features/FEAT-004-yaml"
+cat > "${T}/agent-context/features/FEAT-004-yaml/reasons-canvas.md" <<'EOF'
+---
+readiness: blocked
+---
+# Canvas
+## Metadata
+- Work ID: FEAT-004-yaml
+EOF
+cap --work-id FEAT-004-yaml --phase architect --summary "YAML fallback" \
+  --areas "scripts/capture-session-memory.sh"
+assert_contains "$(mem context-index.md)" "readiness=blocked" "auto readiness from reasons-canvas YAML"
+
+# ---------------------------------------------------------------------------
 echo "== Test 23: prompt-optimization ledger rotates like session-history (FEAT-004 T04) =="
 T="${WORK}/ledger-rot"; mkdir -p "${T}/agent-context/memory"
 ledger="$(mem prompt-optimization-log.md)"

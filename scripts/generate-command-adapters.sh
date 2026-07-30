@@ -4,16 +4,23 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-SPEC_DIR="${REPO_ROOT}/spec/commands"
+# Overrides for tests / alternate trees (also via env):
+#   SDLC_SPEC_DIR, SDLC_TEMPLATE_ROOT
+SPEC_DIR="${SDLC_SPEC_DIR:-${REPO_ROOT}/spec/commands}"
+TEMPLATE_ROOT="${SDLC_TEMPLATE_ROOT:-${REPO_ROOT}/templates}"
 
 usage() {
   cat <<'EOF'
-Usage: generate-command-adapters.sh [--check]
+Usage: generate-command-adapters.sh [--check] [--spec-dir DIR] [--template-root DIR]
 
 Generate templates/cursor, templates/copilot/prompts, and templates/claude/commands
 from canonical specs under spec/commands/.
 
-  --check   Exit 1 if generated output would differ from checked-in templates.
+  --check            Exit 1 if generated output would differ from checked-in templates.
+  --spec-dir DIR     Spec directory (default: <repo>/spec/commands; env SDLC_SPEC_DIR).
+  --template-root DIR
+                     Template root containing cursor/, copilot/prompts/, claude/commands/
+                     (default: <repo>/templates; env SDLC_TEMPLATE_ROOT).
 EOF
 }
 
@@ -21,10 +28,30 @@ CHECK_ONLY=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --check) CHECK_ONLY=1; shift ;;
+    --spec-dir)
+      SPEC_DIR="${2:-}"
+      shift 2
+      ;;
+    --template-root)
+      TEMPLATE_ROOT="${2:-}"
+      shift 2
+      ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 1 ;;
   esac
 done
+
+if [[ -z "${SPEC_DIR}" || ! -d "${SPEC_DIR}" ]]; then
+  echo "generate-command-adapters: spec dir missing or not a directory: ${SPEC_DIR}" >&2
+  exit 1
+fi
+if [[ -z "${TEMPLATE_ROOT}" ]]; then
+  echo "generate-command-adapters: template root is empty" >&2
+  exit 1
+fi
+SPEC_DIR="$(cd "${SPEC_DIR}" && pwd)"
+mkdir -p "${TEMPLATE_ROOT}"
+TEMPLATE_ROOT="$(cd "${TEMPLATE_ROOT}" && pwd)"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
@@ -73,14 +100,14 @@ adapter_paths() {
   local slug="$2"
   case "${family}" in
     lifecycle)
-      CURSOR_OUT="${REPO_ROOT}/templates/cursor/sdlc-spdd-${slug}.md"
-      COPILOT_OUT="${REPO_ROOT}/templates/copilot/prompts/sdlc-spdd-${slug}.prompt.md"
-      CLAUDE_OUT="${REPO_ROOT}/templates/claude/commands/sdlc-spdd-${slug}.md"
+      CURSOR_OUT="${TEMPLATE_ROOT}/cursor/sdlc-spdd-${slug}.md"
+      COPILOT_OUT="${TEMPLATE_ROOT}/copilot/prompts/sdlc-spdd-${slug}.prompt.md"
+      CLAUDE_OUT="${TEMPLATE_ROOT}/claude/commands/sdlc-spdd-${slug}.md"
       ;;
     workflow)
-      CURSOR_OUT="${REPO_ROOT}/templates/cursor/sdlc-${slug}.md"
-      COPILOT_OUT="${REPO_ROOT}/templates/copilot/prompts/sdlc-${slug}.prompt.md"
-      CLAUDE_OUT="${REPO_ROOT}/templates/claude/commands/sdlc-${slug}.md"
+      CURSOR_OUT="${TEMPLATE_ROOT}/cursor/sdlc-${slug}.md"
+      COPILOT_OUT="${TEMPLATE_ROOT}/copilot/prompts/sdlc-${slug}.prompt.md"
+      CLAUDE_OUT="${TEMPLATE_ROOT}/claude/commands/sdlc-${slug}.md"
       ;;
     *)
       echo "Unknown family: ${family}" >&2
@@ -155,20 +182,60 @@ compare_or_install() {
   local generated="$1"
   local target="$2"
   if [[ ! -f "${target}" ]]; then
-    echo "Missing target template: ${target#${REPO_ROOT}/}" >&2
-    failures=$((failures + 1))
+    if (( CHECK_ONLY )); then
+      echo "Missing target template: ${target}" >&2
+      failures=$((failures + 1))
+      return 0
+    fi
+    mkdir -p "$(dirname "${target}")"
+    cp "${generated}" "${target}"
+    echo "Created ${target#${TEMPLATE_ROOT}/}"
     return 0
   fi
   if ! diff -q "${generated}" "${target}" >/dev/null 2>&1; then
     if (( CHECK_ONLY )); then
-      echo "Stale adapter: ${target#${REPO_ROOT}/}" >&2
+      echo "Stale adapter: ${target#${TEMPLATE_ROOT}/}" >&2
       diff -u "${target}" "${generated}" | head -40 >&2 || true
       failures=$((failures + 1))
     else
       cp "${generated}" "${target}"
-      echo "Updated ${target#${REPO_ROOT}/}"
+      echo "Updated ${target#${TEMPLATE_ROOT}/}"
     fi
   fi
+}
+
+# Fail early on incomplete specs so adapters never ship empty sections.
+validate_spec() {
+  local spec="$1"
+  local family="$2"
+  local slug="$3"
+  local adapter rb out_body title ok=0
+
+  if [[ -z "${family}" || -z "${slug}" ]]; then
+    echo "Error: $(basename "${spec}") missing family and/or slug in front matter" >&2
+    return 1
+  fi
+  if ! adapter_paths "${family}" "${slug}"; then
+    return 1
+  fi
+  for adapter in cursor copilot claude; do
+    title="$(read_block "${spec}" "${adapter}:title")"
+    if [[ -z "${title}" ]]; then
+      echo "Error: $(basename "${spec}") missing ---BLOCK:${adapter}:title---" >&2
+      ok=1
+    fi
+  done
+  rb="$(block_or_shared "${spec}" cursor "Required Behavior")"
+  if [[ -z "${rb}" ]]; then
+    echo "Error: $(basename "${spec}") missing Required Behavior block" >&2
+    ok=1
+  fi
+  out_body="$(block_or_shared "${spec}" cursor "Output")"
+  if [[ -z "${out_body}" ]]; then
+    echo "Error: $(basename "${spec}") missing Output block" >&2
+    ok=1
+  fi
+  return "${ok}"
 }
 
 shopt -s nullglob
@@ -181,6 +248,10 @@ fi
 for spec in "${specs[@]}"; do
   family="$(spec_meta "${spec}" family)"
   slug="$(spec_meta "${spec}" slug)"
+  if ! validate_spec "${spec}" "${family}" "${slug}"; then
+    failures=$((failures + 1))
+    continue
+  fi
   adapter_paths "${family}" "${slug}"
 
   write_cursor "${spec}" "${WORK}/cursor.md"
