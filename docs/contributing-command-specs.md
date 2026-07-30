@@ -22,12 +22,32 @@ canonical spec per command. This removes hand-maintained three-way drift.
    ```bash
    ./scripts/generate-command-adapters.sh --check
    ./scripts/validate-command-adapters.sh
+   ./tests/test-command-specs.sh
    ./scripts/check-posture-boundary.sh
    ```
 
 4. Commit **both** the spec and generated template files.
 
-CI runs `generate-command-adapters.sh --check` — stale adapters fail the build.
+CI runs `generate-command-adapters.sh --check`, `validate-command-adapters.sh`, and
+`tests/test-command-specs.sh` — stale adapters or missing semantic contracts fail the build.
+
+### Generator overrides (tests / alternate trees)
+
+```bash
+./scripts/generate-command-adapters.sh --spec-dir /tmp/specs --template-root /tmp/tpl
+# or: SDLC_SPEC_DIR=... SDLC_TEMPLATE_ROOT=...
+```
+
+Incomplete specs (missing `family`/`slug`, unknown family, missing title / Required
+Behavior / Output) fail generation. New command files are created under
+`--template-root` when absent (non-`--check` mode).
+
+### Semantic contracts
+
+`validate-command-adapters.sh` locks per-command anchors (Jira ask, readiness gates,
+Outcome enum `improved` / `neutral` / `worse` / `unknown` on prompt-update and retro,
+analysis index script, plan Needs Analysis, etc.). Keep those strings stable when
+editing specs.
 
 ---
 

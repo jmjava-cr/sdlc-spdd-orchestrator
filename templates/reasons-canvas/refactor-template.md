@@ -5,6 +5,7 @@
 - Work ID:
 - Work Type: Refactor
 - Status: Draft
+- Readiness: Needs Analysis
 - Created:
 - Updated:
 - Owner:

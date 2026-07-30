@@ -276,6 +276,123 @@ assert_contains "${phase_index}" "quality-gates.md" "review phase harness entry"
 assert_contains "${phase_index}" "java-feature-playbook.md" "code phase playbook entry"
 
 # ---------------------------------------------------------------------------
+echo "== Test 21: start-agent-session rotates old briefs into sessions/archive =="
+T="${WORK}/sess-rot"; mkdir -p "${T}"
+"${START}" --target "${T}" --work-id FEAT-100-a --phase plan --session-limit 2 >/dev/null 2>&1
+sleep 1
+"${START}" --target "${T}" --work-id FEAT-100-b --phase plan --session-limit 2 >/dev/null 2>&1
+sleep 1
+"${START}" --target "${T}" --work-id FEAT-100-c --phase plan --session-limit 2 >/dev/null 2>&1
+sess="${T}/agent-context/sessions"
+assert_file "${sess}/current-session.md"
+active_count="$(ls -1 "${sess}"/[0-9]*T*.md 2>/dev/null | wc -l | tr -d ' ')"
+if [[ "${active_count}" == "2" ]]; then ok "keeps 2 timestamped briefs"; else bad "expected 2 active briefs, got ${active_count}"; fi
+arch_count="$(ls -1 "${sess}/archive"/[0-9]*T*.md 2>/dev/null | wc -l | tr -d ' ')"
+if [[ "${arch_count}" == "1" ]]; then ok "archived 1 older brief"; else bad "expected 1 archived brief, got ${arch_count}"; fi
+"${START}" --target "${T}" --work-id FEAT-100-d --phase plan --session-limit 2 --no-session-rotate >/dev/null 2>&1
+active_count="$(ls -1 "${sess}"/[0-9]*T*.md 2>/dev/null | wc -l | tr -d ' ')"
+if [[ "${active_count}" -ge 3 ]]; then ok "--no-session-rotate skips archive"; else bad "expected >=3 active with --no-session-rotate, got ${active_count}"; fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 22: capture metric flags write Kind: metric rows (FEAT-004 T02) =="
+T="${WORK}/metrics"; mkdir -p "${T}"
+cap --work-id FEAT-004-metrics --phase code --summary "With metrics" \
+  --areas "scripts/capture-session-memory.sh" \
+  --readiness "Ready For Coding" --review-result pass --rework 0 --context-files 8
+assert_count "$(mem context-index.md)" '^\| scripts/capture-session-memory.sh \| metric \|' 1 "metric kind indexed"
+assert_contains "$(mem context-index.md)" "review-result=pass" "metric entry includes review-result"
+assert_contains "$(mem session-history.md)" "Metrics: readiness=" "session history records metrics"
+# Omitting flags must not invent metric rows
+T="${WORK}/metrics-omit"; mkdir -p "${T}"
+cap --work-id FEAT-004-omit --phase code --summary "No metrics" --areas "scripts/capture-session-memory.sh"
+assert_count "$(mem context-index.md)" '\| metric \|' 0 "no metric rows when flags omitted"
+# Unknown review-result warns and skips that field only
+T="${WORK}/metrics-bad"; mkdir -p "${T}"
+out="$(${CAPTURE} --target "${T}" --work-id FEAT-004-bad --phase code --summary "Bad enum" \
+  --areas "scripts/x" --review-result nope --rework 1 2>&1)" || true
+if grep -q "Warning: --review-result" <<<"${out}"; then ok "unknown review-result warns"; else bad "expected warning for bad review-result"; fi
+assert_contains "$(mem context-index.md)" "rework=1" "valid rework still indexed after bad review-result"
+if grep -q 'review-result=nope' "$(mem context-index.md)" 2>/dev/null; then
+  bad "invalid review-result should not be indexed"
+else
+  ok "invalid review-result skipped"
+fi
+
+# ---------------------------------------------------------------------------
+echo "== Test 22b: capture auto-fills readiness from canvas when --readiness omitted =="
+T="${WORK}/metrics-auto"; mkdir -p "${T}/spdd/canvas" "${T}/scripts/lib"
+cp "${REPO_ROOT}/scripts/lib/"*.sh "${T}/scripts/lib/" 2>/dev/null || true
+# Capture script sources lib from its own install path (orchestrator scripts/lib) —
+# auto-readiness uses TARGET canvas.
+cat > "${T}/spdd/canvas/FEAT-004-auto.md" <<'EOF'
+# REASONS Canvas: FEAT-004-auto
+
+## Metadata
+- Work ID: FEAT-004-auto
+- Readiness: Ready For Coding
+
+## O - Operations
+EOF
+cap --work-id FEAT-004-auto --phase code --summary "Auto readiness" --areas "scripts/capture-session-memory.sh"
+assert_contains "$(mem context-index.md)" "readiness=ready-for-coding" "auto readiness from canvas"
+assert_contains "$(mem session-history.md)" "Metrics: readiness=ready-for-coding" "session history auto readiness"
+
+# Explicit --readiness overrides canvas value
+T="${WORK}/metrics-override"; mkdir -p "${T}/spdd/canvas"
+cat > "${T}/spdd/canvas/FEAT-004-over.md" <<'EOF'
+# REASONS Canvas
+## Metadata
+- Readiness: Needs Analysis
+EOF
+cap --work-id FEAT-004-over --phase code --summary "Override" \
+  --areas "scripts/capture-session-memory.sh" --readiness "Blocked"
+assert_contains "$(mem context-index.md)" "readiness=Blocked" "explicit --readiness overrides canvas"
+if grep -q 'needs-analysis' "$(mem context-index.md)" 2>/dev/null; then
+  bad "canvas readiness should not win over --readiness"
+else
+  ok "canvas value not used when --readiness set"
+fi
+
+# YAML frontmatter auto-fill + reasons-canvas.md fallback
+T="${WORK}/metrics-yaml"; mkdir -p "${T}/agent-context/features/FEAT-004-yaml"
+cat > "${T}/agent-context/features/FEAT-004-yaml/reasons-canvas.md" <<'EOF'
+---
+readiness: blocked
+---
+# Canvas
+## Metadata
+- Work ID: FEAT-004-yaml
+EOF
+cap --work-id FEAT-004-yaml --phase architect --summary "YAML fallback" \
+  --areas "scripts/capture-session-memory.sh"
+assert_contains "$(mem context-index.md)" "readiness=blocked" "auto readiness from reasons-canvas YAML"
+
+# ---------------------------------------------------------------------------
+echo "== Test 23: prompt-optimization ledger rotates like session-history (FEAT-004 T04) =="
+T="${WORK}/ledger-rot"; mkdir -p "${T}/agent-context/memory"
+ledger="$(mem prompt-optimization-log.md)"
+{
+  echo '# Prompt Optimization Log'
+  echo
+  echo '## Entries'
+  for i in 1 2 3; do
+    echo
+    echo "### Entry ${i}"
+    echo
+    echo "- Date: 2026-07-0${i}"
+    echo "- Work ID: FEAT-004-rot"
+    echo "- Change: c${i}"
+    echo "- Hypothesis: h${i}"
+    echo "- Signal: s${i}"
+    echo "- Outcome: unknown"
+  done
+} > "${ledger}"
+cap --work-id FEAT-004-rot --phase code --summary "rotate ledger" --history-limit 2 --areas "scripts/x"
+assert_count "${ledger}" '^### ' 2 "ledger keeps recent window"
+assert_file "$(mem archive/prompt-optimization-log.md)"
+assert_count "$(mem archive/prompt-optimization-log.md)" '^### ' 1 "older ledger entry archived"
+
+# ---------------------------------------------------------------------------
 echo
 echo "Summary: ${pass} passed, ${fail} failed"
 if [[ "${fail}" -gt 0 ]]; then

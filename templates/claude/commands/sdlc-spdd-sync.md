@@ -30,6 +30,7 @@ $ARGUMENTS
 9. Add follow-up tasks where needed.
 10. Do not use sync to paper over behavior or requirement changes that should have updated the canvas first.
 11. If a behavior change is discovered, record it as a follow-up and recommend `/sdlc-spdd-prompt-update`.
+12. When Final Status is Complete (or equivalent), set Metadata `- Readiness:` (or YAML `readiness:`) to **Complete** unless a more specific reviewed value already applies.
 
 ## Output
 
@@ -46,4 +47,5 @@ Include:
 - What drifted
 - What was reconciled
 - What remains incomplete
+- Readiness after sync (if updated)
 - Follow-up tasks

@@ -137,6 +137,7 @@ Phase and gate tracking for the active Work ID. State lives in `.sdlc/workflows/
 
     ./scripts/sdlc-spdd/sdlc.sh next       # what to do now
     ./scripts/sdlc-spdd/sdlc.sh advance    # move to next phase
+    ./scripts/sdlc-spdd/sdlc.sh advance --force  # override Ready For Coding gate into code
     ./scripts/sdlc-spdd/sdlc.sh shelf --reason "..."
 
 In chat (wrappers for the same actions):

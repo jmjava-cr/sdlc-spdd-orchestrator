@@ -5,6 +5,7 @@
 - Work ID:
 - Work Type: Spike
 - Status: Draft
+- Readiness: Needs Analysis
 - Created:
 - Updated:
 - Owner:

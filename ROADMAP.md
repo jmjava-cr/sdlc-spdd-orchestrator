@@ -17,8 +17,8 @@ whole framework through the stages in order.
 | Stage | State | Focus |
 |-------|-------|-------|
 | **Make it work** | mostly done | MVP delivered — three assistant adapters, capture, indexes, session briefs, and validation CI all function end to end. |
-| **Make it right** | **active** | Refactor the *existing* framework for readability, maintainability, and extensibility — clearer code/docs, shared script helpers, drift-proof command generation, and clean extension points. No new optimization features. |
-| **Make it fast** | horizon (done last) | Prompt and context optimization — *and* the measurement that drives it (an optimization ledger, leading indicators, a `spdd --metrics` surface, hook-driven efficiency). |
+| **Make it right** | **mostly complete** | Refactors landed (FEAT-001→003, FEAT-009→012). Residual: optional readability pass; dual root/subdir milestone stub still warns. |
+| **Make it fast** | **active (spikes)** | Measurement landed (FEAT-004 ledger + FEAT-005 readiness/indicators). Next: SPIKE-001/002 when Guide MCP is available. |
 
 Planning guidance:
 
@@ -68,14 +68,17 @@ come last.
 
 ## Milestone 1 — Make it right (active)
 
-See [milestone-1.md](milestone-1.md). Goal: take the framework from its current
-working state to "right" — refactor the existing code and docs for readability,
-maintainability, and extensibility, and ship each refactor as working code. Prompt
-optimization is deferred to "make it fast" and comes last.
+See [requirements/milestones/milestone-1/MILESTONE-1.md](requirements/milestones/milestone-1/MILESTONE-1.md)
+(root [milestone-1.md](milestone-1.md) is a compatibility stub). Goal: take the
+framework from its current working state to "right" — refactor the existing code
+and docs for readability, maintainability, and extensibility, and ship each
+refactor as working code. Prompt-optimization *measurement* (FEAT-004/005) is
+complete under "make it fast"; remaining make-it-fast work is spikes and acting
+on metrics.
 
 ## Post-MVP backlog
 
-Each item names the Beck stage it serves (see [Delivery posture](#delivery-posture-kent-beck-make-it-work--make-it-right--make-it-fast)). Near-term work is **make it right** (refactors); **make it fast** (prompt optimization and its measurement) comes last.
+Each item names the Beck stage it serves (see [Delivery posture](#delivery-posture-kent-beck-make-it-work--make-it-right--make-it-fast)). Near-term make-it-right refactors and make-it-fast measurement (FEAT-004/005) are largely complete; remaining make-it-fast work is spikes and acting on metrics.
 
 ### Make it right — refactor the existing framework (do first)
 
@@ -83,6 +86,10 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 |------|---------|
 | Shared script library (`scripts/lib/`) for capture/resolve/verify | Maintainability |
 | Single canonical command spec → generated Cursor/Copilot/Claude adapters | Maintainability (kills drift) |
+| Analysis Scope Lock-In (`/sdlc-spdd-analysis`) | Maintainability (clearer analysis contract) — **FEAT-009 Complete** |
+| Jira-compatible requirements format + validator | Maintainability (planning / tracker alignment) — **FEAT-010 Complete** |
+| Milestone subdirectory layout (`requirements/milestones/milestone-N/`) | Maintainability (planning layout) — **FEAT-011 Complete** |
+| Session-brief archive/rotation (`agent-context/sessions/` → `archive/`; data is already extracted into memory at capture) | Maintainability — **FEAT-012 Complete** |
 | Golden-path regression dogfood (fixed stub → analysis→plan→architect diff) | Maintainability |
 | Session-brief + completed/cancelled work archive (`sdlc.sh archive`; sessions/features/canvas → `archive/`) | Maintainability |
 | Python orchestration engine v2 (`engine/sdlc_engine`) with shell compatibility shim | Maintainability / Extensibility |
@@ -94,9 +101,9 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 
 | Item | Concern |
 |------|---------|
-| Prompt-optimization ledger (`agent-context/memory/prompt-optimization-log.md`) | Measurement for optimization |
-| Capture metric flags (`--readiness`, `--review-result`, `--rework`, `--context-files`) → indexed rows (Kind: `metric`) | Measurement for optimization |
-| Canvas `readiness:` front matter + leading indicators (validate/review counts) | Measurement for optimization |
+| Prompt-optimization ledger (`agent-context/memory/prompt-optimization-log.md`) | Measurement — **FEAT-004 Complete** |
+| Capture metric flags (`--readiness`, `--review-result`, `--rework`, `--context-files`) → indexed rows (Kind: `metric`) | Measurement — **FEAT-004 Complete** |
+| Canvas `readiness:` / Metadata readiness + leading indicators (validate/review counts) | Measurement — **FEAT-005 Complete** |
 | `spdd --metrics` surface over the ledger and indexes | Optimization |
 | Act on metrics: prompt + context optimization | Optimization |
 | Context-budget telemetry and enforcement | Optimization |
@@ -112,6 +119,7 @@ the contract that moves each item through the stages.
 Standard loop for any backlog item:
 
 1. **Requirement** — capture intent in `requirements/milestones/<WORK-ID>.md`
+   or `requirements/milestones/milestone-N/<WORK-ID>.md`
    (or map from a milestone via `create-work-from-milestone.sh`).
 2. **`/sdlc-spdd-analysis`** — scoped code scan + analysis artifact.
 3. **`/sdlc-spdd-plan`** — create the REASONS Canvas (`spdd/canvas/<WORK-ID>.md`).
@@ -127,27 +135,38 @@ asks target projects to work.
 
 Framework self-improvement work, governed as Work IDs (dogfooded through SPDD).
 
-Work IDs are numbered in execution order: make-it-right refactors (FEAT-001→003)
-first, prompt optimization (FEAT-004→005) last. Only the specced canvas appears below;
-the rest are planned.
+Work IDs are numbered in execution order: make-it-right refactors (FEAT-001→003,
+FEAT-009→012) first, prompt optimization (FEAT-004→005) next, then spikes.
+Milestone 1 feature track is Complete on the integration branch.
 
 | Work ID | Canvas | Stage | Status |
 |---------|--------|-------|--------|
-| FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | make it fast (prompt optimization) | Specced — deferred until make-it-right refactors land |
-| SPIKE-001-guide-rag-context-backend | spdd/canvas/SPIKE-001-guide-rag-context-backend.md | make it fast (optimization, spike — DICE hybrid) | Draft — parked behind FEAT-004/005 |
-| SPIKE-002-local-llm-and-embedding-format | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md | make it fast (optimization, spike — local models + embedding format) | Draft — parked behind FEAT-004/005 |
+| FEAT-001-shared-script-library | spdd/canvas/FEAT-001-shared-script-library.md | make it right | Complete |
+| FEAT-002-command-spec-generation | spdd/canvas/FEAT-002-command-spec-generation.md | make it right | Complete |
+| FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | make it right | Complete |
+| FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | make it right | Complete (PR #31) |
+| FEAT-007-local-sqlite-index | spdd/canvas/FEAT-007-local-sqlite-index.md | make it right | Complete (PR #38) |
+| FEAT-008-commit-message-command | spdd/canvas/FEAT-008-commit-message-command.md | make it right | Complete (PR #42) |
+| FEAT-009-analysis-scope-lock | spdd/canvas/FEAT-009-analysis-scope-lock.md | make it right | Complete (2026-07-15) |
+| FEAT-010-jira-compatible-requirements | spdd/canvas/FEAT-010-jira-compatible-requirements.md | make it right | Complete (2026-07-15) |
+| FEAT-011-milestone-subdirectory-layout | spdd/canvas/FEAT-011-milestone-subdirectory-layout.md | make it right | Complete (2026-07-15) |
+| FEAT-012-session-brief-archive | spdd/canvas/FEAT-012-session-brief-archive.md | make it right | Complete (2026-07-15) |
+| FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | make it fast (measurement) | Complete (T01–T05) |
+| FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | make it fast (measurement) | Complete (T01–T04) |
+| SPIKE-001-guide-rag-context-backend | spdd/canvas/SPIKE-001-guide-rag-context-backend.md | make it fast (spike — DICE hybrid) | Analysis ready — blocked on Guide MCP for A/B |
+| SPIKE-002-local-llm-and-embedding-format | spdd/canvas/SPIKE-002-local-llm-and-embedding-format.md | make it fast (spike — local models) | Analysis ready — blocked on Guide MCP for A/B |
+| CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | make it right (docs) | Complete |
+| CHORE-002-docgen-video-generation | spdd/canvas/CHORE-002-docgen-video-generation.md | make it right (docs) | Complete |
 
-Planned follow-on canvases (not yet specced):
+Deferred / residual (not Work IDs yet):
 
-| Planned Work ID | Scope | Stage |
-|-----------------|-------|-------|
-| FEAT-001-shared-script-library | `scripts/lib/` shared helpers for capture/resolve/verify | make it right (maintainability) — **do first** |
-| FEAT-002-command-spec-generation | Single canonical command spec → generated Cursor/Copilot/Claude adapters | make it right (maintainability) |
-| FEAT-003-extension-hook-manifest | Extension manifest with phase/skills/hooks | make it right (extensibility) |
-| FEAT-005-canvas-readiness-indicators | Machine-parseable canvas `readiness:` + validate/review leading indicators | make it fast (measurement for optimization) |
-| CHORE-001-docgen-initial-documentation | Bootstrap `docgen` under `docs/demos/` + two initial narration segments | make it right (operator documentation) |
+| Item | Notes |
+|------|-------|
+| Readability pass | Consistent structure/naming across code/docs (milestone residual) |
+| `spdd --metrics` query surface | Explicit FEAT-004 non-goal; later make-it-fast |
+| Dual milestone root stub | Root `milestone-1.md` + subdirectory both exist; prefer subdir |
 
-Refresh this section from canvases with:
+Refresh the generated summary table from canvases with:
 
     ./scripts/sync-roadmap-from-spdd.sh --target .
 
@@ -155,7 +174,7 @@ Refresh this section from canvases with:
 
 ## SDLC-SPDD Work Summary
 
-Generated: 2026-07-27T04:57:02Z
+Generated: 2026-07-30T12:00:00Z
 
 | Work ID | Title | Type | Status | Milestone | Source | Canvas |
 |---------|-------|------|--------|-----------|--------|--------|

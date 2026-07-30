@@ -143,7 +143,7 @@ require_contains() {
   local path="$1"
   local pattern="$2"
   local label="$3"
-  if ! grep -Fq "${pattern}" "${path}"; then
+  if ! grep -Fq -- "${pattern}" "${path}"; then
     echo "Missing '${label}' in ${path}" >&2
     failures=$((failures + 1))
   fi
@@ -181,6 +181,25 @@ check_workflow_pack() {
   require_contains "${path}" "## Output" "Output section"
   require_contains "${path}" "Do not implement" "workflow no-code guardrail"
   require_contains "${path}" "sdlc.sh" "workflow shell delegation"
+
+  case "${cmd}" in
+    next)
+      require_contains "${path}" 'Jira as `missing` or `draft`' "next jira ask"
+      require_contains "${path}" "claim --jira" "next jira claim path"
+      ;;
+    advance)
+      require_contains "${path}" "Ready For Coding" "advance readiness gate"
+      ;;
+    claim)
+      require_contains "${path}" "--jira" "claim jira flag"
+      ;;
+    shelf)
+      require_contains "${path}" "shelf --reason" "shelf reason flag"
+      ;;
+    team)
+      require_contains "${path}" '[STALE>Nd]' "team stale marker"
+      ;;
+  esac
 }
 
 check_pack() {
@@ -191,23 +210,70 @@ check_pack() {
   require_contains "${path}" "## Required Behavior" "Required Behavior section"
   require_contains "${path}" "## Output" "Output section"
 
-  if [[ "${cmd}" == "init" || "${cmd}" == "prompt-update" ]]; then
-    require_contains "${path}" "Do not modify application source code." "source-code guardrail"
-  elif [[ "${cmd}" == "code" ]]; then
-    require_contains "${path}" "Implement only that task." "single-operation scope guardrail"
-  elif [[ "${cmd}" == "review" ]]; then
-    require_contains "${path}" "Do not make code changes unless explicitly asked." "review guardrail"
-  elif [[ "${cmd}" == "commit-message" ]]; then
-    require_contains "${path}" "Do not implement code" "commit-message no-code guardrail"
-    require_contains "${path}" 'Do not run `git commit`' "commit-message no-commit guardrail"
-    require_contains "${path}" "sdlc.sh commit-message" "commit-message engine delegation"
-  elif [[ "${cmd}" == "sync" ]]; then
-    require_contains "${path}" "Do not implement code unless explicitly asked." "sync guardrail"
-  elif [[ "${cmd}" == "whereami" ]]; then
-    require_contains "${path}" "Do not implement code" "whereami guardrail"
-  else
-    require_contains "${path}" "Do not implement code" "no-code guardrail"
-  fi
+  case "${cmd}" in
+    init)
+      require_contains "${path}" "Do not modify application source code." "source-code guardrail"
+      ;;
+    prompt-update)
+      require_contains "${path}" "Do not modify application source code." "source-code guardrail"
+      require_contains "${path}" "prompt-optimization-log.md" "prompt-update ledger path"
+      require_contains "${path}" '`improved` / `neutral` / `worse` / `unknown`' \
+        "prompt-update Outcome enum"
+      ;;
+    code)
+      require_contains "${path}" "Implement only that task." "single-operation scope guardrail"
+      require_contains "${path}" "Ready For Coding" "code readiness gate"
+      require_contains "${path}" "/sdlc-spdd-prompt-update" "code conflict → prompt-update"
+      ;;
+    review)
+      require_contains "${path}" "Do not make code changes unless explicitly asked." "review guardrail"
+      require_contains "${path}" "Ready For Coding" "review readiness finding"
+      ;;
+    sync)
+      require_contains "${path}" "Do not implement code unless explicitly asked." "sync guardrail"
+      ;;
+    whereami)
+      require_contains "${path}" "Do not implement code" "whereami guardrail"
+      require_contains "${path}" 'Jira as `missing` or `draft`' "whereami jira ask"
+      require_contains "${path}" "claim --jira" "whereami jira claim path"
+      ;;
+    analysis)
+      require_contains "${path}" "Do not implement code" "analysis no-code guardrail"
+      require_contains "${path}" "index-spdd-analysis.sh" "analysis index script"
+      require_contains "${path}" "/sdlc-spdd-plan" "analysis next command"
+      require_contains "${path}" "Scope Lock" "analysis scope lock"
+      ;;
+    plan)
+      require_contains "${path}" "Do not implement code" "plan no-code guardrail"
+      require_contains "${path}" "Needs Analysis" "plan initial readiness"
+      require_contains "${path}" "spdd/canvas/" "plan canvas path"
+      require_contains "${path}" "/sdlc-spdd-analysis" "plan requires analysis"
+      ;;
+    architect)
+      require_contains "${path}" "Do not implement code" "architect no-code guardrail"
+      require_contains "${path}" "Ready For Coding" "architect readiness vocabulary"
+      require_contains "${path}" "needs-analysis" "architect canonical token"
+      ;;
+    retro)
+      require_contains "${path}" "Do not implement code" "retro no-code guardrail"
+      require_contains "${path}" "prompt-optimization-log.md" "retro ledger path"
+      require_contains "${path}" '`improved` / `neutral` / `worse` / `unknown`' \
+        "retro Outcome enum"
+      ;;
+    api-test)
+      require_contains "${path}" "Do not implement code" "api-test no-code guardrail"
+      require_contains "${path}" "Operations" "api-test Operations section"
+      require_contains "${path}" "spdd/tasks/" "api-test task script path"
+      ;;
+    commit-message)
+      require_contains "${path}" "Do not implement code" "commit-message no-code guardrail"
+      require_contains "${path}" 'Do not run `git commit`' "commit-message no-commit guardrail"
+      require_contains "${path}" "sdlc.sh commit-message" "commit-message engine delegation"
+      ;;
+    *)
+      require_contains "${path}" "Do not implement code" "no-code guardrail"
+      ;;
+  esac
 }
 
 # Always-on grounding file for each assistant: the file an assistant loads on

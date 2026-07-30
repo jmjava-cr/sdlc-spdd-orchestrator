@@ -1,3 +1,18 @@
+---
+work_id: "FEAT-004-prompt-optimization-ledger"
+jira_key: ""
+jira_epic: ""
+jira_type: "Story"
+jira_status: "Done"
+jira_assignee: ""
+jira_due_date: ""
+jira_sprint: ""
+milestone: "milestone-1"
+blocks: []
+depends_on: []
+related: []
+---
+
 # Requirement: FEAT-004-prompt-optimization-ledger
 
 ## Summary
@@ -23,12 +38,12 @@ before any "make it fast" optimization work.
 
 ## Acceptance Criteria
 
-- [ ] A ledger file exists at `agent-context/memory/prompt-optimization-log.md` with a documented row schema (date, Work ID, change, hypothesis, signal, outcome).
-- [ ] `capture-session-memory.sh` accepts optional metric flags (`--readiness`, `--review-result`, `--rework`, `--context-files`) without breaking existing capture behavior when omitted.
-- [ ] Provided metrics are written as `context-index.md` rows with a new Kind: `metric`, scoped to the resolved code area(s).
-- [ ] `/sdlc-spdd-prompt-update` and `/sdlc-spdd-retro` command templates require a ledger entry as part of their output (parity across Cursor, Copilot, Claude Code).
-- [ ] Existing capture/index tests still pass; new behavior is covered by a smoke test.
-- [ ] Docs updated: `context-loading-and-scaling.md` (new `metric` Kind) and the relevant prompt standards.
+- [x] A ledger file exists at `agent-context/memory/prompt-optimization-log.md` with a documented row schema (date, Work ID, change, hypothesis, signal, outcome).
+- [x] `capture-session-memory.sh` accepts optional metric flags (`--readiness`, `--review-result`, `--rework`, `--context-files`) without breaking existing capture behavior when omitted.
+- [x] Provided metrics are written as `context-index.md` rows with a new Kind: `metric`, scoped to the resolved code area(s).
+- [x] `/sdlc-spdd-prompt-update` and `/sdlc-spdd-retro` command templates require a ledger entry as part of their output (parity across Cursor, Copilot, Claude Code).
+- [x] Existing capture/index tests still pass; new behavior is covered by a smoke test.
+- [x] Docs updated: `context-loading-and-scaling.md` (new `metric` Kind) and the relevant prompt standards.
 
 ## Non-Goals
 
@@ -48,25 +63,4 @@ Resolved Decisions):
 
 ## Next Step
 
-Canvas is `Ready For Coding`. Run:
-
-    /sdlc-spdd-code @spdd/canvas/FEAT-004-prompt-optimization-ledger.md operation T01
-
-## Jira
-
-Draft for issue creation — paste into Jira UI, MCP, or approved API.
-After create, set **Key** and commit.
-
-- Key: TBD
-- Issue type: Story
-- Summary: 
-- Labels:
-
-## GitHub
-
-Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
-
-- Number: TBD
-- Title: 
-- Labels: 
-- URL: 
+Complete (2026-07-15). Follow-up: FEAT-005-canvas-readiness-indicators.

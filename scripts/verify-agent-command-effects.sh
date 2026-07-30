@@ -166,11 +166,20 @@ if [[ "${STEP}" == "plan" || "${STEP}" == "architect" || "${STEP}" == "prompt-up
 fi
 
 if [[ "${STEP}" == "architect" ]]; then
-  check_contains_regex "architect readiness marker" "${CANVAS}" "Ready For Coding|Needs Clarification|Needs Redesign|Blocked"
+  check_contains_regex "architect readiness marker" "${CANVAS}" "Ready For Coding|Needs Analysis|Needs Clarification|Needs Redesign|Blocked"
 fi
 
 if [[ "${STEP}" == "code" ]]; then
   check_contains_regex "progress log operation evidence" "${FEATURE_DIR}/progress-log.md" "${OPERATION}|[Ii]mplement|[Cc]omplete|[Ff]iles changed"
+  # Soft gate: when readiness is declared, it should be Ready For Coding.
+  if grep -qE '^-[[:space:]]*[Rr]eadiness:[[:space:]]*|^readiness:[[:space:]]*' "${CANVAS}" 2>/dev/null; then
+    check_contains_regex "code readiness Ready For Coding" "${CANVAS}" "Ready For Coding|ready-for-coding"
+  fi
+fi
+
+if [[ "${STEP}" == "prompt-update" ]]; then
+  check_exists "prompt-optimization ledger" "${TARGET}/agent-context/memory/prompt-optimization-log.md"
+  check_contains_regex "ledger mentions work-id" "${TARGET}/agent-context/memory/prompt-optimization-log.md" "${WORK_ID}"
 fi
 
 if [[ "${STEP}" == "review" ]]; then

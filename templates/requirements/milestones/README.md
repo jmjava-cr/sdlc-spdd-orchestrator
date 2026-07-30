@@ -2,23 +2,49 @@
 
 This folder holds requirement stubs created from milestone checklist items.
 
+## Layout
+
+**Preferred (new projects):**
+
+```text
+requirements/milestones/
+  README.md
+  milestone-1/
+    _milestone.yml
+    MILESTONE-1.md
+    FEAT-001-….md
+  milestone-2/
+    _milestone.yml
+    MILESTONE-2.md
+    CHORE-….md
+```
+
+**Legacy (still supported):**
+
+- Root `milestone-N.md` at the project root
+- Flat stubs: `requirements/milestones/<WORK-ID>.md`
+
+Scripts prefer subdirectory definitions when both root and subdirectory exist
+(with a warning). See [MIGRATION-root-to-subdirectories.md](../../docs/MIGRATION-root-to-subdirectories.md)
+and [jira-compatible-requirements-format.md](../../docs/jira-compatible-requirements-format.md).
+
 ## Purpose
 
 When you run `create-work-from-milestone.sh`, each unchecked milestone item becomes:
 
 - a Work ID
-- a requirement file here: `requirements/milestones/<WORK-ID>.md`
+- a requirement file here (flat or under `milestone-N/`)
 - a draft REASONS Canvas under `spdd/canvas/<WORK-ID>.md`
-- a **Linked Work** row in the source `milestone-*.md` file
+- a **Linked Work** row in the source milestone definition
 
-Use these files in plan prompts:
+Use these files in analysis/plan prompts:
 
-    /sdlc-spdd-plan @requirements/milestones/<WORK-ID>.md @ROADMAP.md @milestone-1.md
+    /sdlc-spdd-analysis @requirements/milestones/milestone-1/<WORK-ID>.md
+    /sdlc-spdd-plan @requirements/milestones/milestone-1/<WORK-ID>.md @ROADMAP.md @requirements/milestones/milestone-1/MILESTONE-1.md
 
 ## Jira issue drafts
 
-Each milestone requirement file is the **natural place to store Jira syntax** before and after
-issue creation. Keep copy-paste-ready fields under `## Jira`:
+Each milestone requirement file stores Jira syntax:
 
 - **Before create** — fill Summary, Description, acceptance criteria, labels, components
 - **After create** — set `- Key: ABC-123` and commit
@@ -59,14 +85,26 @@ After create, set `Number` / `URL`. Claim auto-links `github:#N` (disable with `
 SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system github --apply   # uses gh CLI
 ```
 
+<!-- reconcile: retained subdirectory guidance from integration -->
+- Optional YAML frontmatter (`jira_key`, epic, status, blocks/depends_on)
+- `## Jira` section for copy-paste create flows
+- **After create** — set `- Key: ABC-123` (and matching `jira_key`) and commit
+- **On claim** — `./scripts/sdlc.sh claim <WORK-ID>` auto-reads the Key into the team registry
+
+Validate:
+
+    ./scripts/sdlc-spdd/validate-requirements-format.sh --target .
+
+See [jira-runbook.md](../../docs/jira-runbook.md).
+
 ## Relationship to other planning artifacts
 
 | Artifact | Role |
 |----------|------|
-| `milestone-*.md` | Goal, scope checklist, linked Work IDs |
+| `milestone-*.md` or `…/milestone-N/MILESTONE-N.md` | Goal, scope checklist, linked Work IDs |
 | `requirements/milestones/` | Per-item requirement stubs + Jira draft syntax |
 | `session-notes/` | Daily agent-session narrative |
 | `ROADMAP.md` | Milestone progress and current focus |
 
 Ad-hoc requirements (not from a milestone) live directly under `requirements/` instead.
-Use the same `## Jira` section there when the work will be tracked in Jira.
+Use the same frontmatter + `## Jira` section there when the work will be tracked in Jira.

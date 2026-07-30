@@ -1,3 +1,18 @@
+---
+work_id: "SPIKE-002-local-llm-and-embedding-format"
+jira_key: ""
+jira_epic: ""
+jira_type: "Story"
+jira_status: "Draft"
+jira_assignee: ""
+jira_due_date: ""
+jira_sprint: ""
+milestone: "milestone-1"
+blocks: []
+depends_on: []
+related: []
+---
+
 # Requirement: SPIKE-002-local-llm-and-embedding-format
 
 ## Summary

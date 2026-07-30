@@ -23,11 +23,20 @@ Use this flow when a request starts outside Jira.
 For Work IDs created from milestones, store Jira field syntax in:
 
     requirements/milestones/<WORK-ID>.md
+    # or
+    requirements/milestones/milestone-N/<WORK-ID>.md
 
-under `## Jira` (scaffolded by `create-work-from-milestone.sh`). Fill Summary, Description,
-and Given/When/Then acceptance criteria there first — it is the copy-paste source for Jira UI,
-MCP, or API creation. After Jira returns a key, set `- Key: ABC-123` in that section and commit.
-`./scripts/sdlc.sh claim <WORK-ID>` then auto-links `jira:ABC-123` in `work-registry.tsv`.
+under YAML frontmatter (`jira_key`, …) and/or `## Jira` (scaffolded by
+`create-work-from-milestone.sh`). Fill Summary, Description, and Given/When/Then
+acceptance criteria there first — it is the copy-paste source for Jira UI, MCP, or
+API creation. After Jira returns a key, set `- Key: ABC-123` (and matching
+`jira_key`) and commit. `./scripts/sdlc.sh claim <WORK-ID>` then auto-links
+`jira:ABC-123` in `work-registry.tsv`.
+
+Format specification: [jira-compatible-requirements-format.md](jira-compatible-requirements-format.md).
+Validate locally (no Jira API):
+
+    ./scripts/sdlc-spdd/validate-requirements-format.sh --target .
 
 ### 1. Triage the request
 

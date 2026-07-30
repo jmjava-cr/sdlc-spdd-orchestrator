@@ -7,6 +7,79 @@ keyword group.
 
 | Keyword | Area | Kind | Work ID | Timestamp | Entry |
 |---------|------|------|---------|-----------|-------|
+| ollama | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| ollama | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| ollama | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| local llm | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| local llm | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| local llm | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| embedding | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| embedding | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| embedding | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| nomic-embed-text | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| nomic-embed-text | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| nomic-embed-text | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| all-minilm-l6-v2 | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| all-minilm-l6-v2 | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| all-minilm-l6-v2 | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| guide | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| guide | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| guide | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| feat-004 ledger | (external) embabel guide usermodelfactory / application.yml | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| feat-004 ledger | (external) ollama | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| feat-004 ledger | agent-context/memory/prompt-optimization-log.md | analysis | SPIKE-002-local-llm-and-embedding-format | 2026-07-15T23:22:33Z | spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md |
+| guide | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| guide | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| guide | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| guide | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| dice | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| dice | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| dice | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| dice | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| neo4j | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| neo4j | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| neo4j | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| neo4j | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| rag | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| rag | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| rag | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| rag | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| mcp | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| mcp | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| mcp | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| mcp | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| context retrieval | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| context retrieval | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| context retrieval | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| context retrieval | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| feat-004 ledger | agent-context/memory | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| feat-004 ledger | spdd/canvas | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| feat-004 ledger | scripts/resolve-agent-context.sh | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| feat-004 ledger | (external) embabel guide / neo4j | analysis | SPIKE-001-guide-rag-context-backend | 2026-07-15T23:22:32Z | spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md |
+| readiness | scripts/validate-reasons-canvas.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| readiness | scripts/capture-session-memory.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| readiness | docs/context-loading-and-scaling.md | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| readiness | spdd/canvas | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| canvas | scripts/validate-reasons-canvas.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| canvas | scripts/capture-session-memory.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| canvas | docs/context-loading-and-scaling.md | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| canvas | spdd/canvas | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| validate-reasons-canvas | scripts/validate-reasons-canvas.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| validate-reasons-canvas | scripts/capture-session-memory.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| validate-reasons-canvas | docs/context-loading-and-scaling.md | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| validate-reasons-canvas | spdd/canvas | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| leading indicators | scripts/validate-reasons-canvas.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| leading indicators | scripts/capture-session-memory.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| leading indicators | docs/context-loading-and-scaling.md | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| leading indicators | spdd/canvas | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| metric | scripts/validate-reasons-canvas.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| metric | scripts/capture-session-memory.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| metric | docs/context-loading-and-scaling.md | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| metric | spdd/canvas | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| feat-004 | scripts/validate-reasons-canvas.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| feat-004 | scripts/capture-session-memory.sh | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| feat-004 | docs/context-loading-and-scaling.md | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
+| feat-004 | spdd/canvas | analysis | FEAT-005-canvas-readiness-indicators | 2026-07-15T23:20:59Z | spdd/analysis/FEAT-005-canvas-readiness-indicators-analysis.md |
 | docgen video pipeline | docs/demos/ — bundle root: add dependencies.txt, animations/, optional tooling.md, update readme | analysis | CHORE-002-docgen-video-generation | 2026-06-20T13:49:01Z | spdd/analysis/CHORE-002-docgen-video-generation-analysis.md |
 | docgen video pipeline | docs/demos/docgen.yaml — populate visual_map, manim.scenes, manim_scene_generation.segments | analysis | CHORE-002-docgen-video-generation | 2026-06-20T13:49:01Z | spdd/analysis/CHORE-002-docgen-video-generation-analysis.md |
 | docgen video pipeline | docs/demos/hints/segment-nn-*.md — add docgen.wiring.visual | analysis | CHORE-002-docgen-video-generation | 2026-06-20T13:49:01Z | spdd/analysis/CHORE-002-docgen-video-generation-analysis.md |

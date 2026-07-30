@@ -43,6 +43,10 @@ LIB_FUNCTIONS=(
   resolve_milestone
   context_index_header_capture
   prepend_context_index_rows
+  normalize_readiness
+  extract_readiness_raw
+  canvas_readiness
+  readiness_allows_coding
   framework_ensure_dir
   is_orchestrator_only_doc
   collect_shipped_doc_paths

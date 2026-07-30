@@ -39,7 +39,7 @@ replace directory scans and chronological history reads.
 |------|-------------|
 | `memory/code-areas.md` | At capture — known categories; match session content here first |
 | `memory/domain-index.md` | Fowler/Troy scoped scan — filter by domain keyword before reading code |
-| `memory/context-index.md` | Before touching code — filter by Area; Kinds: analysis, session, decision, pitfall, pattern |
+| `memory/context-index.md` | Before touching code — filter by Area; Kinds: analysis, session, decision, pitfall, pattern, metric |
 | `memory/session-index.md` | Session-only view — filter by Work ID or Area, newest first |
 | `memory/phase-index.md` | Phase-known — playbooks, harness, planning files by SDLC phase |
 
@@ -219,6 +219,11 @@ analysis/review/sync, and matching session briefs under `archive/`):
 
 Jira **draft syntax** for issue creation lives in `requirements/milestones/<WORK-ID>.md` under
 `## Jira`. Set `- Key: ABC-123` after create; `list-work` shows `jira:ABC-123` or `jira draft`.
+
+**Session / orientation prompts:** `start-agent-session.sh`, `sdlc.sh next`, and `/sdlc-spdd-whereami`
+resolve Jira via `sdlc_team_jira_status`. When the key is `missing` or `draft`, the Resume Prompt and
+`next` output instruct the agent to ask the user for a key (then `claim --jira KEY`). Disable with
+`SDLC_SESSION_ASK_JIRA=0`.
 
 **Notifications:** copy `agent-context/hooks/notify-team-registry.example.sh` and set:
 

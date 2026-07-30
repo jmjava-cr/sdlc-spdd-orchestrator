@@ -1,0 +1,10 @@
+# name: human-readable milestone title
+name: "Milestone 1"
+number: 1
+start_date: "YYYY-MM-DD"
+end_date: "YYYY-MM-DD"
+status: "planned" # planned | in_progress | complete
+related_epics: []
+# related_epics:
+#   - "PROJ-1000"
+notes: ""

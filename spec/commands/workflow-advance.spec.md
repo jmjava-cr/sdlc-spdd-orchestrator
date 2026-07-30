@@ -4,7 +4,7 @@ slug: advance
 copilot_description: Advance the active Work ID to the next lifecycle phase gate.
 copilot_mode: agent
 claude_description: Advance the active Work ID to the next lifecycle phase gate.
-claude_argument_hint: [--to PHASE]
+claude_argument_hint: [--to PHASE] [--force]
 ---
 
 ---BLOCK:cursor:title---
@@ -43,14 +43,16 @@ Do not implement application code.
 1. If no active pointer, suggest `./scripts/sdlc-spdd/sdlc.sh claim <WORK-ID>` or `resume <WORK-ID>` (orchestrator: `./scripts/sdlc.sh …`).
 2. Run `./scripts/sdlc-spdd/sdlc.sh next` (or `./scripts/sdlc.sh next`) first so the user sees open gates before advancing.
 3. If the user supplied a target phase, run `./scripts/sdlc-spdd/sdlc.sh advance --to <PHASE>`; otherwise run `./scripts/sdlc-spdd/sdlc.sh advance` (or `./scripts/sdlc.sh advance`).
-4. If advance fails (open gates, invalid phase, or no pointer), report the CLI error and do not guess a workaround.
-5. After a successful advance, run `next` again and recommend the assistant command for the new phase.
-6. Do not modify application source code.
+4. If advance into `code` fails because canvas readiness is not Ready For Coding, report the CLI error and recommend `/sdlc-spdd-architect` (or `/sdlc-spdd-prompt-update`). Only use `advance --force` when the user explicitly overrides the readiness gate.
+5. If advance fails for other reasons (invalid phase, or no pointer), report the CLI error and do not guess a workaround.
+6. After a successful advance, run `next` again and recommend the assistant command for the new phase.
+7. Do not modify application source code.
 ---END---
 ---BLOCK:shared:Output---
 
 - Previous and new phase
 - Open gates that were passed or still pending
+- Readiness note when advance to code was blocked or forced
 - Recommended next assistant command for the new phase
 - Capture reminder when appropriate (`sdlc.sh capture --summary "…"`)
 ---END---

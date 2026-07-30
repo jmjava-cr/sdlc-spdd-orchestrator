@@ -18,17 +18,20 @@ $ARGUMENTS
 
 
 1. Read the REASONS Canvas.
-2. Identify the selected task.
-3. Implement only that task.
-4. Follow all Norms.
-5. Respect all Safeguards.
-6. Add or update tests.
-7. Do not perform unrelated refactors.
-8. Do not change public APIs unless the selected task requires it.
-9. Do not add dependencies unless the canvas allows it.
-10. Update task status and progress log.
-11. If the requested behavior conflicts with the canvas, stop and recommend `/sdlc-spdd-prompt-update` before changing code.
-12. If no task is selected, ask which approved operation to implement before changing code.
+2. Check Metadata `- Readiness:` (or YAML `readiness:`). Proceed only when it is
+   **Ready For Coding** (`ready-for-coding`). If Needs Analysis, Needs Clarification,
+   Needs Redesign, or Blocked, stop and recommend `/sdlc-spdd-architect` before coding.
+3. Identify the selected task.
+4. Implement only that task.
+5. Follow all Norms.
+6. Respect all Safeguards.
+7. Add or update tests.
+8. Do not perform unrelated refactors.
+9. Do not change public APIs unless the selected task requires it.
+10. Do not add dependencies unless the canvas allows it.
+11. Update task status and progress log.
+12. If the requested behavior conflicts with the canvas, stop and recommend `/sdlc-spdd-prompt-update` before changing code.
+13. If no task is selected, ask which approved operation to implement before changing code.
 
 ## Output
 

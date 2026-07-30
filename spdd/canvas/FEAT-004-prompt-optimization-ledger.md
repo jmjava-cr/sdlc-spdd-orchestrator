@@ -4,10 +4,10 @@
 
 - Work ID: FEAT-004-prompt-optimization-ledger
 - Work Type: Feature
-- Status: Draft
-- Readiness: Ready For Coding
+- Status: Complete
+- Readiness: Reviewed — Approved With Notes
 - Created: 2026-06-18
-- Updated: 2026-06-18 (architect: resolved open questions for long-term stability)
+- Updated: 2026-07-15 (T01–T05 complete; review/retro/sync)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown
@@ -16,8 +16,8 @@
 - Source URL:
 - Docs URL:
 - Roadmap: ROADMAP.md
-- Milestone: milestone-1.md
-- Delivery stage: make it fast (prompt-optimization measurement) — **deferred until make-it-right refactors land**
+- Milestone: requirements/milestones/milestone-1/MILESTONE-1.md
+- Delivery stage: make it fast (prompt-optimization measurement) — make-it-right refactors landed; coding started 2026-07-15
 - Related PR:
 
 ## R - Requirements
@@ -35,15 +35,15 @@ is sequenced **last** — only after the make-it-right refactors (FEAT-001→003
 
 ### Acceptance Criteria
 
-- [ ] `agent-context/memory/prompt-optimization-log.md` exists (global, single file) with a documented row schema: `date | Work ID | change | hypothesis | signal | outcome`.
-- [ ] `capture-session-memory.sh` accepts optional `--readiness`, `--review-result`, `--rework`, `--context-files`; omitting them preserves current behavior exactly.
-- [ ] `--review-result` accepts only `pass | fail | mixed | blocked`; unknown values warn and are skipped, never aborting capture.
-- [ ] `--rework` accepts a non-negative integer (corrective prompt-update/sync cycles after first `Ready For Coding`).
-- [ ] Provided metrics are indexed as `context-index.md` rows with Kind: `metric`, scoped to resolved area(s).
-- [ ] The ledger is bounded by the same rotation/archive mechanism as `session-history.md` (recent inline; older to `agent-context/memory/archive/`).
-- [ ] `/sdlc-spdd-prompt-update` and `/sdlc-spdd-retro` require a ledger entry in their output, with parity across the three assistants.
-- [ ] Existing tests pass; a smoke test covers the new flags, enum validation, and ledger write/rotation.
-- [ ] Docs updated (`context-loading-and-scaling.md` metric Kind + ledger rotation; prompt standards).
+- [x] `agent-context/memory/prompt-optimization-log.md` exists (global, single file) with a documented row schema: `date | Work ID | change | hypothesis | signal | outcome`.
+- [x] `capture-session-memory.sh` accepts optional `--readiness`, `--review-result`, `--rework`, `--context-files`; omitting them preserves current behavior exactly.
+- [x] `--review-result` accepts only `pass | fail | mixed | blocked`; unknown values warn and are skipped, never aborting capture.
+- [x] `--rework` accepts a non-negative integer (corrective prompt-update/sync cycles after first `Ready For Coding`).
+- [x] Provided metrics are indexed as `context-index.md` rows with Kind: `metric`, scoped to resolved area(s).
+- [x] The ledger is bounded by the same rotation/archive mechanism as `session-history.md` (recent inline; older to `agent-context/memory/archive/`).
+- [x] `/sdlc-spdd-prompt-update` and `/sdlc-spdd-retro` require a ledger entry in their output, with parity across the three assistants.
+- [x] Existing tests pass; a smoke test covers the new flags, enum validation, and ledger write/rotation.
+- [x] Docs updated (`context-loading-and-scaling.md` metric Kind + ledger rotation; prompt standards).
 
 ### Non-Goals
 
@@ -153,7 +153,7 @@ is sequenced **last** — only after the make-it-right refactors (FEAT-001→003
 
 ### T01 - Add the ledger file + schema
 
-- Status: Not Started
+- Status: Complete
 - Description: Create `prompt-optimization-log.md` with a documented row schema and example.
 - Files: agent-context/memory/prompt-optimization-log.md
 - Tests: Not applicable (doc artifact)
@@ -161,31 +161,31 @@ is sequenced **last** — only after the make-it-right refactors (FEAT-001→003
 
 ### T02 - Extend capture-session-memory.sh with metric flags
 
-- Status: Not Started
+- Status: Complete
 - Description: Add optional `--readiness/--review-result/--rework/--context-files`; write `metric` rows to context-index scoped by resolved area; no-op when omitted.
-- Files: scripts/capture-session-memory.sh
-- Tests: capture smoke test with and without flags
+- Files: scripts/capture-session-memory.sh, scripts/lib/context-index.sh, tests/test-session-memory-index.sh
+- Tests: capture smoke test with and without flags (Test 22)
 - Validation: `--dry-run` shows correct rows; existing capture unchanged
 
 ### T03 - Require ledger entry in prompt-update + retro templates
 
-- Status: Not Started
+- Status: Complete
 - Description: Update all three assistant adapters for both commands to require a ledger entry; keep parity anchors.
-- Files: templates/cursor/*, templates/copilot/prompts/*, templates/claude/commands/*
-- Tests: ./scripts/validate-command-adapters.sh
+- Files: spec/commands/lifecycle-prompt-update.spec.md, lifecycle-retro.spec.md, generated templates
+- Tests: ./scripts/validate-command-adapters.sh, ./scripts/check-posture-boundary.sh
 - Validation: adapter parity CI passes
 
 ### T04 - Bound ledger growth (rotation/archive)
 
-- Status: Not Started
+- Status: Complete
 - Description: Apply the existing `session-history.md` rotation pattern to the ledger — keep a recent inline window, move older entries to `agent-context/memory/archive/`.
 - Files: scripts/capture-session-memory.sh
-- Tests: rotation smoke test (entries beyond the window move to archive)
+- Tests: rotation smoke test (entries beyond the window move to archive) — Test 23
 - Validation: `--dry-run` shows correct rotation; recent window intact
 
 ### T05 - Document the metric Kind + workflow
 
-- Status: Not Started
+- Status: Complete
 - Description: Add Kind: metric to the index catalog; document the enum, `--rework` definition, and ledger rotation.
 - Files: docs/context-loading-and-scaling.md
 - Tests: Not applicable
@@ -229,28 +229,27 @@ is sequenced **last** — only after the make-it-right refactors (FEAT-001→003
 
 ## Review Checklist
 
-- [ ] Requirements satisfied
-- [ ] Entities updated correctly
-- [ ] Approach followed or synced
-- [ ] Structure followed or synced
-- [ ] Operations completed
-- [ ] Norms followed
-- [ ] Safeguards respected
-- [ ] Tests added or updated
-- [ ] No unrelated refactors
-- [ ] Documentation updated if needed
+- [x] Requirements satisfied
+- [x] Entities updated correctly
+- [x] Approach followed or synced
+- [x] Structure followed or synced
+- [x] Operations completed
+- [x] Norms followed
+- [x] Safeguards respected
+- [x] Tests added or updated
+- [x] No unrelated refactors
+- [x] Documentation updated if needed
 
 ## Sync Notes
 
-Created during framework self-improvement (dogfood). Classified as "make it fast"
-(prompt-optimization measurement) and deferred until the make-it-right refactors
-(FEAT-001→003) land — see ROADMAP Delivery posture and milestone-1.md. The canvas is
-specced and Ready For Coding so it can start immediately once its turn comes. Use
-sync notes to track drift between the roadmap, canvas, and implementation.
+Implementation matched the canvas. Specs (not hand-edited adapters) are the source
+for T03. Adjacent fix: `_wf_infer_next_operation` ignores empty Final Status `- Status:`
+by stopping at `##` headings. Follow-ups: optional workflow regression for all-ops-complete;
+FEAT-005 readiness indicators next.
 
 ## Final Status
 
-- Status:
-- Completed Date:
-- PR:
-- Follow-Up Tasks:
+- Status: Complete (T01–T05)
+- Completed Date: 2026-07-15
+- PR: (local on cursor/integration-981e; not committed unless requested)
+- Follow-Up Tasks: FEAT-005-canvas-readiness-indicators; optional Test 12b for Final Status boundary

@@ -9,6 +9,7 @@ SDLC_SHIPPED_LIB_FILES=(
   work-id.sh
   milestone.sh
   context-index.sh
+  readiness.sh
 )
 
 # Orchestrator-only libs (never installed into targets).

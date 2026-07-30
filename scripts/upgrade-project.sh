@@ -336,14 +336,24 @@ create_missing_project_doc \
   "${TARGET}/ROADMAP.md"
 
 shopt -s nullglob
-milestone_files=("${TARGET}"/milestone-*.md)
+root_milestones=("${TARGET}"/milestone-*.md)
+subdir_milestones=("${TARGET}"/requirements/milestones/milestone-*/MILESTONE-*.md)
 shopt -u nullglob
-if ((${#milestone_files[@]} == 0)); then
+if ((${#root_milestones[@]} == 0 && ${#subdir_milestones[@]} == 0)); then
+  ensure_dir "${TARGET}/requirements/milestones/milestone-1"
   create_missing_project_doc \
-    "${REPO_ROOT}/templates/project-docs/milestone-1.md" \
-    "${TARGET}/milestone-1.md"
+    "${REPO_ROOT}/templates/requirements/milestones/milestone-definition.md" \
+    "${TARGET}/requirements/milestones/milestone-1/MILESTONE-1.md"
+  create_missing_project_doc \
+    "${REPO_ROOT}/templates/requirements/milestones/milestone-template.yml" \
+    "${TARGET}/requirements/milestones/milestone-1/_milestone.yml"
 else
-  preserved+=("${TARGET}/milestone-*.md")
+  if ((${#root_milestones[@]} > 0)); then
+    preserved+=("${TARGET}/milestone-*.md")
+  fi
+  if ((${#subdir_milestones[@]} > 0)); then
+    preserved+=("${TARGET}/requirements/milestones/milestone-*/")
+  fi
 fi
 
 create_missing_project_doc \
@@ -366,6 +376,10 @@ done
 create_missing_memory_file \
   "${REPO_ROOT}/templates/agent-context/memory/domain-index.md" \
   "${TARGET}/agent-context/memory/domain-index.md"
+
+create_missing_memory_file \
+  "${REPO_ROOT}/templates/agent-context/memory/prompt-optimization-log.md" \
+  "${TARGET}/agent-context/memory/prompt-optimization-log.md"
 
 # Framework-owned playbooks and harness files are upgraded, with backups.
 for file in "${REPO_ROOT}"/agent-context/playbooks/*.md; do
@@ -463,6 +477,7 @@ for file in \
   validate-command-adapters.sh \
   verify-agent-command-effects.sh \
   validate-reasons-canvas.sh \
+  validate-requirements-format.sh \
   verify-project-install.sh \
   sdlc.sh; do
   copy_executable_framework_file \

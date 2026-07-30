@@ -4,10 +4,10 @@
 
 - Work ID: SPIKE-002-local-llm-and-embedding-format
 - Work Type: Spike
-- Status: Draft
-- Readiness: Needs Analysis
+- Status: Analysis ready — blocked on Guide MCP
+- Readiness: Ready For Coding
 - Created: 2026-06-19
-- Updated: 2026-06-19 (confirmational research via live MCP store)
+- Updated: 2026-07-15 (analysis resume; MCP blocked)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood) + Embabel guide fork
 - Stack: Bash + Markdown harness ↔ JVM (Embabel guide) + Neo4j + ONNX/Ollama, over MCP (SSE)
@@ -237,6 +237,8 @@ embedding model in the A/B.
 - [ ] No secrets committed
 
 ## Sync Notes
+
+2026-07-15 analysis: FEAT-004/005 unblocked; Guide MCP down — local LLM/embedding A/B deferred. See spdd/analysis/SPIKE-002-local-llm-and-embedding-format-analysis.md
 
 Sibling to SPIKE-001: same retrieval substrate (guide/Neo4j) and scoring method
 (FEAT-004 ledger), but focused on the **model layer** — local tool-capable LLM via

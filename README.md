@@ -26,25 +26,22 @@ New agent coordination shipped in [#19](https://github.com/jmjava/sdlc-spdd-orch
 
 Pointer and workflow state stay local (`.sdlc/pointer`, `.sdlc/workflows/`); team claims live in `agent-context/work-registry.tsv` and sync through git. Details: [agent-context/README.md](agent-context/README.md)
 
-> **Project status: turning the corner from MVP to "make it right."**
+> **Project status: Milestone 1 make-it-right track is largely complete; make-it-fast measurement landed.**
 > We develop this framework through Kent Beck's progression — *make it work → make it
-> right → make it fast*. Phase one (**make it work**) is done: it functions end to end
-> today. We are now in **make it right** — refactoring the existing code and docs for
-> **readability, maintainability, and extensibility** — before any later **make it
-> fast** work (performance and prompt optimization). Expect the surface to keep
-> improving. See the [ROADMAP](ROADMAP.md) and [milestone-1.md](milestone-1.md) for the
-> current direction and what is in progress.
+> right → make it fast*. **Make it work** is done. **Make it right** refactors
+> (shared libs, command-spec generation, extension manifest, analysis Scope Lock,
+> Jira requirements format, milestone subdirs, session-brief archive) are Complete
+> on the integration line. **Make it fast** measurement (prompt-optimization ledger +
+> canvas readiness indicators) is also Complete; remaining make-it-fast work is
+> SPIKE-001/002 (Guide / local models), shelved until Guide MCP is available.
+> See the [ROADMAP](ROADMAP.md) and
+> [milestone-1](requirements/milestones/milestone-1/MILESTONE-1.md) (root
+> [`milestone-1.md`](milestone-1.md) is a compatibility stub).
 >
-> **We dogfood the framework on itself.** This second-phase work is driven through
-> SDLC-SPDD: each improvement is a governed Work ID with its own REASONS Canvas
-> under [`spdd/canvas/`](spdd/canvas/) and requirement under
+> **We dogfood the framework on itself.** Improvements are governed Work IDs with
+> REASONS Canvases under [`spdd/canvas/`](spdd/canvas/) and requirements under
 > [`requirements/milestones/`](requirements/milestones/) — the same workflow this
 > repo asks target projects to use.
->
-> **A note on judging the code right now:** much of this phase is active refactoring.
-> Reviewing AI-assisted code before the *make it right* loop is complete is like
-> inspecting wet cement and declaring the building unsafe — let the loop finish
-> before drawing conclusions about a given area.
 
 Note: Guide integration spike details (including the flow diagram) live in the
 [Work in progress](#work-in-progress) section above and on the spike branch.

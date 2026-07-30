@@ -154,20 +154,41 @@ copy_if_missing \
   "${REPO_ROOT}/templates/project-docs/ROADMAP.md" \
   "${TARGET}/ROADMAP.md"
 
+# Prefer subdirectory milestone layout for new projects; keep root milestone-*.md
+# if already present (backward compatible).
 shopt -s nullglob
-milestone_files=("${TARGET}"/milestone-*.md)
+root_milestones=("${TARGET}"/milestone-*.md)
+subdir_milestones=("${TARGET}"/requirements/milestones/milestone-*/MILESTONE-*.md)
 shopt -u nullglob
-if ((${#milestone_files[@]} == 0)); then
+if ((${#root_milestones[@]} == 0 && ${#subdir_milestones[@]} == 0)); then
+  ensure_dir "${TARGET}/requirements/milestones/milestone-1"
   copy_if_missing \
-    "${REPO_ROOT}/templates/project-docs/milestone-1.md" \
-    "${TARGET}/milestone-1.md"
+    "${REPO_ROOT}/templates/requirements/milestones/milestone-definition.md" \
+    "${TARGET}/requirements/milestones/milestone-1/MILESTONE-1.md"
+  copy_if_missing \
+    "${REPO_ROOT}/templates/requirements/milestones/milestone-template.yml" \
+    "${TARGET}/requirements/milestones/milestone-1/_milestone.yml"
 else
-  skipped+=("${TARGET}/milestone-*.md")
+  if ((${#root_milestones[@]} > 0)); then
+    skipped+=("${TARGET}/milestone-*.md")
+  fi
+  if ((${#subdir_milestones[@]} > 0)); then
+    skipped+=("${TARGET}/requirements/milestones/milestone-*/")
+  fi
 fi
 
 copy_if_missing \
   "${REPO_ROOT}/templates/requirements/milestones/README.md" \
   "${TARGET}/requirements/milestones/README.md"
+
+# Empty memory scaffolds — do not seed orchestrator dogfood rows into targets.
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/memory/domain-index.md" \
+  "${TARGET}/agent-context/memory/domain-index.md"
+
+copy_if_missing \
+  "${REPO_ROOT}/templates/agent-context/memory/prompt-optimization-log.md" \
+  "${TARGET}/agent-context/memory/prompt-optimization-log.md"
 
 # Copy memory and harness templates
 for file in \
@@ -181,11 +202,6 @@ for file in \
     "${REPO_ROOT}/agent-context/memory/${file}" \
     "${TARGET}/agent-context/memory/${file}"
 done
-
-# Empty index scaffold — do not seed orchestrator dogfood rows into targets.
-copy_if_missing \
-  "${REPO_ROOT}/templates/agent-context/memory/domain-index.md" \
-  "${TARGET}/agent-context/memory/domain-index.md"
 
 # Copy playbooks for SDLC Agents-style handoffs and repeatable workflows
 for file in "${REPO_ROOT}"/agent-context/playbooks/*.md; do
@@ -289,6 +305,7 @@ for file in \
   validate-command-adapters.sh \
   verify-agent-command-effects.sh \
   validate-reasons-canvas.sh \
+  validate-requirements-format.sh \
   verify-project-install.sh \
   sdlc.sh; do
   copy_if_missing \

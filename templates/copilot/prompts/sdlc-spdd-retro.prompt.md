@@ -21,6 +21,10 @@ Capture reusable learnings after a feature, bugfix, refactor, or spike. Do not i
 6. Identify reusable patterns.
 7. Identify project-specific pitfalls.
 8. Update project memory.
+9. **Append a prompt-optimization ledger entry** to
+   `agent-context/memory/prompt-optimization-log.md` with Date, Work ID, Change
+   (what you learned about prompts/process), Hypothesis (what you expected),
+   Signal (what happened), and Outcome (`improved` / `neutral` / `worse` / `unknown`).
 
 ## Output
 
@@ -31,6 +35,7 @@ Create or update:
 - `agent-context/memory/project-memory.md`
 - `agent-context/memory/known-pitfalls.md`
 - `agent-context/memory/reusable-patterns.md`
+- `agent-context/memory/prompt-optimization-log.md` (required ledger entry)
 
 Include:
 
@@ -39,3 +44,4 @@ Include:
 - Reusable patterns
 - Mistakes to avoid
 - Suggested future safeguards
+- Ledger entry summary (Change / Hypothesis / Outcome)

@@ -71,6 +71,9 @@ Also useful day to day:
 | Guide | Use it when |
 |-------|-------------|
 | [Jira runbook](jira-runbook.md) | You need to create Jira issues or keep Jira synchronized with SDLC-SPDD artifacts |
+| [Jira-compatible requirements format](jira-compatible-requirements-format.md) | You want YAML frontmatter, Related Work, and validation for requirements |
+| [Analysis phase scope validation](analysis-phase-scope-validation.md) | You want Scope Lock before analysis generation |
+| [Migration: root milestones → subdirs](MIGRATION-root-to-subdirectories.md) | You are moving root `milestone-N.md` under `requirements/milestones/` |
 | [Integration linking](integration-linking.md) | You need to link canvases to Jira, GitHub issues, pull requests, or GitHub Pages |
 | [GitHub project setup](github-project-setup.md) | You need labels, milestones, and issue template conventions |
 | [Installing into your project](installing-into-your-project.md) | You need target-project CI checks (adapter parity workflow and script validation) |

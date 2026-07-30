@@ -8,6 +8,7 @@ on:
       - 'agent-context/README.md'
       - 'scripts/start-agent-session.sh'
       - 'scripts/capture-session-memory.sh'
+      - 'scripts/lib/readiness.sh'
       - 'scripts/init-project.sh'
       - 'scripts/upgrade-project.sh'
       - 'scripts/verify-project-install.sh'
@@ -33,6 +34,7 @@ on:
       - 'agent-context/README.md'
       - 'scripts/start-agent-session.sh'
       - 'scripts/capture-session-memory.sh'
+      - 'scripts/lib/readiness.sh'
       - 'scripts/init-project.sh'
       - 'scripts/upgrade-project.sh'
       - 'scripts/verify-project-install.sh'
@@ -63,6 +65,7 @@ jobs:
           bash -n tests/test-sdlc-workflow.sh
           bash -n scripts/start-agent-session.sh
           bash -n scripts/capture-session-memory.sh
+          bash -n scripts/lib/readiness.sh
           bash -n scripts/validate-command-adapters.sh
 
       - name: Run SDLC pointer regression tests

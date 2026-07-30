@@ -18,7 +18,7 @@ They solve three operational needs:
 | `scripts/sdlc-spdd/sdlc.sh` | Workflow CLI: `next`, `claim`, `resume`, `advance`, `skip`, `shelf`, `sync`, `capture`, `team`, `list-work` |
 | `scripts/sdlc-spdd/start-agent-session.sh` | Target-local script that creates a session brief for a new agent |
 | `scripts/sdlc-spdd/resync-agent-session.sh` | Target-local script that checks or reconciles feature/canonical canvases, validates the canvas, and creates a session brief |
-| `scripts/sdlc-spdd/capture-session-memory.sh` | Target-local script that persists current session summary, validation, decisions, pitfalls, patterns, and next steps |
+| `scripts/sdlc-spdd/capture-session-memory.sh` | Persist session summary, decisions/pitfalls/patterns, optional **metrics**, and next steps into memory indexes |
 | `scripts/sdlc-spdd/index-spdd-analysis.sh` | Index Fowler analysis artifacts into `domain-index.md` and `context-index.md` |
 | `scripts/sdlc-spdd/resolve-agent-context.sh` | Resolve SDLC Agents `#SkillName` / phase extensions for progressive loading |
 | `scripts/sdlc-spdd/create-work-from-milestone.sh` | Target-local script that maps milestone checklist items into SDLC-SPDD work artifacts |
@@ -27,7 +27,8 @@ They solve three operational needs:
 | `scripts/sdlc-spdd/sync-agent-context.sh` | Target-local low-level canvas copy synchronization |
 | `scripts/sdlc-spdd/validate-command-adapters.sh` | Target-local checker that validates Cursor/Copilot/Claude Code command-pack parity in the installed project |
 | `scripts/sdlc-spdd/verify-agent-command-effects.sh` | Target-local verifier for deterministic artifact side-effects after `/sdlc-spdd-*` command invocations and post-capture planning sync |
-| `scripts/sdlc-spdd/validate-reasons-canvas.sh` | Target-local REASONS Canvas structure validation |
+| `scripts/sdlc-spdd/validate-reasons-canvas.sh` | REASONS Canvas structure validation (+ optional readiness vocabulary) |
+| `scripts/sdlc-spdd/validate-requirements-format.sh` | Jira-compatible requirements frontmatter / Work ID reference checks |
 | `scripts/sdlc-spdd/verify-project-install.sh` | Target-local three-part install verification (Planning, SPDD, SDLC) |
 
 ## 1. Set Up Prompts and Memory
@@ -52,7 +53,8 @@ The target app receives:
 - `spdd/sync/`
 - `ROADMAP.md`
 - `.github/workflows/validate-sdlc-spdd-adapters.yml` when both Cursor and Copilot adapters are installed
-- `milestone-1.md` when no `milestone-*.md` exists
+- `milestone-1.md` when no milestone definition exists (new installs prefer
+  `requirements/milestones/milestone-1/MILESTONE-1.md` + `_milestone.yml`)
 - `session-notes/`
 - `agent-context/memory/`
 - `agent-context/playbooks/`
@@ -98,6 +100,12 @@ See [Bootstrap and index-based loading](context-loading-and-scaling.md#bootstrap
 With an explicit milestone:
 
     ./scripts/sdlc-spdd/start-agent-session.sh --target . --work-id FEAT-001-order-status-api --phase code --milestone milestone-1.md
+
+Session-brief rotation (keeps `agent-context/sessions/` bounded):
+
+- `--session-limit <n>` — keep at most N timestamped briefs; older move to
+  `agent-context/sessions/archive/` (default 20). `current-session.md` is never archived.
+- `--no-session-rotate` — leave prior timestamped briefs in place (previous behavior).
 
 This writes:
 
@@ -179,12 +187,35 @@ supplement parsed areas.
       --patterns "Use focused service tests for status transitions." \
       --next "/sdlc-spdd-review @spdd/canvas/FEAT-001-order-status-api.md"
 
+Optional capture metrics (Kind: `metric` in `context-index.md` when areas resolve):
+
+    ./scripts/sdlc-spdd/capture-session-memory.sh \
+      --target . \
+      --work-id FEAT-001-order-status-api \
+      --phase review \
+      --summary "Review passed" \
+      --areas "src/order" \
+      --readiness "ready-for-coding" \
+      --review-result pass \
+      --rework 0 \
+      --context-files 12 \
+      --validate-cycles 1 \
+      --review-cycles 1
+
+When `--readiness` is omitted, capture auto-fills from the canvas Metadata
+`- Readiness:` or YAML `readiness:` value when present.
+
+`--history-limit` / `--no-history-rotate` bound `session-history.md` and, when
+present, `prompt-optimization-log.md` (older `###` sections →
+`agent-context/memory/archive/`).
+
 This updates:
 
 - `agent-context/memory/session-history.md` (recent window; older entries archive)
 - `agent-context/memory/sessions/<entry>.md` (immutable per-session detail)
 - `agent-context/memory/session-index.md` (newest-first, with Areas column)
-- `agent-context/memory/context-index.md` (area → session/decision/pitfall/pattern rows)
+- `agent-context/memory/context-index.md` (area → session/decision/pitfall/pattern/**metric** rows)
+- `agent-context/memory/prompt-optimization-log.md` (rotated when present; ledger entries come from prompt-update/retro)
 - `agent-context/memory/code-areas.md` (appends genuinely new categories)
 - `agent-context/features/<WORK-ID>/progress-log.md`
 - `session-notes/YYYY-MM-DD.md`
@@ -222,6 +253,7 @@ Invoke the SDLC-SPDD skill:
 After completing a phase step:
 
     ./scripts/sdlc-spdd/sdlc.sh advance
+    ./scripts/sdlc-spdd/sdlc.sh advance --force   # override Ready For Coding gate into code
 
 Review and sync:
 

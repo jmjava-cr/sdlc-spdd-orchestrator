@@ -31,7 +31,7 @@ This installs:
 - `spdd/reviews/`
 - `spdd/sync/`
 - `ROADMAP.md`
-- `milestone-1.md` when no `milestone-*.md` exists
+- `requirements/milestones/milestone-1/MILESTONE-1.md` and `_milestone.yml` when no root or subdirectory milestone exists (root `milestone-*.md` still supported)
 - `session-notes/`
 - `agent-context/memory/`
 - `agent-context/playbooks/`

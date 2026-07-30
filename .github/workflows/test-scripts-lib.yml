@@ -29,5 +29,5 @@ jobs:
           bash -n tests/test-scripts-lib.sh
           for f in scripts/lib/*.sh; do bash -n "$f"; done
 
-      - name: Run scripts/lib regression tests
+      - name: Run scripts/lib smoke and regression tests
         run: ./tests/test-scripts-lib.sh

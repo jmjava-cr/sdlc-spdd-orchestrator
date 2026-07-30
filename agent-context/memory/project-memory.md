@@ -20,3 +20,45 @@ Run `./scripts/detect-stack.sh --target .` to append detected technologies here.
 ## Recent Learnings
 
 Add retro outputs here over time.
+
+### 2026-07-15T23:05:49Z - FEAT-004-prompt-optimization-ledger
+
+- Phase: code
+- Summary: FEAT-004 T02: capture metric flags (--readiness/--review-result/--rework/--context-files) write Kind: metric rows; invalid review-result warns and skips
+- Next: /sdlc-spdd-code @spdd/canvas/FEAT-004-prompt-optimization-ledger.md operation T03
+
+### 2026-07-15T23:18:43Z - FEAT-004-prompt-optimization-ledger
+
+- Phase: code
+- Summary: FEAT-004 T03-T05: ledger required in prompt-update/retro specs; ledger rotation via capture; docs metric Kind + workflow
+- Next: Not recorded
+
+### 2026-07-15T23:19:59Z - FEAT-004-prompt-optimization-ledger
+
+- Phase: retro
+- Summary: FEAT-004 retro: ledger measurement landed; fixed next-op Final Status boundary; Approved With Notes
+- Next: Not recorded
+
+### 2026-07-15T23:20:00Z - FEAT-004-prompt-optimization-ledger
+
+- Phase: sync
+- Summary: FEAT-004 sync: canvas/requirement/milestone aligned; Work ID Complete
+- Next: Not recorded
+
+### 2026-07-15T23:21:58Z - FEAT-005-canvas-readiness-indicators
+
+- Phase: code
+- Summary: FEAT-005 T01-T04: readiness vocab + validate + cycle metrics + docs
+- Next: Not recorded
+
+### 2026-07-15T23:21:59Z - FEAT-005-canvas-readiness-indicators
+
+- Phase: retro
+- Summary: FEAT-005 retro complete
+- Next: Not recorded
+
+### 2026-07-15T23:21:59Z - FEAT-005-canvas-readiness-indicators
+
+- Phase: sync
+- Summary: FEAT-005 sync complete
+- Next: Not recorded

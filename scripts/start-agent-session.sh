@@ -18,9 +18,14 @@ Phases:
   init, analysis, plan, architect, code, api-test, review, prompt-update, retro, sync, resume
 
 Options:
-  --milestone <file>    Active milestone doc, such as milestone-1.md. When omitted
-                        and --work-id is set, the script searches milestone-*.md
-                        files for a matching Work ID.
+  --milestone <file>     Active milestone doc (root milestone-1.md or
+                         requirements/milestones/milestone-1/MILESTONE-1.md).
+                         When omitted and --work-id is set, searches known
+                         milestone definitions for a matching Work ID.
+  --session-limit <n>    Keep at most N timestamped briefs in sessions/
+                         (older move to sessions/archive/; default 20)
+  --no-session-rotate    Do not archive older timestamped session briefs
+  --help                 Print this help
 
 Examples:
   ./scripts/start-agent-session.sh --target /path/to/app --work-id FEAT-001-order-status-api --phase code
@@ -33,6 +38,8 @@ TARGET="."
 WORK_ID=""
 PHASE="resume"
 MILESTONE=""
+SESSION_LIMIT=20
+SESSION_ROTATE=1
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -51,6 +58,14 @@ while [[ $# -gt 0 ]]; do
     --milestone)
       MILESTONE="${2:-}"
       shift 2
+      ;;
+    --session-limit)
+      SESSION_LIMIT="${2:-20}"
+      shift 2
+      ;;
+    --no-session-rotate)
+      SESSION_ROTATE=0
+      shift
       ;;
     --help|-h)
       usage
@@ -84,7 +99,10 @@ if [[ -f "${pointer_script}" && -n "${WORK_ID}" ]]; then
 fi
 
 workflow_script="${TARGET}/agent-context/sdlc-workflow.sh"
+team_script="${TARGET}/agent-context/sdlc-team-registry.sh"
 workflow_brief_md="Workflow tools not installed."
+jira_status=""
+jira_ask_prompt=""
 if [[ -f "${workflow_script}" && -n "${WORK_ID}" ]]; then
   SDLC_ROOT="${TARGET}"
   # shellcheck source=/dev/null
@@ -92,6 +110,16 @@ if [[ -f "${workflow_script}" && -n "${WORK_ID}" ]]; then
   sdlc_workflow_touch_session "${WORK_ID}" "${PHASE}" "${MILESTONE}"
   sdlc_workflow_sync "${WORK_ID}" >/dev/null 2>&1 || true
   workflow_brief_md="$(sdlc_workflow_brief_markdown "${WORK_ID}")"
+elif [[ -f "${team_script}" && -n "${WORK_ID}" ]]; then
+  SDLC_ROOT="${TARGET}"
+  # shellcheck source=/dev/null
+  source "${team_script}"
+fi
+if [[ -n "${WORK_ID}" ]] && declare -F sdlc_team_jira_status >/dev/null 2>&1; then
+  jira_status="$(sdlc_team_jira_status "${WORK_ID}")"
+fi
+if [[ -n "${WORK_ID}" ]] && declare -F sdlc_team_jira_ask_prompt >/dev/null 2>&1; then
+  jira_ask_prompt="$(sdlc_team_jira_ask_prompt "${WORK_ID}")"
 fi
 
 timestamp="$(sdlc_timestamp_iso)"
@@ -189,6 +217,11 @@ case "${PHASE}" in
     ;;
 esac
 
+# Prefer workflow helper when installed — honors Ready For Coding gate for code phase.
+if declare -F sdlc_workflow_recommended_command >/dev/null 2>&1 && [[ -n "${WORK_ID}" ]]; then
+  recommended_command="$(sdlc_workflow_recommended_command "${PHASE}" "${WORK_ID}")"
+fi
+
 git_status="not a git repository"
 if git -C "${TARGET}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git_status="$(git -C "${TARGET}" status --short)"
@@ -198,17 +231,16 @@ if git -C "${TARGET}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 latest_session="none"
+# Previous brief = newest existing *timestamped* file (exclude current-session.md).
 shopt -s nullglob
-session_files=("${session_dir}"/*.md)
+mapfile -t _prior_briefs < <(ls -t "${session_dir}"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T*.md 2>/dev/null || true)
 shopt -u nullglob
-if ((${#session_files[@]} > 0)); then
-  latest_session="$(ls -t "${session_dir}"/*.md 2>/dev/null | head -n 1 || true)"
+if ((${#_prior_briefs[@]} > 0)); then
+  latest_session="${_prior_briefs[0]}"
 fi
 
 milestone_list="- none found"
-shopt -s nullglob
-milestone_files=("${TARGET}"/milestone-*.md)
-shopt -u nullglob
+mapfile -t milestone_files < <(list_milestone_files "${TARGET}" absolute 2>/dev/null || true)
 if ((${#milestone_files[@]} > 0)); then
   milestone_list=""
   for file in "${milestone_files[@]}"; do
@@ -266,6 +298,11 @@ fi
 
 resume_prompt+=$'\n\n'"Continue in the ${PHASE} phase using the hybrid SDLC Agents + SPDD workflow."
 resume_prompt+=$'\n'"Recommended command: ${recommended_command}"
+if [[ -n "${jira_ask_prompt}" ]]; then
+  resume_prompt+=$'\n\n'"${jira_ask_prompt}"
+elif [[ -n "${jira_status}" && "${jira_status}" != "missing" && "${jira_status}" != "draft" ]]; then
+  resume_prompt+=$'\n'"Jira: ${jira_status}"
+fi
 
 resume_prompt_indented="$(printf '%s\n' "${resume_prompt}" | sed 's/^/    /')"
 
@@ -278,6 +315,7 @@ cat > "${session_file}" <<EOF
 - Target: ${TARGET}
 - Work ID: ${WORK_ID:-none}
 - Phase: ${PHASE}
+- Jira: ${jira_status:-unknown}
 - Active milestone: ${active_milestone:-none}
 - Recommended command: ${recommended_command}
 - Canvas sync state: ${canvas_sync_state}
@@ -366,6 +404,42 @@ Add notes here during the session, then persist them with:
 EOF
 
 cp "${session_file}" "${current_file}"
+
+rotate_session_briefs() {
+  # Keep the newest ${limit} timestamped briefs; move older ones to archive/.
+  # Never moves current-session.md.
+  local dir="$1"
+  local limit="$2"
+  local archive_dir="${dir}/archive"
+  local -a briefs=()
+  local file base count move_count
+
+  [[ "${limit}" =~ ^[0-9]+$ ]] || return 0
+  (( limit >= 1 )) || return 0
+
+  shopt -s nullglob
+  mapfile -t briefs < <(ls -t "${dir}"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]T*.md 2>/dev/null || true)
+  shopt -u nullglob
+  count="${#briefs[@]}"
+  if (( count <= limit )); then
+    return 0
+  fi
+
+  mkdir -p "${archive_dir}"
+  move_count=0
+  for file in "${briefs[@]:limit}"; do
+    base="$(basename "${file}")"
+    mv "${file}" "${archive_dir}/${base}"
+    move_count=$((move_count + 1))
+  done
+  if (( move_count > 0 )); then
+    echo "Archived ${move_count} older session brief(s) to ${archive_dir}/"
+  fi
+}
+
+if [[ "${SESSION_ROTATE}" -eq 1 ]]; then
+  rotate_session_briefs "${session_dir}" "${SESSION_LIMIT}"
+fi
 
 echo "Created session brief:"
 echo "  ${session_file}"
