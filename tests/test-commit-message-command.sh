@@ -75,22 +75,30 @@ else
   bad "validate-command-adapters"
 fi
 
-echo "== Test 4: engine commit-message CLI smoke =="
+echo "== Test 4: engine commit-message CLI smoke (isolated repo) =="
+# Use a throwaway git repo so CI checkouts without origin/main still exercise
+# the staged-diff path (unit coverage for ahead-of-base lives in pytest).
+smoke_root="$(mktemp -d)"
+trap 'rm -rf "${smoke_root}"' EXIT
+git -C "${smoke_root}" init -q
+git -C "${smoke_root}" config user.email "ci@example.com"
+git -C "${smoke_root}" config user.name "CI"
+printf '# smoke\n' > "${smoke_root}/README.md"
+git -C "${smoke_root}" add README.md
+git -C "${smoke_root}" commit -q -m "init"
+printf 'staged\n' > "${smoke_root}/staged.txt"
+git -C "${smoke_root}" add staged.txt
 if PYTHONPATH="${REPO_ROOT}/engine/src${PYTHONPATH:+:${PYTHONPATH}}" \
-  python3 -m sdlc_engine --root "${REPO_ROOT}" commit-message --hint "smoke" >/tmp/sdlc-cm-smoke.out 2>/tmp/sdlc-cm-smoke.err
+  python3 -m sdlc_engine --root "${smoke_root}" commit-message --hint "smoke" --work-id FEAT-008 \
+  >/tmp/sdlc-cm-smoke.out 2>/tmp/sdlc-cm-smoke.err
 then
-  if grep -Eq 'source: (staged|unstaged|ahead-of-base)' /tmp/sdlc-cm-smoke.out; then
-    ok "python -m sdlc_engine commit-message emits source"
+  if grep -Fq 'source: staged' /tmp/sdlc-cm-smoke.out && grep -Fq 'staged.txt' /tmp/sdlc-cm-smoke.out; then
+    ok "python -m sdlc_engine commit-message emits staged report"
   else
-    bad "engine output missing source line"
+    bad "engine output missing staged report"
   fi
 else
-  # Empty tree on a clean checkout of main is a valid failure mode.
-  if grep -Fq "nothing to commit" /tmp/sdlc-cm-smoke.err; then
-    ok "engine fails closed on empty change set"
-  else
-    bad "engine commit-message unexpected failure: $(cat /tmp/sdlc-cm-smoke.err)"
-  fi
+  bad "engine commit-message unexpected failure: $(cat /tmp/sdlc-cm-smoke.err)"
 fi
 
 echo
