@@ -21,10 +21,10 @@ Make it right (do first):
 3. **FEAT-003 — extension/hook manifest.** A clean, documented extension point.
 4. **Readability pass — consistent structure, naming, and examples** across code
    and docs.
-5. **FEAT-006 — analysis Scope Lock-In.** Prevent analysis scope creep before generation.
-6. **FEAT-007 — Jira-compatible requirements format.** Frontmatter, templates, validation.
-7. **FEAT-008 — milestone subdirectory layout.** Prefer `requirements/milestones/milestone-N/`.
-8. **FEAT-009 — session-brief archive/rotation.** Keep `agent-context/sessions/` bounded.
+5. **FEAT-009 — analysis Scope Lock-In.** Prevent analysis scope creep before generation.
+6. **FEAT-010 — Jira-compatible requirements format.** Frontmatter, templates, validation.
+7. **FEAT-011 — milestone subdirectory layout.** Prefer `requirements/milestones/milestone-N/`.
+8. **FEAT-012 — session-brief archive/rotation.** Keep `agent-context/sessions/` bounded.
 
 Make it fast (measurement + spikes):
 

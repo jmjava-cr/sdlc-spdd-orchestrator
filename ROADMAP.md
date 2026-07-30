@@ -17,7 +17,7 @@ whole framework through the stages in order.
 | Stage | State | Focus |
 |-------|-------|-------|
 | **Make it work** | mostly done | MVP delivered — three assistant adapters, capture, indexes, session briefs, and validation CI all function end to end. |
-| **Make it right** | **mostly complete** | Refactors landed (FEAT-001→003, FEAT-006→009). Residual: optional readability pass; dual root/subdir milestone stub still warns. |
+| **Make it right** | **mostly complete** | Refactors landed (FEAT-001→003, FEAT-009→012). Residual: optional readability pass; dual root/subdir milestone stub still warns. |
 | **Make it fast** | **active (spikes)** | Measurement landed (FEAT-004 ledger + FEAT-005 readiness/indicators). Next: SPIKE-001/002 when Guide MCP is available. |
 
 Planning guidance:
@@ -86,10 +86,10 @@ Each item names the Beck stage it serves (see [Delivery posture](#delivery-postu
 |------|---------|
 | Shared script library (`scripts/lib/`) for capture/resolve/verify | Maintainability |
 | Single canonical command spec → generated Cursor/Copilot/Claude adapters | Maintainability (kills drift) |
-| Analysis Scope Lock-In (`/sdlc-spdd-analysis`) | Maintainability (clearer analysis contract) — **FEAT-006 Complete** |
-| Jira-compatible requirements format + validator | Maintainability (planning / tracker alignment) — **FEAT-007 Complete** |
-| Milestone subdirectory layout (`requirements/milestones/milestone-N/`) | Maintainability (planning layout) — **FEAT-008 Complete** |
-| Session-brief archive/rotation (`agent-context/sessions/` → `archive/`; data is already extracted into memory at capture) | Maintainability — **FEAT-009 Complete** |
+| Analysis Scope Lock-In (`/sdlc-spdd-analysis`) | Maintainability (clearer analysis contract) — **FEAT-012 Complete** |
+| Jira-compatible requirements format + validator | Maintainability (planning / tracker alignment) — **FEAT-010 Complete** |
+| Milestone subdirectory layout (`requirements/milestones/milestone-N/`) | Maintainability (planning layout) — **FEAT-011 Complete** |
+| Session-brief archive/rotation (`agent-context/sessions/` → `archive/`; data is already extracted into memory at capture) | Maintainability — **FEAT-012 Complete** |
 | Golden-path regression dogfood (fixed stub → analysis→plan→architect diff) | Maintainability |
 | Code + docs readability pass (consistent structure, naming, examples) | Readability |
 | Extension/hook manifest in `agent-context/extensions/` | Extensibility |
@@ -134,7 +134,7 @@ asks target projects to work.
 Framework self-improvement work, governed as Work IDs (dogfooded through SPDD).
 
 Work IDs are numbered in execution order: make-it-right refactors (FEAT-001→003,
-FEAT-006→009) first, prompt optimization (FEAT-004→005) next, then spikes.
+FEAT-009→012) first, prompt optimization (FEAT-004→005) next, then spikes.
 Milestone 1 feature track is Complete on the integration branch.
 
 | Work ID | Canvas | Stage | Status |
