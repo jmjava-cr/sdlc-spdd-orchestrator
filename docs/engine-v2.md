@@ -47,6 +47,7 @@ engine/
     jira_format.py  # markdown ↔ ADF / wiki for Jira descriptions
     local_sessions.py  # LOCAL-* offline sessions + promote
     db.py           # regenerable local SQLite index (.sdlc/index.sqlite)
+    commit_message.py  # staged/unstaged/ahead-of-base diff report for commit drafts
   tests/            # pytest
 ```
 
@@ -104,6 +105,24 @@ Jira Cloud descriptions are sent as **ADF** (not raw markdown). See
 
 **Repair does not:** invent issue keys, transition remote workflows, or overwrite
 acceptance criteria without `--apply` on `issues pull`.
+
+## Commit message diff report
+
+Collect the change set the user is about to commit (staged → unstaged → commits
+since merge base) so `/sdlc-spdd-commit-message` can draft a message from a
+stable engine report instead of ad-hoc git calls. **Generate only** — never
+creates a commit.
+
+Always routed to the Python engine (even when `SDLC_ENGINE=shell`):
+
+```bash
+./scripts/sdlc.sh commit-message
+./scripts/sdlc.sh commit-message --hint "wire engine report" --work-id FEAT-008-commit-message-command
+./scripts/sdlc.sh commit-message --json
+./scripts/sdlc.sh commit-message --base origin/main --max-diff 40000
+```
+
+Implementation: `engine/src/sdlc_engine/commit_message.py` (`CommitMessageService`).
 
 ## Local SQLite index (pre-GUIDE)
 

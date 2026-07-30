@@ -67,6 +67,9 @@ case "${cmd}" in
   db-path) _py_only_args=("db" "path" "$@") ;;
   db-query) _py_only_args=("db" "query" "$@") ;;
   db-export) _py_only_args=("db" "export" "$@") ;;
+  commit-message)
+    _py_only_args=("commit-message" "$@")
+    ;;
 esac
 if ((${#_py_only_args[@]} > 0)); then
   if ! _python_engine_available; then

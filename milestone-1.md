@@ -51,6 +51,7 @@ grounding files). This is enforced by `./scripts/check-posture-boundary.sh`.
 | FEAT-003-extension-hook-manifest | spdd/canvas/FEAT-003-extension-hook-manifest.md | requirements/milestones/FEAT-003-extension-hook-manifest.md | Complete | On integration branch |
 | FEAT-006-python-orchestration-engine | spdd/canvas/FEAT-006-python-orchestration-engine.md | requirements/milestones/FEAT-006-python-orchestration-engine.md | Complete | Python v2 engine + shell shim (merged #31) |
 | FEAT-007-local-sqlite-index | spdd/canvas/FEAT-007-local-sqlite-index.md | requirements/milestones/FEAT-007-local-sqlite-index.md | Complete | Pre-GUIDE local SQLite query cache |
+| FEAT-008-commit-message-command | spdd/canvas/FEAT-008-commit-message-command.md | requirements/milestones/FEAT-008-commit-message-command.md | Complete | `/sdlc-spdd-commit-message` + engine `commit-message` diff report (closes #41) |
 | FEAT-004-prompt-optimization-ledger | spdd/canvas/FEAT-004-prompt-optimization-ledger.md | requirements/milestones/FEAT-004-prompt-optimization-ledger.md | Draft | Make it fast; runs after refactors |
 | FEAT-005-canvas-readiness-indicators | spdd/canvas/FEAT-005-canvas-readiness-indicators.md | requirements/milestones/FEAT-005-canvas-readiness-indicators.md | Draft | Make it fast; do last |
 | CHORE-001-docgen-initial-documentation | spdd/canvas/CHORE-001-docgen-initial-documentation.md | requirements/milestones/CHORE-001-docgen-initial-documentation.md | Complete | Docgen bundle scaffold + initial narration (parallel) |

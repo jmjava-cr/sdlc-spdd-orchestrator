@@ -40,6 +40,7 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 ./scripts/sdlc.sh local promote --type feature --name "Documented title"
 ./scripts/sdlc.sh db rebuild
 ./scripts/sdlc.sh db query --search "orchestration"
+./scripts/sdlc.sh commit-message --hint "summarize current changes"
 ```
 
 ## Package layout
@@ -58,6 +59,7 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `jira_format` | Markdown ↔ ADF / wiki markup for Jira Cloud/Server descriptions |
 | `local_sessions` | `LOCAL-*` offline sessions + promote into documented Work IDs |
 | `db` | Regenerable local SQLite index (`.sdlc/index.sqlite`) before GUIDE |
+| `commit_message` | Staged/unstaged/ahead-of-base diff report for commit-message drafts |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
 
 ## Compatibility

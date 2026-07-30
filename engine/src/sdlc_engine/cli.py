@@ -10,6 +10,7 @@ from pathlib import Path
 
 from . import __version__
 from .archive import ArchiveService
+from .commit_message import CommitMessageError, CommitMessageService
 from .db import LocalIndex, format_rows
 from .issues import IssueSyncService
 from .local_sessions import LocalSessionService
@@ -275,6 +276,35 @@ def cmd_issues(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_commit_message(args: argparse.Namespace) -> int:
+    svc = CommitMessageService(_project(args))
+    try:
+        if args.json:
+            print(
+                svc.report_json(
+                    base=args.base,
+                    work_id=args.work_id or "",
+                    hint=args.hint or "",
+                    max_diff_chars=args.max_diff,
+                ),
+                end="",
+            )
+        else:
+            print(
+                svc.report_text(
+                    base=args.base,
+                    work_id=args.work_id or "",
+                    hint=args.hint or "",
+                    max_diff_chars=args.max_diff,
+                ),
+                end="",
+            )
+    except CommitMessageError as exc:
+        print(f"commit-message: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def cmd_db(args: argparse.Namespace) -> int:
     idx = LocalIndex(_project(args))
     action = args.db_cmd
@@ -519,6 +549,22 @@ def build_parser() -> argparse.ArgumentParser:
     lp.add_argument("--no-claim", action="store_true", help="Create artifacts without claiming")
     lp.add_argument("--dry-run", action="store_true")
     lp.set_defaults(func=cmd_local)
+
+    cm = sub.add_parser(
+        "commit-message",
+        help="Collect staged/unstaged/ahead-of-base diff for drafting a commit message (does not commit)",
+    )
+    cm.add_argument("--hint", help="Optional short intent for the draft")
+    cm.add_argument("--work-id", help="Optional Work ID (default: active pointer)")
+    cm.add_argument("--base", help="Preferred base ref (default: origin/main)")
+    cm.add_argument(
+        "--max-diff",
+        type=int,
+        default=80_000,
+        help="Truncate unified diff text to this many characters (default: 80000)",
+    )
+    cm.add_argument("--json", action="store_true", help="Emit DiffSnapshot JSON")
+    cm.set_defaults(func=cmd_commit_message)
 
     db = sub.add_parser(
         "db",
