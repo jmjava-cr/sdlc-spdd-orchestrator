@@ -75,3 +75,15 @@ markdown + TSV (git, source of truth)
 ```
 
 Do not treat the SQLite file as authoritative. If it drifts, `db rebuild`.
+
+## Ops console
+
+Visual status + rebuild live in the ops console:
+
+```bash
+./scripts/sdlc.sh console --target .
+```
+
+Open the **SQLite** tab for counts, registry breakdown, and rebuild. The **Guide** tab
+stores local Embabel Guide connection settings (gitignored under `.sdlc/guide-config.json`)
+so you can stage SPIKE-001 config next to the SQLite cache.

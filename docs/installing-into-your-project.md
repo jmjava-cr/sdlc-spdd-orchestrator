@@ -2,10 +2,41 @@
 
 Use this guide to install SDLC-SPDD Orchestrator into an application repository.
 
+## Ops console (EXPERIMENTAL)
+
+> **Experimental.** The visual ops console (`installer` / `console` / `dashboard`) is an
+> orchestrator-dev convenience for dogfooding installs, SQLite, rollback, and local
+> Embabel Guide + Neo4j. It is **not** the supported consumer install path. Prefer
+> `setup-agent-prompts.sh` / `upgrade-project.sh` / `verify-project-install.sh` for
+> production installs. APIs and UI may change without a migration guide.
+
+From the orchestrator repository (requires Flask via the engine `[viewer]` extra):
+
+    python3 -m pip install -e './engine[viewer]'
+    ./scripts/sdlc.sh console --target /path/to/app
+    # aliases: installer · dashboard
+    # or: ./scripts/visual-installer.sh --target /path/to/app
+
+Opens a localhost UI (default `http://127.0.0.1:5051/`) with four panels:
+
+| Panel | What it does |
+|-------|----------------|
+| **Install / Upgrade** | Detects fresh vs upgrade; runs `setup-agent-prompts.sh` / `upgrade-project.sh` / verify |
+| **SQLite** | Shows `.sdlc/index.sqlite` counts, registry breakdown, sample Work IDs; rebuild button |
+| **Rollback** | Lists `.sdlc-spdd-upgrade-backups/<timestamp>/` and restores (with safety snapshot) |
+| **Guide** | Pulls `jmjava/guide`, starts Neo4j + Guide on custom ports, saves `.sdlc/guide-config.json`, checklist + logs |
+
+Install options still include dry-run, force overwrite, skip upgrade backup, and optional Python engine install.
+
+Use `--no-browser` in CI or headless environments. Use `--port` / `--host` / `--lan` like the ADF viewer.
+
+Guide research background: [Guide RAG research and dogfooding](guide-rag-research-and-dogfooding.md).
+
 ## Which Install Path Should I Use?
 
 | Situation | Use |
 |-----------|-----|
+| Prefer a UI for install or upgrade | `./scripts/sdlc.sh installer --target /path/to/app` |
 | New project with no SDLC-SPDD files | `setup-agent-prompts.sh --all` |
 | Existing project initialized by an older orchestrator version | `upgrade-project.sh --all` |
 | Cursor only | `init-project.sh --cursor` |

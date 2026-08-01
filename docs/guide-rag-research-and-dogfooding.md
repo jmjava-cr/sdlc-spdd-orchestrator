@@ -51,6 +51,48 @@ Config files (local only, not checked into this repo):
 - `application-menke-3.yml`
 - `application-menke-4.yml`
 
+## Experimental ops console + live Guide stack test
+
+The ops console Guide tab and `tests/test-guide-stack-live.sh` are **experimental**.
+They dogfood a full Guide + Neo4j instance; they are not a consumer install contract.
+
+Live stack (opt-in locally; CI workflow `test-guide-stack-experimental.yml`):
+
+```bash
+# Requires Docker, Java 21, and a jmjava/guide checkout on the SPDD spike branch
+SDLC_GUIDE_STACK_LIVE=1 GUIDE_HOME=~/github/jmjava/guide \
+  ./tests/test-guide-stack-live.sh
+```
+
+This starts Compose Neo4j, boots Guide with `SPRING_PROFILES_ACTIVE=neo4j,local,sdlc-spdd`,
+loads NamedEntity projection, probes MCP SSE, then stops Guide.
+
+## Ops console (Guide tab)
+
+Bring up local Guide + Neo4j from the orchestrator ops console:
+
+```bash
+./scripts/sdlc.sh console --target .
+```
+
+The **Guide** tab drives an **Embabel-mechanics-aligned** local stack:
+
+1. Saves `.sdlc/guide-config.json` (gitignored) — ports, profile, `SPRING_PROFILES_ACTIVE=neo4j,local,<profile>`
+2. **Ensure / pull jmjava/guide** — clones/pulls the spike ref (`cursor/spike-spdd-dice-projection-17f4`)
+3. **Write Embabel SPDD profile** — generates `application-sdlc-spdd.yml` with `guide.spdd-projection.enabled=true` + RAG directories
+4. **Start Neo4j** — Guide compose (`embabel-neo4j`) with custom `NEO4J_*_PORT`
+5. **Start Guide (+ingest)** — `append-ingest.sh` (keeps the `neo4j` Spring profile) 
+6. **Load NamedEntity projection** — `POST /api/v1/data/spdd-projection/load` (leg 3 via `NamedEntityDataRepository`)
+7. Embabel mechanics checklist: profiles · ingest · Neo4j · NamedEntity module · projection · MCP SSE
+8. **Neo4j / ingest operators** (Guide must be up):
+   - Refresh Guide stats (`GET /api/v1/data/stats`)
+   - Incremental ingest (`POST /api/v1/data/load-references`)
+   - Purge preview / purge ContentElements by directory or URI prefix
+   - Reset git-ingestion revision (force full re-scan of a directory)
+   - Nuclear: purge ALL RAG `ContentElement` nodes via docker `cypher-shell` (does not delete typed `__Entity__` projection)
+
+Default dogfood ports: Guide `21337`, Neo4j Bolt `7687` / HTTP `7474` (editable).
+
 ## MCP research during analysis
 
 1. Ensure Guide is running on `:21337` with the corpus that covers your Work ID.

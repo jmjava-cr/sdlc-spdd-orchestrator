@@ -138,11 +138,13 @@ val schema = DataDictionary.fromClasses(
 
 ## Open choices (resolve in T02)
 
-- **Recommended:** Kotlin `NamedEntity` module in guide fork (`com.embabel.spdd.domain`).
-- **Prototype fallback:** `SimpleNamedEntityData` + explicit labels — must still include `__Entity__`.
+- **Implemented (guide spike):** Kotlin `NamedEntity` types in `com.embabel.guide.spdd.domain` +
+  `DataDictionary.fromClasses("sdlc-spdd", …)`. Persist still uses `SimpleNamedEntityData` with
+  `linkedDomainType` + `__Entity__` (Embabel merge-by-id path); schema is no longer `DynamicType`.
 - `Area` closed set vs free-text from index.
 - Proposition/`ContextId` layer — defer; entity projection sufficient for spike.
 
 ## Status
 
-Draft — Embabel convention review done 2026-06-19; finalize types in T02, implement in T03.
+T02 schema path closed on guide branch `cursor/spike-spdd-dice-projection-17f4` (NamedEntity +
+`fromClasses`). T03 projection loader + MCP `spdd_*` tools already on that branch; A/B + T06 remain.

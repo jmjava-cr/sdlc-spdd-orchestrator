@@ -74,6 +74,9 @@ case "${cmd}" in
   viewer)
     _py_only_args=("viewer" "$@")
     ;;
+  installer|console|dashboard)
+    _py_only_args=("${cmd}" "$@")
+    ;;
 esac
 if ((${#_py_only_args[@]} > 0)); then
   if ! _python_engine_available; then
