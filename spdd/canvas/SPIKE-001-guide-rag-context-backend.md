@@ -251,10 +251,17 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T06 - Write go / no-go recommendation
 
-- Status: Not Started
+- Status: Provisional go — field validation (2026-08-01)
 - Description: Summarize evidence + trade-offs; if go, sketch follow-on FEAT(s) including production entity ingest + retrieval seam.
+- Decision: **Provisional GO** to land SPIKE wiring on `main` via integration PR #56 so we can
+  confirm retrieval quality **in the field** (live Guide + Neo4j + ops console) and iterate.
+  Not a closed research verdict — final keep/rollback after dogfood sessions.
+- Evidence so far: legs 1–3 live (NamedEntity projection, `spdd_*` MCP, resolver gold, A/B ledger
+  modes a/b); experimental console on `main` (#54); integration stack tested locally + CI.
+- Follow-on if field confirms: FEAT(s) for production ingest/retrieval seam hardening; if not,
+  strip optional Guide path and keep markdown-first default.
 - Files: `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md` (T06 section), this canvas Sync Notes
-- Validation: Clear decision with rationale; only then consider merging research notes to `main`
+- Validation: Provisional decision recorded; field confirmation is the remaining gate
 
 ### T07 - Mock retrieval fixture + resolver gold test
 
@@ -290,9 +297,9 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 ## S - Safeguards
 
 - This is exploratory: do not wire guide into the default resolver or installers under this Work ID.
-- **Stay off `main`:** all spike implementation and docs on `cursor/spike-*` branches until T06
-  go/no-go. **All PRs for this Work ID must remain draft** until T06 — never mark ready for review
-  or merge to `main` during the experiment. Markdown-first default on `main` unchanged.
+- **T06 provisional go (2026-08-01):** land optional Guide path on `main` via #56 for **field
+  confirmation**; markdown-first default unchanged when Guide is absent. Final keep/rollback
+  after live dogfood — not a closed research verdict.
 - Keep all Neo4j/guide setup local/throwaway; no secrets committed.
 - Operator docs and Guide profiles are orchestrator-only — never ship to target projects.
 - If the spike says "go", the real integration is a separate FEAT with its own canvas on a new branch.

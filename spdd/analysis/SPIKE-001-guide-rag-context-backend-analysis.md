@@ -6,10 +6,11 @@
 - **Requirement:** `requirements/milestones/SPIKE-001-guide-rag-context-backend.md`
 - **Canvas:** `spdd/canvas/SPIKE-001-guide-rag-context-backend.md`
 - **Timestamp:** 2026-07-05T15:10:00Z
-- **Branch policy:** all implementation and docs for this spike live on
-  `cursor/spike-guide-ingest-agent-context-17f4` until T06 go/no-go — **do not merge to `main`**
-- **Guide branch:** `jmjava/guide` → `ingest-to-hub` (git incremental ingest + operator purge API)
-- **PR:** #24 (draft)
+- **Branch policy:** T06 recorded as **provisional go** (2026-08-01) — land via integration
+  PR #56 for field confirmation; Guide runtime still pins
+  `jmjava/guide` `cursor/spike-spdd-dice-projection-17f4` until Guide #2 merges.
+- **Guide branch:** `jmjava/guide` → `cursor/spike-spdd-dice-projection-17f4` (NamedEntity + neo4j profiles)
+- **PR:** #24 (spike) · #56 (integration → `main` for field dogfood)
 
 ## Domain Keywords
 
@@ -140,11 +141,16 @@ ledger stub filled by human.
 
 ## Recommendation
 
-Proceed on the spike branch through the SPDD operations in order:
+### T06 — Provisional go (field confirmation)
 
-1. Complete T01 ingest + MCP spot-checks (exploration log)
-2. Run T05 A/B on fixture with ledger stub (mode B uses menke-fixture)
-3. T06 go/no-go before any merge to `main`
+**Decision (2026-08-01): provisional GO.** Ship optional Guide DICE backend wiring to
+`main` (integration PR #56) so operators can confirm retrieval quality live and iterate.
+Markdown-first remains the default when Guide is absent (`CONTEXT_BACKEND=files`).
 
-**Next command:** `/sdlc-spdd-plan` is already satisfied (canvas exists). Continue with
-T01 validation locally, then `/sdlc-spdd-code` for T07 when ready.
+| Keep if field confirms | Rollback / no-go if field rejects |
+|------------------------|-----------------------------------|
+| Runtime-resolved `guide-dice` + `spdd_*` tools improve context vs files alone | Strip command Context Backend / `--with-guide` seams; keep console as experimental ops only |
+| Ops console + projection/ingest stay useful dogfood | Leave Guide on spike branch; do not promote Guide #2 |
+
+**Next:** dogfood on real Work IDs with Guide up (`./scripts/sdlc.sh console` + embabel-dev MCP);
+update this section with keep/rollback after sessions.
