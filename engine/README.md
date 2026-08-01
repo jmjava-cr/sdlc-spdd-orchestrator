@@ -40,6 +40,7 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 ./scripts/sdlc.sh local promote --type feature --name "Documented title"
 ./scripts/sdlc.sh db rebuild
 ./scripts/sdlc.sh db query --search "orchestration"
+./scripts/sdlc.sh db lookup --work-id FEAT-001-example --markdown
 ./scripts/sdlc.sh commit-message --hint "summarize current changes"
 ```
 

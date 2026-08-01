@@ -280,8 +280,43 @@ resolved_includes() {
   grep -Fxq "${needle}" <<< "${resolved_paths_raw}"
 }
 
+# Soft-fail Local SQLite Index lookup for the active Work ID (FEAT-007).
+# Never fails session start when the Python engine / index is unavailable.
+sqlite_section_md=""
+sqlite_lookup_loaded=0
+if [[ -n "${WORK_ID}" ]]; then
+  _run_db_lookup() {
+    local out=""
+    if [[ -x "${TARGET}/scripts/sdlc-spdd/sdlc.sh" ]]; then
+      out="$(
+        SDLC_ENGINE=python SDLC_ROOT="${TARGET}" \
+          "${TARGET}/scripts/sdlc-spdd/sdlc.sh" db lookup \
+          --work-id "${WORK_ID}" \
+          --markdown 2>/dev/null || true
+      )"
+    fi
+    if [[ -z "${out}" ]] && python3 -c 'import sdlc_engine' 2>/dev/null; then
+      out="$(
+        python3 -m sdlc_engine --root "${TARGET}" db lookup \
+          --work-id "${WORK_ID}" \
+          --markdown 2>/dev/null || true
+      )"
+    fi
+    printf '%s' "${out}"
+  }
+  sqlite_section_md="$(_run_db_lookup)"
+  if [[ -n "${sqlite_section_md}" ]] && grep -Fq 'Local SQLite Index' <<<"${sqlite_section_md}"; then
+    sqlite_lookup_loaded=1
+  else
+    sqlite_section_md=""
+  fi
+fi
+
 resume_prompt="For ${WORK_ID:-<WORK-ID>}, read @agent-context/sessions/current-session.md first."
 resume_prompt+=$'\n\n'"Load only the files listed under **Resolved Context** in that brief for the ${PHASE} phase (SDLC Agents progressive disclosure)."
+if [[ "${sqlite_lookup_loaded}" -eq 1 ]]; then
+  resume_prompt+=$'\n'"Also treat **Local SQLite Index (query cache)** in that brief as loaded lookup context for Work ID ${WORK_ID} (regenerable cache; prefer canvas/requirement files if they disagree)."
+fi
 if [[ -n "${WORK_ID}" && ( "${PHASE}" == "code" || "${PHASE}" == "review" || "${PHASE}" == "architect" || "${PHASE}" == "api-test" || "${PHASE}" == "retro" || "${PHASE}" == "sync" ) ]]; then
   if ! resolved_includes "spdd/canvas/${WORK_ID}.md"; then
     resume_prompt+=$'\n'"Also read @spdd/canvas/${WORK_ID}.md for this Work ID."
@@ -385,6 +420,8 @@ Refresh after adding extensions, code areas, or `#SkillName` skills:
 
     ./scripts/sdlc-spdd/resolve-agent-context.sh --target . --phase ${PHASE}${WORK_ID:+ --work-id ${WORK_ID}}
     ./scripts/sdlc-spdd/resolve-agent-context.sh --target . --phase ${PHASE} --text "#TDD #java"
+
+$(if [[ "${sqlite_lookup_loaded}" -eq 1 ]]; then printf '%s\n' "${sqlite_section_md}"; fi)
 
 ## Git Status
 

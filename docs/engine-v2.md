@@ -137,6 +137,7 @@ Zero-install query cache rebuilt from git artifacts into `.sdlc/index.sqlite`
 ```bash
 ./scripts/sdlc.sh db rebuild
 ./scripts/sdlc.sh db query --search "orchestration"
+./scripts/sdlc.sh db lookup --work-id FEAT-001-example --markdown
 ./scripts/sdlc.sh db export --format json -o /tmp/sdlc-index.json
 ```
 

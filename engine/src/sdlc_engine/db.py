@@ -383,6 +383,132 @@ class LocalIndex:
         if not self.db_path.is_file():
             self.rebuild()
 
+    LOOKUP_COLUMNS = (
+        "work_id",
+        "title",
+        "registry_status",
+        "registry_owner",
+        "registry_phase",
+        "jira_key",
+        "canvas_status",
+        "final_status",
+        "has_canvas",
+        "has_requirement",
+        "has_feature",
+        "canvas_path",
+        "requirement_path",
+        "feature_path",
+    )
+
+    def lookup(
+        self,
+        work_id: str,
+        *,
+        search: str = "",
+        search_limit: int = 5,
+        rebuild_if_missing: bool = True,
+    ) -> dict[str, Any]:
+        """Machine-readable Work ID snapshot for session briefs.
+
+        Returns a dict with db_path, work_item (or null), related (optional search
+        hits), and rebuilt flag. Never raises for missing rows.
+        """
+        rebuilt = False
+        if rebuild_if_missing and not self.db_path.is_file():
+            self.rebuild()
+            rebuilt = True
+        elif not self.db_path.is_file():
+            return {
+                "db_path": str(self.db_path),
+                "rebuilt": False,
+                "available": False,
+                "work_id": work_id,
+                "work_item": None,
+                "related": [],
+                "error": "SQLite index missing",
+            }
+
+        cols = ", ".join(self.LOOKUP_COLUMNS)
+        rows = self.query_sql(
+            f"SELECT {cols} FROM work_items WHERE work_id = ?",
+            (work_id,),
+        )
+        related: list[dict[str, Any]] = []
+        if search.strip():
+            hits = self.find(search=search.strip(), limit=max(1, min(search_limit, 20)))
+            related = [
+                {k: h.get(k) for k in self.LOOKUP_COLUMNS if k in h}
+                for h in hits
+                if h.get("work_id") != work_id
+            ][:search_limit]
+        return {
+            "db_path": str(self.db_path),
+            "rebuilt": rebuilt,
+            "available": True,
+            "work_id": work_id,
+            "work_item": rows[0] if rows else None,
+            "related": related,
+        }
+
+    def lookup_markdown(
+        self,
+        work_id: str,
+        *,
+        search: str = "",
+        search_limit: int = 5,
+    ) -> str:
+        """Markdown block for embedding into a session brief."""
+        data = self.lookup(work_id, search=search, search_limit=search_limit)
+        lines = [
+            "## Local SQLite Index (query cache)",
+            "",
+            f"- Index path: `{data.get('db_path', '')}`",
+            f"- Work ID lookup: `{work_id}`",
+        ]
+        if data.get("rebuilt"):
+            lines.append("- Note: index was rebuilt because it was missing.")
+        if not data.get("available"):
+            lines.append(f"- Status: unavailable ({data.get('error', 'unknown')})")
+            lines.append("- Git artifacts remain the source of truth.")
+            lines.append("")
+            return "\n".join(lines)
+
+        item = data.get("work_item")
+        if not item:
+            lines.append("- Status: no `work_items` row for this Work ID (run `db rebuild`).")
+            lines.append("- Git artifacts remain the source of truth.")
+            lines.append("")
+            return "\n".join(lines)
+
+        lines.append("- Status: loaded into this brief for progressive disclosure.")
+        lines.append("")
+        lines.append("| Field | Value |")
+        lines.append("|-------|-------|")
+        for key in self.LOOKUP_COLUMNS:
+            val = item.get(key, "")
+            if val is None or val == "":
+                continue
+            # Keep table cells single-line (canvas Final Status can be multi-line).
+            cell = re.sub(r"\s+", " ", str(val)).strip().replace("|", "\\|")
+            if not cell:
+                continue
+            lines.append(f"| {key} | {cell} |")
+        related = data.get("related") or []
+        if related:
+            lines.append("")
+            lines.append("Related search hits:")
+            for hit in related:
+                wid = hit.get("work_id", "")
+                title = hit.get("title") or ""
+                lines.append(f"- `{wid}` {title}".rstrip())
+        lines.append("")
+        lines.append(
+            "This is a local regenerable cache. Do not treat it as authoritative; "
+            "prefer canvas/requirement/registry files when they disagree."
+        )
+        lines.append("")
+        return "\n".join(lines)
+
     def query_sql(self, sql: str, params: Iterable[Any] = ()) -> list[dict[str, Any]]:
         sql = sql.strip().rstrip(";")
         if not _SELECT_RE.match(sql) or _FORBIDDEN_SQL.search(sql):

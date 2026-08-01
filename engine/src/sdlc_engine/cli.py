@@ -369,6 +369,33 @@ def cmd_db(args: argparse.Namespace) -> int:
         else:
             print(format_rows(rows, cols), end="")
         return 0
+    if action == "lookup":
+        work_id = (args.work_id or "").strip()
+        if not work_id:
+            print("db lookup: --work-id is required", file=sys.stderr)
+            return 2
+        search = args.search or ""
+        if args.markdown:
+            print(
+                idx.lookup_markdown(
+                    work_id,
+                    search=search,
+                    search_limit=args.limit,
+                ),
+                end="",
+            )
+        else:
+            print(
+                json.dumps(
+                    idx.lookup(
+                        work_id,
+                        search=search,
+                        search_limit=args.limit,
+                    ),
+                    indent=2,
+                )
+            )
+        return 0
     if action == "export":
         out = Path(args.output) if args.output else None
         if args.format == "sql":
@@ -680,6 +707,25 @@ def build_parser() -> argparse.ArgumentParser:
     dq.add_argument("--columns", help="Comma-separated columns for table output")
     dq.add_argument("--json", action="store_true")
     dq.set_defaults(func=cmd_db)
+
+    dl = db_sub.add_parser(
+        "lookup",
+        help="Machine-readable Work ID snapshot for session briefs (JSON or markdown)",
+    )
+    dl.add_argument("--work-id", required=True, help="Work ID to look up")
+    dl.add_argument("--search", default="", help="Optional related FTS/LIKE hits")
+    dl.add_argument("--limit", type=int, default=5, help="Max related search hits (default: 5)")
+    dl.add_argument(
+        "--markdown",
+        action="store_true",
+        help="Emit markdown section for embedding into a session brief",
+    )
+    dl.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit JSON (default when --markdown is not set)",
+    )
+    dl.set_defaults(func=cmd_db)
 
     de = db_sub.add_parser("export", help="Export index as JSON or SQL dump (not for live multi-user sync)")
     de.add_argument("--format", choices=["json", "sql"], default="json")

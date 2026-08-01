@@ -1,0 +1,12 @@
+{
+  "name": "sdlc-spdd-live-cursor-agent",
+  "private": true,
+  "type": "module",
+  "description": "Local-only: run real Cursor agents against seeded consumer slash-command files",
+  "scripts": {
+    "run-matrix": "node run-slash-matrix.mjs"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.0"
+  }
+}

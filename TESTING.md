@@ -28,6 +28,7 @@ In orchestrator repo:
 - `validate-command-spec-generation` (`.github/workflows/validate-command-spec-generation.yml`)
 - `test-integration-merge` (`.github/workflows/test-integration-merge.yml`)
 - `test-sdlc-engine` (`.github/workflows/test-sdlc-engine.yml`) — Python v2 engine
+- `test-live-consumer` (`.github/workflows/test-live-consumer.yml`) — seed/flush consumer matrix; Cursor SDK jobs when `CURSOR_API_KEY` is set
 - `test-session-memory` (`.github/workflows/test-session-memory.yml`)
 - `test-index-spdd-analysis` (`.github/workflows/test-index-spdd-analysis.yml`)
 - `test-resolve-agent-context` (`.github/workflows/test-resolve-agent-context.yml`)
@@ -263,6 +264,37 @@ Use one canonical Work ID and one operation.
 
        ./scripts/sdlc-spdd/capture-session-memory.sh --target . --work-id <WORK-ID> --phase code --summary "<summary>" --validation "<tests>" --milestone milestone-1.md --roadmap-note "<progress>" --next "<next command>"
        ./scripts/sdlc-spdd/verify-agent-command-effects.sh --target . --work-id <WORK-ID> --step capture --milestone milestone-1.md --require-roadmap
+
+### Live consumer matrix (seed / flush)
+
+Idempotent Cursor-only consumer install exercised against a throwaway git repo.
+
+CI workflow: `.github/workflows/test-live-consumer.yml`
+
+| Job | Needs secret? | What |
+|-----|---------------|------|
+| `test-live-consumer-shell` | No | `./tests/test-live-consumer-matrix.sh` (incl. SQLite brief scenario 09) |
+| `test-live-consumer-cursor-sdk` | `CURSOR_API_KEY` | Persistence test + slash subset; **skipped** if secret unset |
+
+Add the key under **GitHub → Settings → Secrets and variables → Actions** as
+`CURSOR_API_KEY` (same Integrations key as local). Cursor Dashboard “runtime /
+Cloud Agents” secrets do **not** inject into GitHub Actions.
+
+```bash
+./tests/test-live-consumer-matrix.sh
+
+# Keep a reopenable tree for manual IDE slash commands:
+LIVE_CONSUMER_KEEP=1 ./tests/live-consumer/run-matrix.sh
+# then open /tmp/sdlc-spdd-live and follow tests/live-consumer/CURSOR-SLASH-LIVE.md
+
+# REAL Cursor agents (local or CI with secret):
+export CURSOR_API_KEY=...   # https://cursor.com/dashboard/integrations
+./tests/live-consumer/run-cursor-agent-matrix.sh
+./tests/live-consumer/run-cursor-persistence-test.sh
+```
+
+Details: [tests/live-consumer/README.md](tests/live-consumer/README.md) and
+[tests/live-consumer/cursor-agent/README.md](tests/live-consumer/cursor-agent/README.md).
 
 ## Release Confidence Contract
 

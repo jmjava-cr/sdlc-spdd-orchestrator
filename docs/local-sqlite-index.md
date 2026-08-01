@@ -31,11 +31,28 @@ Always routed to the Python engine (even when `SDLC_ENGINE=shell`):
 ./scripts/sdlc.sh db query --search "orchestration"
 ./scripts/sdlc.sh db query "SELECT work_id, jira_key FROM work_items WHERE has_canvas = 1"
 
+./scripts/sdlc.sh db lookup --work-id FEAT-001-hello-live --json
+./scripts/sdlc.sh db lookup --work-id FEAT-001-hello-live --markdown
+
 ./scripts/sdlc.sh db export --format json -o /tmp/sdlc-index.json
 ./scripts/sdlc.sh db export --format sql  -o /tmp/sdlc-index.sql
 ```
 
 `db query` with raw SQL is **read-only** (single `SELECT` only).
+
+## Session brief embedding
+
+`start-agent-session.sh` soft-loads a **Local SQLite Index (query cache)** section into
+the session brief when the Python engine is importable and a `--work-id` is set:
+
+1. Rebuilds `.sdlc/index.sqlite` if missing (`db lookup` → `ensure`/`rebuild`).
+2. Embeds `db lookup --work-id … --markdown` under the brief.
+3. Mentions that section in the **Resume Prompt** so future agents treat it as
+   loaded lookup context.
+
+If the engine is unavailable, the section is omitted and session start still
+succeeds. Markdown indexes (`context-index.md`, etc.) remain the primary
+progressive-disclosure path; SQLite is an additional Work ID snapshot.
 
 ## Schema (v1)
 

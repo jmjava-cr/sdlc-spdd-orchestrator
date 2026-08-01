@@ -121,6 +121,57 @@ def test_export_json_and_cli(tmp_path: Path, monkeypatch) -> None:
     )
 
 
+def test_lookup_json_and_markdown(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("SDLC_USER", "db-tester")
+    wid = "FEAT-704-lookup"
+    _seed(tmp_path, wid, jira="ORCH-74")
+    TeamRegistry(Project(tmp_path)).claim(wid)
+    idx = LocalIndex(Project(tmp_path))
+    idx.rebuild()
+
+    data = idx.lookup(wid)
+    assert data["available"] is True
+    assert data["work_item"] is not None
+    assert data["work_item"]["work_id"] == wid
+    assert data["work_item"]["jira_key"] == "ORCH-74"
+    assert data["work_item"]["has_canvas"] == 1
+    assert data["work_item"]["registry_status"] == "active"
+
+    md = idx.lookup_markdown(wid)
+    assert "## Local SQLite Index (query cache)" in md
+    assert wid in md
+    assert "has_canvas" in md
+    assert "registry_status" in md
+
+    assert main(["--root", str(tmp_path), "db", "lookup", "--work-id", wid, "--json"]) == 0
+    assert (
+        main(
+            [
+                "--root",
+                str(tmp_path),
+                "db",
+                "lookup",
+                "--work-id",
+                wid,
+                "--markdown",
+            ]
+        )
+        == 0
+    )
+
+
+def test_lookup_rebuilds_when_missing(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("SDLC_USER", "db-tester")
+    wid = "FEAT-705-lookup-rebuild"
+    _seed(tmp_path, wid)
+    idx = LocalIndex(Project(tmp_path))
+    assert not idx.db_path.is_file()
+    data = idx.lookup(wid)
+    assert data["rebuilt"] is True
+    assert data["available"] is True
+    assert idx.db_path.is_file()
+
+
 def test_local_sessions_indexed(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("SDLC_USER", "db-tester")
     from sdlc_engine.local_sessions import LocalSessionService

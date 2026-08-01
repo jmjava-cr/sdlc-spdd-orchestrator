@@ -1,0 +1,86 @@
+name: Test Live Consumer Matrix
+
+on:
+  pull_request:
+    paths:
+      - 'tests/live-consumer/**'
+      - 'tests/test-live-consumer-matrix.sh'
+      - 'scripts/start-agent-session.sh'
+      - 'scripts/sdlc.sh'
+      - 'scripts/setup-agent-prompts.sh'
+      - 'scripts/init-project.sh'
+      - 'engine/**'
+      - 'templates/**'
+      - '.github/workflows/test-live-consumer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tests/live-consumer/**'
+      - 'tests/test-live-consumer-matrix.sh'
+      - 'scripts/start-agent-session.sh'
+      - 'scripts/sdlc.sh'
+      - 'scripts/setup-agent-prompts.sh'
+      - 'scripts/init-project.sh'
+      - 'engine/**'
+      - 'templates/**'
+      - '.github/workflows/test-live-consumer.yml'
+
+jobs:
+  # Deterministic seed/flush consumer (no Cursor API key).
+  test-live-consumer-shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python engine (for db lookup / scenario 09)
+        run: python3 -m pip install -e './engine[dev]'
+
+      - name: Syntax-check live-consumer scripts
+        run: |
+          bash -n tests/test-live-consumer-matrix.sh
+          bash -n tests/live-consumer/*.sh
+          bash -n tests/live-consumer/scenarios/*.sh
+
+      - name: Run live consumer shell matrix
+        run: ./tests/test-live-consumer-matrix.sh
+
+  # Real Cursor SDK agents — requires repo secret CURSOR_API_KEY.
+  # Skips cleanly when the secret is absent (forks / local mirrors).
+  test-live-consumer-cursor-sdk:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.CURSOR_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/live-consumer/cursor-agent/package-lock.json
+
+      - name: Install Python engine
+        run: python3 -m pip install -e './engine[dev]'
+
+      - name: Install Cursor SDK deps
+        run: npm ci --no-fund --no-audit
+        working-directory: tests/live-consumer/cursor-agent
+
+      - name: Cursor SDK persistence + SQLite context (phase A–D)
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          LIVE_CURSOR_MODEL: composer-2.5
+        run: ./tests/live-consumer/run-cursor-persistence-test.sh
+
+      - name: Cursor SDK slash subset (init, claim, analysis, plan)
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          LIVE_CURSOR_MODEL: composer-2.5
+        run: ./tests/live-consumer/run-cursor-agent-matrix.sh --only init,claim,analysis,plan
