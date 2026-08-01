@@ -66,6 +66,7 @@ case "${cmd}" in
   db-status) _py_only_args=("db" "status" "$@") ;;
   db-path) _py_only_args=("db" "path" "$@") ;;
   db-query) _py_only_args=("db" "query" "$@") ;;
+  db-lookup) _py_only_args=("db" "lookup" "$@") ;;
   db-export) _py_only_args=("db" "export" "$@") ;;
   commit-message)
     _py_only_args=("commit-message" "$@")
