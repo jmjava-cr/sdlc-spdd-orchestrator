@@ -296,6 +296,17 @@ def cmd_issues(args: argparse.Namespace) -> int:
             )
         )
         return 0
+    if action == "download-adf":
+        issue_key = getattr(args, "issue", None) or args.work_id
+        adf_file = getattr(args, "adf_file", None)
+        print(
+            svc.download_adf(
+                issue_key,
+                adf_path=Path(adf_file) if adf_file else None,
+                apply=args.apply,
+            )
+        )
+        return 0
     return 2
 
 
@@ -429,6 +440,23 @@ def cmd_local(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_viewer(args: argparse.Namespace) -> int:
+    """Launch the ADF WYSIWYG viewer (binds localhost by default)."""
+    try:
+        from .viewer.app import run_viewer
+    except ImportError as exc:
+        print(
+            "viewer requires Flask. Install with: python3 -m pip install -e './engine[viewer]'",
+            file=sys.stderr,
+        )
+        print(str(exc), file=sys.stderr)
+        return 1
+    project = _project(args)
+    host = "0.0.0.0" if getattr(args, "lan", False) else args.host
+    run_viewer(project.root, host=host, port=args.port, debug=bool(args.debug))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdlc-engine",
@@ -501,12 +529,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     iss = sub.add_parser(
         "issues",
-        help="Draft/push/pull/upload-adf for Jira or GitHub (explicit CLI; never auto-sync)",
+        help=(
+            "Draft/push/pull/upload-adf/download-adf for Jira or GitHub "
+            "(explicit CLI; never auto-sync)"
+        ),
     )
-    iss.add_argument("issues_cmd", choices=["draft", "push", "pull", "upload-adf"])
+    iss.add_argument(
+        "issues_cmd",
+        choices=["draft", "push", "pull", "upload-adf", "download-adf"],
+    )
     iss.add_argument(
         "work_id",
-        help="Work ID for draft/push/pull, or Jira issue key for upload-adf",
+        help=(
+            "Work ID for draft/push/pull, or Jira issue key for "
+            "upload-adf/download-adf"
+        ),
     )
     iss.add_argument(
         "--system",
@@ -533,16 +570,22 @@ def build_parser() -> argparse.ArgumentParser:
     iss.add_argument(
         "--file",
         dest="adf_file",
-        help="For upload-adf: path to ADF JSON file",
+        help="For upload-adf/download-adf: path to ADF JSON file",
     )
     iss.add_argument(
         "--issue",
-        help="For upload-adf: Jira issue key (defaults to work_id positional)",
+        help=(
+            "For upload-adf/download-adf: Jira issue key "
+            "(defaults to work_id positional)"
+        ),
     )
     iss.add_argument(
         "--apply",
         action="store_true",
-        help="Actually create/update remote issue or write pulled fields (default is dry-run)",
+        help=(
+            "Actually create/update remote issue, write pulled milestone fields, "
+            "or overwrite local ADF on download-adf (default is dry-run)"
+        ),
     )
     iss.set_defaults(func=cmd_issues)
 
@@ -669,6 +712,20 @@ def build_parser() -> argparse.ArgumentParser:
     shell.set_defaults(func=cmd_shell)
 
     sub.add_parser("version", help="Print version").set_defaults(func=cmd_version)
+
+    vw = sub.add_parser(
+        "viewer",
+        help="ADF WYSIWYG ticket viewer (Flask; requires optional [viewer] extra)",
+    )
+    vw.add_argument("--host", default="127.0.0.1", help="Bind address (default 127.0.0.1)")
+    vw.add_argument("--port", type=int, default=5050)
+    vw.add_argument("--debug", action="store_true")
+    vw.add_argument(
+        "--lan",
+        action="store_true",
+        help="Bind 0.0.0.0 for LAN access (opt-in)",
+    )
+    vw.set_defaults(func=cmd_viewer)
     return p
 
 

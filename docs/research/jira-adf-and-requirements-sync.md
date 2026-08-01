@@ -316,6 +316,7 @@ Default CLI posture stays fail-closed: `push` without `--apply` is dry-run only.
 | Requirements → REASONS canvas sync | Manual / separate | Explicit engine CLI op (not automatic) |
 | Slash command prepares CLI only | N/A | New command: preview + print invocation; never `--apply` |
 | Continuous / hook-based Jira sync | Absent (keep it that way) | **Do not add** |
+| ADF WYSIWYG viewer (checked-in `adf/`) | Yes — see [`docs/adf-viewer.md`](../adf-viewer.md) | Keep; sync prepare/apply only |
 | ADF schema validation in CI | No | Validate fixtures against official schema |
 
 Existing code entry points:

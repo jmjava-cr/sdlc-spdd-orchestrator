@@ -412,6 +412,121 @@ New body with **ADF**.
     assert seen["auth"].startswith("Basic ")
 
 
+def _sample_adf(text: str = "Hello ADF") -> dict:
+    return {
+        "type": "doc",
+        "version": 1,
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": text}],
+            }
+        ],
+    }
+
+
+def test_download_adf_dry_run_and_apply(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+    remote = _sample_adf("Remote hand edit")
+    local_path = tmp_path / "adf" / "ORCH-88.adf.json"
+    local_path.parent.mkdir(parents=True)
+    local_path.write_text(json.dumps(_sample_adf("Local version"), indent=2), encoding="utf-8")
+
+    class _Resp:
+        def read(self) -> bytes:
+            return json.dumps(
+                {"fields": {"summary": "S", "description": remote}}
+            ).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return None
+
+    def fake_urlopen(req, timeout=30):  # noqa: ANN001
+        assert req.get_method() == "GET"
+        assert "ORCH-88" in req.full_url
+        return _Resp()
+
+    svc = IssueSyncService(Project(tmp_path), urlopen=fake_urlopen)
+    dry = svc.download_adf("ORCH-88", apply=False)
+    assert "[dry-run]" in dry
+    assert "differ" in dry
+    assert local_path.read_text(encoding="utf-8").find("Local version") > 0
+
+    out = svc.download_adf("ORCH-88", apply=True)
+    assert "Wrote" in out
+    written = json.loads(local_path.read_text(encoding="utf-8"))
+    assert written["content"][0]["content"][0]["text"] == "Remote hand edit"
+
+
+def test_download_adf_identical_and_missing_local(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+    remote = _sample_adf("Same")
+
+    class _Resp:
+        def read(self) -> bytes:
+            return json.dumps({"fields": {"description": remote}}).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return None
+
+    svc = IssueSyncService(Project(tmp_path), urlopen=lambda req, timeout=30: _Resp())
+    missing = svc.download_adf("ORCH-1", apply=False)
+    assert "remote-only" in missing
+
+    path = tmp_path / "adf" / "ORCH-1.adf.json"
+    path.parent.mkdir(parents=True)
+    path.write_text(json.dumps(remote, indent=2) + "\n", encoding="utf-8")
+    same = svc.download_adf("ORCH-1", apply=False)
+    assert "identical" in same
+
+
+def test_download_adf_rejects_non_adf_description(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+
+    class _Resp:
+        def read(self) -> bytes:
+            return json.dumps(
+                {"fields": {"description": "wiki *markup* string"}}
+            ).encode()
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return None
+
+    svc = IssueSyncService(Project(tmp_path), urlopen=lambda req, timeout=30: _Resp())
+    try:
+        svc.download_adf("ORCH-2", apply=False)
+        raise AssertionError("expected RuntimeError")
+    except RuntimeError as exc:
+        assert "not ADF" in str(exc)
+
+
+def test_download_adf_invalid_key(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
+    monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")
+    monkeypatch.setenv("JIRA_API_TOKEN", "token")
+    svc = IssueSyncService(Project(tmp_path))
+    try:
+        svc.download_adf("not-a-key", apply=False)
+        raise AssertionError("expected ValueError")
+    except ValueError as exc:
+        assert "invalid Jira issue key" in str(exc)
+
+
 def test_upload_adf_raw_vs_wiki_shim(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("JIRA_BASE_URL", "https://example.atlassian.net")
     monkeypatch.setenv("JIRA_EMAIL", "bot@example.com")

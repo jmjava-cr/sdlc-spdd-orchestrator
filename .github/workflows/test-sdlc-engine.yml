@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - 'engine/**'
+      - 'adf/**'
       - 'scripts/sdlc.sh'
       - '.github/workflows/test-sdlc-engine.yml'
   push:
     branches: [main]
     paths:
       - 'engine/**'
+      - 'adf/**'
       - 'scripts/sdlc.sh'
       - '.github/workflows/test-sdlc-engine.yml'
 
@@ -23,16 +25,27 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install engine + pytest
-        run: python3 -m pip install -e './engine[dev]'
+      - name: Install engine + pytest + viewer
+        run: python3 -m pip install -e './engine[dev,viewer]'
 
-      - name: Run pytest (unit + mocked issue sync)
+      - name: Run pytest (unit + mocked issue sync + viewer)
         run: pytest -q engine/tests
+
+      - name: Install Playwright viewer e2e extras + Chromium
+        run: |
+          python3 -m pip install -e './engine[dev,viewer-e2e]'
+          python3 -m playwright install --with-deps chromium
+
+      - name: Run ADF viewer Playwright GUI tests
+        env:
+          SDLC_VIEWER_E2E: "1"
+        run: pytest -q engine/tests/test_viewer_playwright.py -m viewer_e2e
 
       - name: CLI smoke via sdlc.sh python engine
         run: |
           SDLC_ENGINE=python ./scripts/sdlc.sh version
           SDLC_ENGINE=python ./scripts/sdlc.sh next
+          SDLC_ENGINE=python ./scripts/sdlc.sh viewer --help
 
       - name: Shim regression harness
         run: ./tests/test-sdlc-engine-shim.sh

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import difflib
 import json
 import os
 import shutil
@@ -17,6 +18,7 @@ from .jira_format import (
     adf_to_markdown,
     adf_to_wiki,
     build_jira_markdown,
+    load_adf_document,
     load_adf_file,
     markdown_to_adf,
     markdown_to_wiki,
@@ -489,6 +491,134 @@ class IssueSyncService:
         return (
             f"Updated Jira issue {issue_key} description "
             f"[api=v{api_ver} description={fmt} auth={self._jira_auth_mode()} http={status}]"
+        )
+
+    def _default_adf_path(self, issue_key: str) -> Path:
+        return self.project.root / "adf" / f"{issue_key}.adf.json"
+
+    def _resolve_adf_path(self, issue_key: str, adf_path: Path | None) -> Path:
+        if adf_path is None:
+            return self._default_adf_path(issue_key)
+        path = Path(adf_path)
+        if not path.is_absolute():
+            path = self.project.root / path
+        return path
+
+    @staticmethod
+    def _adf_pretty(doc: dict, *, sort_keys: bool = False) -> str:
+        return json.dumps(doc, indent=2, ensure_ascii=False, sort_keys=sort_keys) + "\n"
+
+    def _adf_diff_report(self, local: dict | None, remote: dict) -> str:
+        remote_pretty = self._adf_pretty(remote, sort_keys=True)
+        if local is None:
+            return (
+                "local: (missing)\n"
+                "remote vs local: remote-only (no local file)\n"
+                "--- markdown preview (remote) ---\n"
+                + adf_to_markdown(remote).rstrip()
+                + "\n"
+            )
+        local_pretty = self._adf_pretty(local, sort_keys=True)
+        equal = json.loads(local_pretty) == json.loads(remote_pretty)
+        if equal:
+            return "local: present\nremote vs local: identical (normalized JSON)\n"
+        local_md = adf_to_markdown(local).splitlines(keepends=True)
+        remote_md = adf_to_markdown(remote).splitlines(keepends=True)
+        md_diff = "".join(
+            difflib.unified_diff(
+                local_md,
+                remote_md,
+                fromfile="local.md",
+                tofile="remote.md",
+                n=3,
+            )
+        )
+        json_diff = "".join(
+            difflib.unified_diff(
+                local_pretty.splitlines(keepends=True),
+                remote_pretty.splitlines(keepends=True),
+                fromfile="local.adf.json",
+                tofile="remote.adf.json",
+                n=2,
+            )
+        )
+        # Prefer a short markdown diff; fall back to JSON if markdown is identical.
+        body = md_diff if md_diff.strip() else json_diff
+        if len(body) > 4000:
+            body = body[:4000] + "\n… (diff truncated)\n"
+        return (
+            "local: present\n"
+            "remote vs local: differ\n"
+            "--- diff ---\n"
+            + body
+        )
+
+    def fetch_issue_adf(self, issue_key: str) -> dict:
+        """GET issue description ADF from Jira Cloud (API v3 by default)."""
+        if not _JIRA_KEY_RE.match(issue_key):
+            raise ValueError(f"invalid Jira issue key: {issue_key}")
+        base = self._jira_base_url()
+        token = os.environ.get("JIRA_API_TOKEN", "")
+        if not base or not token:
+            raise RuntimeError(
+                "download-adf requires JIRA_BASE_URL (or JIRA_URL) and JIRA_API_TOKEN"
+            )
+        if self._jira_auth_mode() == "basic" and not os.environ.get("JIRA_EMAIL"):
+            raise RuntimeError("Jira basic auth requires JIRA_EMAIL")
+        api_ver = self._jira_api_version(base)
+        _status, data = self._jira_http(
+            "GET",
+            f"{base}/rest/api/{api_ver}/issue/{issue_key}?fields=summary,description",
+        )
+        if not isinstance(data, dict):
+            raise RuntimeError("Jira download-adf returned unexpected payload")
+        fields = data.get("fields") or {}
+        desc = fields.get("description")
+        if not isinstance(desc, dict):
+            raise RuntimeError(
+                f"Jira {issue_key} description is not ADF JSON "
+                f"(got {type(desc).__name__}). Use Cloud REST API v3 "
+                "(JIRA_API_VERSION=3); wiki/string descriptions cannot be "
+                "written to adf/<KEY>.adf.json."
+            )
+        return load_adf_document(desc)
+
+    def download_adf(
+        self,
+        issue_key: str,
+        *,
+        adf_path: Path | None = None,
+        apply: bool = False,
+    ) -> str:
+        """Pull remote Jira description ADF into a local adf/<KEY>.adf.json file.
+
+        Dry-run by default (diff only). Pass ``apply=True`` to overwrite the
+        local file. Explicit CLI only — never automatic.
+        """
+        if not _JIRA_KEY_RE.match(issue_key):
+            raise ValueError(f"invalid Jira issue key: {issue_key}")
+        path = self._resolve_adf_path(issue_key, adf_path)
+        remote = self.fetch_issue_adf(issue_key)
+        local: dict | None = None
+        if path.is_file():
+            local = load_adf_file(path)
+        diff = self._adf_diff_report(local, remote)
+        base = self._jira_base_url()
+        if not apply:
+            return (
+                f"[dry-run] would write {path}\n"
+                f"issue: {issue_key}\n"
+                f"url: {base}/browse/{issue_key}\n"
+                f"{diff}"
+                "Re-run with --apply to overwrite the local ADF file "
+                "(explicit; no automatic sync). Use git to roll back."
+            )
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(self._adf_pretty(remote), encoding="utf-8")
+        return (
+            f"Wrote {path} from Jira {issue_key} "
+            f"({base}/browse/{issue_key})\n"
+            f"{diff}"
         )
 
     def pull(self, work_id: str, system: str, *, apply: bool = False) -> str:
