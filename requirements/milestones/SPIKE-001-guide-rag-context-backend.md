@@ -57,12 +57,25 @@ before committing. The output is a **decision**, not production code.
 
 - No production integration, no required dependency, no changes to the default
   markdown-first path.
+- **No merge to `main`** until T06 go/no-go. All spike work on `cursor/spike-*` branches.
+
+## Branch policy
+
+All implementation, tests, and docs for this spike live on dedicated spike branches
+(for example `cursor/spike-guide-ingest-agent-context-17f4`). The markdown-first
+workflow on `main` must not gain Guide dependencies, installer changes, or command
+template changes during the experiment.
 
 ## Next Step
 
-When its turn comes (make it fast):
+Active spike branch (draft PR #24):
 
-    /sdlc-spdd-architect @spdd/canvas/SPIKE-001-guide-rag-context-backend.md
+    /sdlc-spdd-analysis @requirements/milestones/SPIKE-001-guide-rag-context-backend.md
+    # → spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md
+
+Integration branch `integrate/console-and-spike-001` combines SPIKE-001 with the
+experimental ops console (`./scripts/sdlc.sh console`). Continue T06 go/no-go;
+operator dogfood prefers the console over ad-hoc shell-only Guide babysitting.
 
 ## Jira
 
@@ -81,4 +94,4 @@ Optional — use when tracking is GitHub Issues instead of/in addition to Jira.
 - Number: TBD
 - Title: 
 - Labels: 
-- URL: 
+- URL:

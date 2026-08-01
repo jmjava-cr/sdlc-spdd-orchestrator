@@ -4,10 +4,10 @@
 
 - Work ID: SPIKE-001-guide-rag-context-backend
 - Work Type: Spike
-- Status: Shelved — blocked on Guide MCP
-- Readiness: Ready For Coding
+- Status: In Progress
+- Readiness: Needs Analysis
 - Created: 2026-06-19
-- Updated: 2026-07-15 (analysis resume; MCP blocked)
+- Updated: 2026-07-05 (SPDD analysis + branch policy; menke-5 scaffold on spike branch)
 - Owner:
 - Target Project: sdlc-spdd-orchestrator (self / dogfood)
 - Stack: Bash + Markdown harness ↔ JVM (Embabel guide) + Neo4j graph + RAG, over MCP (SSE)
@@ -16,7 +16,8 @@
 - Milestone:
 - Delivery stage: make it fast (optimization) — **spike, parked behind FEAT-004/005**
 - Time-box: 1–2 focused sessions
-- Related PR:
+- Branch: `cursor/spike-guide-ingest-agent-context-17f4` — **off `main` until T06 go/no-go**
+- Related PR: #24 (draft)
 
 ## R - Requirements
 
@@ -111,8 +112,10 @@ Design verification against live guide MCP (`:21337`) + Neo4j + Embabel/DICE cor
 engineering, evals, DICE proposition pipeline. `broadenChunk` surfaces Fowler "decision
 memory" passages. Leg 3: `__Entity__` count = 0. Indexes ONLINE (underscore names).
 
-**Not yet in store (expected):** orchestrator `agent-context/` + `spdd/canvas/` — needed
-for Work-ID A/B, not for validating the design direction.
+**Not yet in store (expected until menke-5):** orchestrator `agent-context/` +
+`spdd/canvas/` — needed for Work-ID A/B. Exploration branch
+`cursor/spike-guide-ingest-agent-context-17f4` adds menke-5 profile + runbook; guide
+branch `ingest-to-hub` for git incremental ingest.
 
 ## E - Entities
 
@@ -170,7 +173,11 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 - Confirmational research (done): `spdd/analysis/SPIKE-001-guide-rag-context-backend-research.md`
 - DICE entity schema (draft): `spdd/analysis/SPIKE-001-dice-entity-schema.md`
-- A/B findings note (pending): `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
+- Spike analysis (done): `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
+- T01 exploration log: `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`
+- A/B findings note (pending): extend analysis artifact T06 section
+- Feature workspace (done): `agent-context/features/SPIKE-001-guide-rag-context-backend/`
+- Mock fixture (pending T07): `examples/retrieval-fixture/`, `tests/test-retrieval-fixture-resolver.sh`
 
 ### Files To Modify
 
@@ -184,47 +191,100 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ### T01 - Stand up guide + ingest orchestrator memory (leg 2 — RAG chunks)
 
-- Status: Shelved — blocked on Guide MCP
-- Description: Local guide instance; point `guide.directories` at orchestrator memory; append-ingest; verify store stats.
-- Files: (guide config; no orchestrator changes)
-- Validation: Ingestion summary shows orchestrator memory loaded as chunks
-- Research: menke code + menke-2 reference corpus ingested; orchestrator memory not yet
+- Status: Complete (2026-07-11 — menke-5 append-ingest on :21337, ~18k chunks; MCP
+  `docs_textSearch`/`docs_vectorSearch` return Work ID hits)
+- Description: Local guide instance on branch `ingest-to-hub`; menke-5 profile points
+  `guide.directories` at `agent-context/memory/`, `spdd/canvas/`, `spdd/analysis/`; append-ingest
+  with git incremental; verify MCP spot-checks.
+- Files: `templates/guide-profiles/application-menke-5-orchestrator-context.yml.example`,
+  `scripts/guide/append-orchestrator-context.sh`, `docs/spike-guide-ingest-agent-context.md`,
+  `spdd/analysis/SPIKE-001-guide-ingest-agent-context-exploration.md`
+- Validation: Ingestion summary shows orchestrator memory loaded as chunks; MCP returns Work ID hits
+- Research: menke code + menke-2 reference corpus ingested; menke-5 exploration scaffold on
+  `cursor/spike-guide-ingest-agent-context-17f4`
 
 ### T02 - Design SDLC-SPDD DICE entity schema (Embabel conventions)
 
-- Status: Complete
+- Status: Complete (2026-07-11 — persist/retrieve contract formalized in schema doc; typed
+  Kotlin module deferred to post-spike hardening)
 - Description: Define `NamedEntity` types per Embabel conventions (`id`/`name`/`description`, `@Semantics` relationships, `DataDictionary.fromClasses` or `dataDictionaryFromPackages`). Review against `dice/README.md` and `embabel-agent-rag` `NamedEntity`/`NamedEntityDataRepository` APIs. Finalize draft against one real Work ID.
 - Files: `spdd/analysis/SPIKE-001-dice-entity-schema.md`
 - Validation: Convention alignment table complete; ingest mapping uses `NamedEntityDataRepository`, not proposition pipeline
 
 ### T03 - Implement entity projection ingest (leg 3 — domain graph)
 
-- Status: Not Started
-- Description: Fork loader: parse orchestrator artifacts → populate Neo4j `__Entity__` subgraph; register `Spdd*` for DICE `entityPackages` / `SearchOperations`; optional fork MCP domain-query tool.
-- Files: (guide fork; projection script)
-- Validation: `__Entity__` count > 0; domain query by Work ID returns linked Canvas, Operations, Decision/Pitfall/Pattern
+- Status: Complete (2026-07-11 — hardened + tested on Guide spike branch `bc1f12f`;
+  live load: 9 WorkIds / 9 Canvases / 12 Areas / 21 rels; lesson edges + `allowed-roots`
+  guard + 32 unit tests; runtime-resolved optional backend wired into command packs)
+- Description: Guide spike branch `cursor/spike-spdd-dice-projection-17f4` (base `ingest-to-hub`):
+  `SpddMarkdownProjectionService` parses canvas + context-index → `NamedEntityDataRepository`;
+  operator API `POST /api/v1/data/spdd-projection/load`. **Not** DICE proposition pipeline.
+  Orchestrator helper: `scripts/guide/project-spdd-entities.sh`. Dual-ingest model:
+  `spdd/analysis/SPIKE-001-dual-ingest-model.md`.
+- Files: guide `src/main/kotlin/com/embabel/guide/spdd/*`, `docs/spdd-projection-ingest.md`;
+  orchestrator `scripts/guide/project-spdd-entities.sh`
+- Validation: `__Entity__` count > 0 via `/spdd-projection/stats`; domain query by Work ID (T04 MCP fork)
 
 ### T04 - Connect Cursor to guide MCP + sanity retrieval (all legs)
 
-- Status: Shelved — blocked on Guide MCP
-- Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via fork domain-query tool on projected entities.
-- Files: (Cursor MCP config; fork tool)
+- Status: Complete (2026-07-11 — Cursor client lists all 14 tools incl. `spdd_*`;
+  `spdd_workSubgraph` returns the SPIKE-001 subgraph via typed edges end-to-end)
+- Description: Link guide SSE MCP into Cursor; confirm legs 1–2 on corpus; leg 3 via `spdd_*` domain-query tools on projected entities.
+- Files: guide `SpddDomainTools` / `SpddProjectionConfiguration`; Cursor MCP `embabel-dev` → `http://localhost:21337/sse`
 - Validation: Relevant results for a known Work ID/area via each leg
-- Research: MCP connected; legs 1+2 verified; leg 3 blocked on T02/T03
+- Research: MCP connected; legs 1+2 verified; leg 3 `spdd_workSubgraph` / `spdd_projectionStats` / `spdd_findByLabel` verified via MCP JSON-RPC (2026-07-11)
 
 ### T05 - Compare modes on one real Work ID and record on the ledger
 
-- Status: Not Started
-- Description: Run a session across (a) lexical resolver, (b) embedding-only, (c) DICE hybrid; capture rework/review-result/tokens + auditability.
-- Files: spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md
-- Validation: All modes recorded; metrics comparable
+- Status: Complete (2026-07-11 — mode (a) baseline + mode (b) live MCP on
+  menke-fixture corpus; mode (c) domain-graph spot-check already recorded.
+  Fixture ingest fixed: empty `content.versioned.versions` so FORCE_STARTUP_INGEST
+  does not re-embed Embabel docs; Spring `neo4j.authentication` wired so health
+  no longer connects with AuthTokens.none())
+- Description: Run fixture drill across (a) resolver, (b) embedding MCP; capture metrics in
+  `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`. Scripts automate mode (a) baseline and
+  validate mode (b) MCP URI results.
+- Files: `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md`,
+  `scripts/guide/run-retrieval-ab-fixture.sh`, `scripts/guide/capture-mode-a-baseline.sh`,
+  `tests/fixtures/spike-001-mode-a-baseline.tsv`, `tests/fixtures/spike-001-mcp-results.example.tsv`
+- Validation: `--capture-a` prints 3 cases; `--check-mcp` passes on example results; ledger rows filled
 
 ### T06 - Write go / no-go recommendation
 
-- Status: Not Started
+- Status: Provisional go — field validation (2026-08-01)
 - Description: Summarize evidence + trade-offs; if go, sketch follow-on FEAT(s) including production entity ingest + retrieval seam.
-- Files: spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md, this canvas Sync Notes
-- Validation: Clear decision with rationale
+- Decision: **Provisional GO** to land SPIKE wiring on `main` via integration PR #56 so we can
+  confirm retrieval quality **in the field** (live Guide + Neo4j + ops console) and iterate.
+  Not a closed research verdict — final keep/rollback after dogfood sessions.
+- Evidence so far: legs 1–3 live (NamedEntity projection, `spdd_*` MCP, resolver gold, A/B ledger
+  modes a/b); experimental console on `main` (#54); integration stack tested locally + CI.
+- Follow-on if field confirms: FEAT(s) for production ingest/retrieval seam hardening; if not,
+  strip optional Guide path and keep markdown-first default.
+- Files: `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md` (T06 section), this canvas Sync Notes
+- Validation: Provisional decision recorded; field confirmation is the remaining gate
+
+### T07 - Mock retrieval fixture + resolver gold test
+
+- Status: Complete
+- Description: Add `examples/retrieval-fixture/` with seeded indexes, canvas, analysis, and tiny
+  `src/` tree; `tests/test-retrieval-fixture-resolver.sh` diffs `resolve-agent-context.sh`
+  output against gold TSV. Optional `menke-fixture` Guide profile for MCP spot-checks (local only).
+- Files: `examples/retrieval-fixture/`, `tests/test-retrieval-fixture-resolver.sh`,
+  `tests/fixtures/spike-001-retrieval-gold.tsv`, `tests/fixtures/spike-001-mcp-queries.tsv`,
+  `templates/guide-profiles/application-menke-fixture.yml.example`,
+  `scripts/guide/append-retrieval-fixture.sh`, `.github/workflows/test-retrieval-fixture-resolver.yml`
+- Validation: `./tests/test-retrieval-fixture-resolver.sh` passes (15 gold assertions); CI workflow added
+
+### T08 - SPDD workspace documentation
+
+- Status: Complete (2026-07-11 — runbook `docs/dice-projection-runbook.md`, install doc
+  `--with-guide` section, Guide-side change summary, runtime-resolution docs; chain
+  requirement → analysis → canvas → feature workspace present on spike branch)
+- Description: Feature workspace under `agent-context/features/SPIKE-001-guide-rag-context-backend/`;
+  analysis artifact with branch policy and experiment protocol; operator runbook links analysis.
+- Files: `agent-context/features/SPIKE-001-guide-rag-context-backend/*`,
+  `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
+- Validation: requirement → analysis → canvas → feature workspace chain complete on spike branch
 
 ## N - Norms
 
@@ -237,8 +297,12 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 ## S - Safeguards
 
 - This is exploratory: do not wire guide into the default resolver or installers under this Work ID.
+- **T06 provisional go (2026-08-01):** land optional Guide path on `main` via #56 for **field
+  confirmation**; markdown-first default unchanged when Guide is absent. Final keep/rollback
+  after live dogfood — not a closed research verdict.
 - Keep all Neo4j/guide setup local/throwaway; no secrets committed.
-- If the spike says "go", the real integration is a separate FEAT with its own canvas.
+- Operator docs and Guide profiles are orchestrator-only — never ship to target projects.
+- If the spike says "go", the real integration is a separate FEAT with its own canvas on a new branch.
 - Posture/optimization framing stays internal; nothing ships to target projects from this spike.
 
 ## Review Checklist
@@ -253,8 +317,6 @@ labels = class simple names + `__Entity__`; relationships via `@Semantics` prope
 
 ## Sync Notes
 
-2026-07-15 analysis: FEAT-004/005 unblocked; Guide MCP down — A/B deferred. See spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md
-
 Spike to de-risk the make-it-fast retrieval direction via a **DICE (Domain-Integrated
 Context Engineering)** hybrid over guide/Neo4j: lexical index + embedding discovery +
 typed domain graph, with the domain model as the shared join key. Converges with the
@@ -267,6 +329,15 @@ architecture sound; proceed. Refinements: explicit `Spdd*` DICE entity design + 
 ingest required for leg 3 (RAG alone leaves `__Entity__` empty); auditability via legs
 1+3; embedding for discovery only. Entity schema draft:
 `spdd/analysis/SPIKE-001-dice-entity-schema.md`. A/B + go/no-go still pending.
+
+**SPDD documentation 2026-07-05:** analysis artifact + feature workspace on spike branch
+`cursor/spike-guide-ingest-agent-context-17f4` (PR #24). Branch stays off `main` until T06.
+Mock fixture (T07) complete for scriptable A/B. See
+`spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`.
+
+**Leg 3 projection 2026-07-05:** guide spike branch `cursor/spike-spdd-dice-projection-17f4`
+implements structured markdown → `__Entity__` (coexists with leg 2 RAG). Not the DICE
+proposition pipeline. Operator: `project-spdd-entities.sh` + dual-ingest doc.
 
 ## Final Status
 

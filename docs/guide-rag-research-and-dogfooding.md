@@ -32,6 +32,7 @@ Profiles live under `~/github/jmjava/guide/scripts/user-config/`. Each profile i
 | `menke-2` | Reference reading | SPDD, context engineering, evals URLs (~24 docs) |
 | `menke-3` | Framework depth | Shell, task runners, VS Code manifests, harness, craft, RAG |
 | `menke-4` | Docgen consumer | `documentation-generator/src` + course-builder text `docs/` paths |
+| `menke-5` | Orchestrator context | `agent-context/memory/`, `spdd/canvas/`, `spdd/analysis/` (SPIKE-001 T01) |
 
 Example (menke-4 on top of prior passes):
 
@@ -50,6 +51,10 @@ Config files (local only, not checked into this repo):
 - `application-menke-2.yml`
 - `application-menke-3.yml`
 - `application-menke-4.yml`
+- `application-menke-5.yml` (template in this repo: `templates/guide-profiles/application-menke-5-orchestrator-context.yml.example`)
+
+**menke-5** requires guide branch **`ingest-to-hub`** (git incremental ingestion). See
+[spike-guide-ingest-agent-context](spike-guide-ingest-agent-context.md).
 
 ## Experimental ops console + live Guide stack test
 
@@ -161,6 +166,7 @@ docs/scripts result from completed chores — never the research graph or ingest
 | Doc | Role |
 |-----|------|
 | [SPIKE-001 canvas](../spdd/canvas/SPIKE-001-guide-rag-context-backend.md) | DICE hybrid retrieval architecture (experiment) |
+| [SPIKE guide ingest](spike-guide-ingest-agent-context.md) | menke-5 orchestrator context append-ingest (leg 2) |
 | [SPIKE retrieval corpus](../spdd/analysis/SPIKE-retrieval-reference-corpus.md) | menke-2 URL catalog |
 | [Context loading and scaling](context-loading-and-scaling.md) | Tier-1 vs on-demand agent context |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Orchestrator vs target paths; posture boundary |

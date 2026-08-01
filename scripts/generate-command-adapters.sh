@@ -116,6 +116,16 @@ adapter_paths() {
   esac
 }
 
+write_optional_context_backend() {
+  local spec="$1"
+  local adapter="$2"
+  local cb
+  cb="$(block_or_shared "${spec}" "${adapter}" "Context Backend (runtime-resolved)")"
+  if [[ -n "${cb}" ]]; then
+    printf '## Context Backend (runtime-resolved)\n\n%s\n\n' "${cb}"
+  fi
+}
+
 write_cursor() {
   local spec="$1"
   local out="$2"
@@ -128,6 +138,7 @@ write_cursor() {
     printf '# %s\n\n' "${title}"
     [[ -n "${preamble}" ]] && printf '%s\n\n' "${preamble}"
     printf '## Required Behavior\n\n%s\n\n' "${rb}"
+    write_optional_context_backend "${spec}" cursor
     printf '## Output\n\n%s\n' "${out_body}"
   } > "${out}"
 }
@@ -151,6 +162,7 @@ write_copilot() {
     printf '# %s\n\n' "${title}"
     [[ -n "${preamble}" ]] && printf '%s\n\n' "${preamble}"
     printf '## Required Behavior\n\n%s\n\n' "${rb}"
+    write_optional_context_backend "${spec}" copilot
     printf '## Output\n\n%s\n' "${out_body}"
   } > "${out}"
 }
@@ -174,6 +186,7 @@ write_claude() {
     printf '# %s\n\n' "${title}"
     [[ -n "${preamble}" ]] && printf '%s\n\n' "${preamble}"
     printf '## Required Behavior\n\n%s\n\n' "${rb}"
+    write_optional_context_backend "${spec}" claude
     printf '## Output\n\n%s\n' "${out_body}"
   } > "${out}"
 }
