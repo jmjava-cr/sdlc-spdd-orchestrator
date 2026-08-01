@@ -30,24 +30,6 @@ Implement exactly one approved operation from a REASONS Canvas.
 
 If no task is selected, ask the user which operation to implement before changing code.
 
-## Context Backend (runtime-resolved)
-
-File-based indexes under `agent-context/memory/` are the baseline and always
-work. This install may optionally augment them with the Guide DICE entity
-graph, but Guide is never assumed to be present. Resolve at runtime:
-
-    ./scripts/sdlc-spdd/resolve-context-backend.sh --target .
-
-(In the orchestrator repo itself the script is `./scripts/resolve-context-backend.sh`.)
-
-- `CONTEXT_BACKEND=files` — proceed with file-based context only. This is the
-  normal case, not an error.
-- `CONTEXT_BACKEND=guide-dice` — additionally call `spdd_workSubgraph` for the active Work ID and
-  `spdd_areaLessons` for each code area you are about to modify; treat
-  returned Pitfalls as extra Safeguards.
-
-Never block or fail this command because Guide is absent or unreachable.
-
 ## Output
 
 
