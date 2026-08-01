@@ -352,32 +352,73 @@ class LocalIndex:
         row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
         return row["value"] if row else ""
 
-    def status_text(self) -> str:
+    def status_dict(self) -> dict[str, Any]:
+        """Machine-readable index status for CLI JSON / ops dashboard."""
+        base: dict[str, Any] = {
+            "path": str(self.db_path),
+            "exists": self.db_path.is_file(),
+            "schema": None,
+            "fts": None,
+            "rebuilt_at": None,
+            "source_commit": None,
+            "work_items": 0,
+            "artifacts": 0,
+            "local_sessions": 0,
+            "by_registry_status": {},
+            "error": None,
+        }
         if not self.db_path.is_file():
-            return (
-                f"SQLite index missing: {self.db_path}\n"
-                "Rebuild: ./scripts/sdlc.sh db rebuild\n"
-            )
+            base["error"] = "missing"
+            return base
         with self.connect() as conn:
             try:
-                n_work = conn.execute("SELECT COUNT(*) AS n FROM work_items").fetchone()["n"]
-                n_art = conn.execute("SELECT COUNT(*) AS n FROM artifacts").fetchone()["n"]
-                n_local = conn.execute("SELECT COUNT(*) AS n FROM local_sessions").fetchone()["n"]
+                base["work_items"] = conn.execute(
+                    "SELECT COUNT(*) AS n FROM work_items"
+                ).fetchone()["n"]
+                base["artifacts"] = conn.execute(
+                    "SELECT COUNT(*) AS n FROM artifacts"
+                ).fetchone()["n"]
+                base["local_sessions"] = conn.execute(
+                    "SELECT COUNT(*) AS n FROM local_sessions"
+                ).fetchone()["n"]
+                base["schema"] = self._meta(conn, "schema_version") or None
+                base["fts"] = self._meta(conn, "fts") or None
+                base["rebuilt_at"] = self._meta(conn, "rebuilt_at") or None
+                base["source_commit"] = self._meta(conn, "source_commit") or None
+                rows = conn.execute(
+                    "SELECT COALESCE(NULLIF(registry_status, ''), '(none)') AS s, "
+                    "COUNT(*) AS n FROM work_items GROUP BY s ORDER BY n DESC"
+                ).fetchall()
+                base["by_registry_status"] = {r["s"]: r["n"] for r in rows}
             except sqlite3.Error as exc:
-                return f"SQLite index unreadable ({exc}). Run: ./scripts/sdlc.sh db rebuild\n"
+                base["error"] = str(exc)
+        return base
+
+    def status_text(self) -> str:
+        info = self.status_dict()
+        if info.get("error") == "missing":
             return (
-                f"SQLite index: {self.db_path}\n"
-                f"  schema: {self._meta(conn, 'schema_version') or '?'}\n"
-                f"  fts: {self._meta(conn, 'fts') or '?'}\n"
-                f"  rebuilt_at: {self._meta(conn, 'rebuilt_at') or '?'}\n"
-                f"  source_commit: {self._meta(conn, 'source_commit') or '?'}\n"
-                f"  work_items: {n_work}\n"
-                f"  artifacts: {n_art}\n"
-                f"  local_sessions: {n_local}\n"
-                "\n"
-                "Multi-user sync: git (markdown + work-registry.tsv), not this file.\n"
-                "Before GUIDE/Neo4j this is a local query cache only.\n"
+                f"SQLite index missing: {info['path']}\n"
+                "Rebuild: ./scripts/sdlc.sh db rebuild\n"
             )
+        if info.get("error"):
+            return (
+                f"SQLite index unreadable ({info['error']}). "
+                "Run: ./scripts/sdlc.sh db rebuild\n"
+            )
+        return (
+            f"SQLite index: {info['path']}\n"
+            f"  schema: {info['schema'] or '?'}\n"
+            f"  fts: {info['fts'] or '?'}\n"
+            f"  rebuilt_at: {info['rebuilt_at'] or '?'}\n"
+            f"  source_commit: {info['source_commit'] or '?'}\n"
+            f"  work_items: {info['work_items']}\n"
+            f"  artifacts: {info['artifacts']}\n"
+            f"  local_sessions: {info['local_sessions']}\n"
+            "\n"
+            "Multi-user sync: git (markdown + work-registry.tsv), not this file.\n"
+            "Before GUIDE/Neo4j this is a local query cache only.\n"
+        )
 
     def ensure(self) -> None:
         if not self.db_path.is_file():
