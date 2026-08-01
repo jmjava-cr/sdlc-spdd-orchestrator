@@ -70,6 +70,9 @@ case "${cmd}" in
   commit-message)
     _py_only_args=("commit-message" "$@")
     ;;
+  viewer)
+    _py_only_args=("viewer" "$@")
+    ;;
 esac
 if ((${#_py_only_args[@]} > 0)); then
   if ! _python_engine_available; then

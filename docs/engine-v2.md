@@ -43,7 +43,7 @@ engine/
     canvas.py
     links.py        # milestone/canvas/registry link parsing
     sync_local.py   # sync-links / sync-roadmap
-    issues.py       # Jira/GitHub draft|push|pull
+    issues.py       # Jira/GitHub draft|push|pull|upload-adf|download-adf
     jira_format.py  # markdown ↔ ADF / wiki for Jira descriptions
     local_sessions.py  # LOCAL-* offline sessions + promote
     db.py           # regenerable local SQLite index (.sdlc/index.sqlite)
@@ -91,6 +91,10 @@ SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system github   
 SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system github --apply  # gh issue create
 SDLC_ENGINE=python ./scripts/sdlc.sh issues push FEAT-006-… --system jira --apply    # ADF on Jira Cloud
 SDLC_ENGINE=python ./scripts/sdlc.sh issues pull FEAT-006-… --system github --apply
+# Checked-in ADF library ↔ Jira description (explicit; never auto)
+SDLC_ENGINE=python ./scripts/sdlc.sh issues upload-adf ORCH-1 --file adf/ORCH-1.adf.json --apply
+SDLC_ENGINE=python ./scripts/sdlc.sh issues download-adf ORCH-1   # dry-run diff
+SDLC_ENGINE=python ./scripts/sdlc.sh issues download-adf ORCH-1 --apply
 ```
 
 Jira Cloud descriptions are sent as **ADF** (not raw markdown). See

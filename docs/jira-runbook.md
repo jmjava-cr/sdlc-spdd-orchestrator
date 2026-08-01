@@ -80,6 +80,20 @@ SDLC_ENGINE=python ./scripts/sdlc.sh issues push <WORK-ID> --system jira --apply
 SDLC_ENGINE=python ./scripts/sdlc.sh sync-links --repair
 ```
 
+**Checked-in ADF library (`adf/`):** for tickets edited as raw ADF (viewer or hand-tuned JSON), push/pull the description explicitly:
+
+```bash
+# Local file → Jira description
+SDLC_ENGINE=python ./scripts/sdlc.sh issues upload-adf ORCH-1 \
+  --file adf/ORCH-1.adf.json --apply
+
+# Jira hand-edits → local file (dry-run shows diff; --apply overwrites)
+SDLC_ENGINE=python ./scripts/sdlc.sh issues download-adf ORCH-1
+SDLC_ENGINE=python ./scripts/sdlc.sh issues download-adf ORCH-1 --apply
+```
+
+Or use the ADF viewer sync panel (Local → Jira / Jira → Local). Never automatic. Project-specific ticket ADF bodies belong in the consuming project, not this orchestrator repo.
+
 ### Description formatting (ADF)
 
 Jira Cloud REST **v3** rejects plain markdown strings for `description` — it needs

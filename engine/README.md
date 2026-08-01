@@ -56,11 +56,20 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `canvas` | Final Status + next-operation inference |
 | `links` / `sync_local` | Milestone↔canvas↔registry drift check/repair + ROADMAP sync |
 | `issues` | Draft/push/pull Jira (`JIRA_*`) or GitHub (`gh`) from milestone sections |
-| `jira_format` | Markdown ↔ ADF / wiki markup for Jira Cloud/Server descriptions |
+| `jira_format` | Markdown ↔ ADF; optional ADF→wiki shim (`adf_to_wiki`) for Server/DC — raw ADF is default on Cloud v3 |
+| `issues` CLI | `draft` / `push` / `pull` / `upload-adf` / `download-adf` — explicit only; `--description-format adf\|wiki` |
 | `local_sessions` | `LOCAL-*` offline sessions + promote into documented Work IDs |
 | `db` | Regenerable local SQLite index (`.sdlc/index.sqlite`) before GUIDE |
 | `commit_message` | Staged/unstaged/ahead-of-base diff report for commit-message drafts |
+| `viewer` | ADF WYSIWYG editor for checked-in `adf/*.json` (optional `[viewer]` / Flask) |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
+
+ADF viewer runbook: [docs/adf-viewer.md](../docs/adf-viewer.md).
+
+```bash
+python3 -m pip install -e './engine[dev,viewer]'
+./scripts/sdlc.sh viewer --port 5050
+```
 
 ## Compatibility
 
@@ -71,14 +80,22 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 ## Tests
 
 ```bash
-python3 -m pip install -e './engine[dev]'
+python3 -m pip install -e './engine[dev,viewer]'
 pytest -q engine/tests
 ```
 
-Or without install:
+Or without install (viewer tests need Flask):
 
 ```bash
 PYTHONPATH=engine/src python3 -m pytest -q engine/tests
+```
+
+ADF viewer Playwright GUI (opt-in):
+
+```bash
+python3 -m pip install -e './engine[dev,viewer-e2e]'
+playwright install chromium
+SDLC_VIEWER_E2E=1 pytest -q engine/tests/test_viewer_playwright.py -m viewer_e2e
 ```
 
 ## Design notes
