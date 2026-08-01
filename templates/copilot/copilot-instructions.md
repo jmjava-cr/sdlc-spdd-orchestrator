@@ -65,6 +65,14 @@ Load context by index, not by scanning. Keep working context small and relevant 
 2. Retrieve by relevance, not recency. A Work ID's own history is its `agent-context/features/<WORK-ID>/progress-log.md` and `spdd/canvas/<WORK-ID>.md` — read those, not the global history. Sessions for unrelated work are interleaved in time, so never read history top-to-bottom.
 3. Discover related work by code area or domain keyword, not by scanning. Filter `agent-context/memory/domain-index.md` by Domain Keywords from the analysis artifact, then `context-index.md` and `session-index.md` by Area (Kinds: analysis, session, decision, pitfall, pattern, metric). Read matches newest-first. Full per-session detail is in `agent-context/memory/sessions/`. For static playbooks and harness files, use `agent-context/memory/phase-index.md` by phase or `./scripts/sdlc-spdd/resolve-agent-context.sh --phase <phase>`. `session-history.md` is only a recent chronological overview (older entries archived under `agent-context/memory/archive/`). Do not read whole directories. When capturing: read `agent-context/memory/code-areas.md`; `capture-session-memory.sh` parses session documents/content (summary, session-notes, current-session.md, latest timestamped session brief, analysis, canvas, progress log, capture flags) for path/package tokens, matches known categories, and registers new ones. After `/sdlc-spdd-analysis`, run `index-spdd-analysis.sh` to index domain keywords. Use `--areas` only to override or supplement parsed categories.
 
+Optional Guide DICE backend: file-based indexes are always the baseline. If
+`agent-context/harness/guide-dice.md` exists, resolve the backend at runtime
+with `./scripts/sdlc-spdd/resolve-context-backend.sh --target .` and, only
+when it reports `CONTEXT_BACKEND=guide-dice`, augment retrieval with the
+`spdd_*` MCP tools (`spdd_workSubgraph`, `spdd_areaLessons`, `spdd_findByLabel`,
+`spdd_projectionStats`). Never assume Guide is present, and never fail a
+command because it is not.
+
 Per-phase context budget:
 
 - plan: the requirement, `spdd/analysis/<WORK-ID>-analysis.md`, `ROADMAP.md`, active milestone definition (root `milestone-*.md` or `requirements/milestones/milestone-N/`)

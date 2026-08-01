@@ -114,6 +114,26 @@ All three:
 
     ./scripts/init-project.sh --target /path/to/app --cursor --copilot --claude
 
+## Optional: Guide DICE Context Backend
+
+Not every install has a Guide + Neo4j instance, so the file-based memory
+indexes are always the baseline. Add `--with-guide` to opt an install into the
+optional Guide DICE entity graph:
+
+    ./scripts/init-project.sh --target /path/to/app --cursor --with-guide
+
+This writes `agent-context/harness/guide-dice.md` (endpoint + tool reference).
+Even with the marker present, availability is resolved at **runtime**:
+
+    ./scripts/sdlc-spdd/resolve-context-backend.sh --target .
+    # CONTEXT_BACKEND=guide-dice  → Guide is live; commands augment with spdd_* MCP tools
+    # CONTEXT_BACKEND=files       → file-based context only (normal, not an error)
+
+Commands never fail because Guide is absent or down. To opt in later, copy
+`templates/agent-context/harness/guide-dice.md` into
+`agent-context/harness/`; to opt out, delete it. Full setup:
+`docs/dice-projection-runbook.md` in the orchestrator repo.
+
 ## Preview Before Installing
 
     ./scripts/init-project.sh --target /path/to/app --cursor --copilot --claude --dry-run

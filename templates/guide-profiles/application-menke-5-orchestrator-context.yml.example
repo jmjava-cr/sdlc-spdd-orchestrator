@@ -1,0 +1,34 @@
+# Guide profile: menke-5 — orchestrator agent-context store (leg 2 RAG chunks)
+#
+# Copy into your local guide checkout (gitignored there):
+#   cp templates/guide-profiles/application-menke-5-orchestrator-context.yml.example \
+#      ~/github/jmjava/guide/scripts/user-config/application-menke-5.yml
+#
+# Prerequisite: guide on branch ingest-to-hub (git incremental ingestion + operator purge API).
+# Run as an append pass on top of menke / menke-2 / menke-3 / menke-4 (do not fresh-ingest).
+#
+# Paths below assume guide is started from ~/github/jmjava/guide and the orchestrator
+# clone lives at ~/github/jmjava/sdlc-spdd-orchestrator. Adjust ORCHESTRATOR_ROOT if needed.
+
+guide:
+  reload-content-on-startup: true
+  content-chunker:
+    include-section-title-in-chunk: true
+    max-chunk-size: 4000
+    overlap-size: 200
+    embedding-batch-size: 50
+  # No new URLs — reference corpus already loaded by menke-2.
+  urls: []
+  directories:
+    # Decision memory + indexes (context-index, domain-index, session-index, phase-index, …)
+    - ~/github/jmjava/sdlc-spdd-orchestrator/agent-context/memory
+    # REASONS canvases (Work ID metadata, Operations, Sync Notes)
+    - ~/github/jmjava/sdlc-spdd-orchestrator/spdd/canvas
+    # Analysis artifacts (scoped codebase findings, research notes)
+    - ~/github/jmjava/sdlc-spdd-orchestrator/spdd/analysis
+    # Work-ID feature folders (progress logs, requirement snapshots) — uncomment if needed:
+    # - ~/github/jmjava/sdlc-spdd-orchestrator/agent-context/features
+  # Incremental ingest: only changed markdown since last append (ideal for capture-as-we-go).
+  git-ingestion:
+    enabled: true
+    state-file: scripts/user-config/ingestion-git-revisions-menke-5.json

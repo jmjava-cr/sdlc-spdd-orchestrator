@@ -1,150 +1,158 @@
-# SPIKE-001 — SDLC-SPDD DICE Entity Schema (draft)
+# SPIKE-001 — SDLC-SPDD DICE Entity Schema (contract)
 
-Typed domain entities for leg 3 (domain-graph retrieval) over guide/Neo4j. Validated
-against Embabel conventions in `dice/`, `embabel-agent-rag`, and `embabel-agent-rag-neo-drivine`
-(ingested in menke corpus + source review 2026-06-19).
+Typed domain entities for **leg 3** (domain-graph persist + retrieve) over guide/Neo4j.
+This is the DICE contract: structured domain objects as memory, retrieved by typed
+structure — not the proposition-extraction pipeline, and not embedding-only context.
 
-Related: `spdd/canvas/SPIKE-001-guide-rag-context-backend.md` (T02 design, T03 ingest)
+Related:
 
-## Embabel convention alignment (T02 gate)
+- Canvas: `spdd/canvas/SPIKE-001-guide-rag-context-backend.md`
+- Dual ingest: `spdd/analysis/SPIKE-001-dual-ingest-model.md`
+- Guide operator: `docs/spdd-projection-ingest.md` (guide repo)
 
-Reviewed against upstream patterns — not just MCP spot checks.
+## Contract summary
+
+| Concern | Contract |
+|---------|----------|
+| **Join key** | Work ID string (`SPIKE-001-guide-rag-context-backend`, `FEAT-004-…`) |
+| **Persist** | Markdown (source of truth) → projection load → `__Entity__` + typed relationships |
+| **Retrieve** | Walk edges from WorkId / Area / Canvas; explain inclusions via relationship type |
+| **Idempotency** | Merge-by-id: `NamedEntityDataRepository.save(id=…)` + `mergeRelationship` |
+| **Not in scope** | DICE proposition pipeline (`PropositionExtractor` → conversation graph) |
+
+## Embabel convention alignment
 
 | Embabel convention | Source | Our design |
 |--------------------|--------|------------|
-| Entities implement `NamedEntity` (`id`, `name`, `description` required) | `embabel-agent-rag/.../NamedEntity.kt` | ✅ All types implement `NamedEntity` |
-| Neo4j label = class simple name + `__Entity__` super-label | `NamedEntityData.ENTITY_LABEL`, `SimpleNamedEntityData` | ✅ Use `WorkId`, `Canvas`, … not `SpddWorkId` prefix labels |
-| Schema via `DataDictionary.fromClasses("sdlc-spdd", …)` or `NamedEntity.dataDictionaryFromPackages(...)` | `dice/README.md`, `NamedEntity.dataDictionaryFromPackages` | ✅ Package `com.embabel.spdd.domain` (guide fork module) |
-| Relationships via typed properties + `@Semantics(predicate=…)` — **property name becomes Neo4j rel type** | `RelationBasedGraphProjector.kt`, `dice/README.md` §Relations | ✅ Prefer reference properties (`canvas`, `area`, `workId`) over ad-hoc `HAS_*` edge names |
-| Persist via `NamedEntityDataRepository.save()` + `mergeRelationship()` | `NamedEntityDataRepositoryGraphRelationshipPersister` | ✅ Spike loader uses repository API, not raw Cypher |
-| `SimpleNamedEntityData` acceptable for fast spike without full Kotlin module | `NamedEntityDataRepositoryProxyTest` | ⚠️ OK for T03 prototype; **proper path = Kotlin `NamedEntity` classes** |
-| Proposition pipeline (`PropositionExtractor` → `GraphProjectionService`) | `dice/README.md` | ❌ **Not our ingest path** — for conversation text, not structured markdown |
-| `ContextId` scopes proposition memory | `dice/README.md` §ContextId | Optional `ContextId("sdlc-spdd-orchestrator")` if we add propositions later; not required for entity-only spike |
+| Entities carry `id`, `name`, `description` | `NamedEntity` / `NamedEntityData` | ✅ All projected nodes |
+| Neo4j label = type simple name + `__Entity__` | `NamedEntityData.ENTITY_LABEL` | ✅ `WorkId`, `Canvas`, … |
+| Schema via `DataDictionary` | `DataDictionary.fromDomainTypes` / `fromClasses` | ✅ `SpddEntityDictionary` (spike: `DynamicType`) |
+| Relationships via property / predicate names | `@Semantics` → Neo4j rel type | ✅ Rel types `canvas`, `area` |
+| Persist via repository | `NamedEntityDataRepository` | ✅ Not raw Cypher; not propositions |
+| Chunk join (optional) | `DrivineStore.findChunksForEntity(id)` | ⚠️ Available in store API; not yet wired to projection HTTP/MCP |
 
-**Naming correction from research:** drop `Spdd*` label prefix. Embabel uses domain class
-names directly (`Person`, `Composer`, `Work`). Namespace via package
-(`com.embabel.spdd.domain.WorkId`), not label prefix.
+**Label naming:** no `Spdd*` prefix on Neo4j labels. Namespace via package / dictionary name
+`sdlc-spdd`.
 
-## Design principles
+## Entity types
 
-1. **Join key = Work ID** — every retrievable artifact links back to `FEAT-001-*`, `SPIKE-001-*`, etc.
-2. **Auditable edges** — retrieval explains inclusions via typed `@Semantics` relationships.
-3. **Minimal spike slice** — seven entity types; expand only if A/B shows gaps.
-4. **Dual ingest** — markdown → RAG chunks (leg 2) **and** repository projection → `__Entity__` (leg 3).
-5. **Source of truth stays markdown** — entities are a projection, not a second authoring surface.
+Spike implementation uses `SimpleNamedEntityData` + labels. Target module (post-spike):
+`com.embabel.spdd.domain` Kotlin `NamedEntity` classes.
 
-## Entity types (Kotlin `NamedEntity` — target)
+| Type | `id` rule | Produced from | Outgoing rels |
+|------|-----------|---------------|---------------|
+| **WorkId** | Work ID string as-is | Canvas metadata `- Work ID:` | `canvas` → Canvas; `area` → Area; `decision` → Decision; `pitfall` → Pitfall; `pattern` → Pattern |
+| **Canvas** | `{workId}:canvas` | `spdd/canvas/<WorkID>.md` | — |
+| **Area** | `area:{path}` | `context-index.md` Area column | — |
+| **Operation** | `{workId}:{Tnn}` | Canvas Operations (not yet projected in spike loader) | `canvas` (planned) |
+| **Decision** | `decision:{workId}:{area}:{source}` | context-index Kind=decision | `about` → Area |
+| **Pitfall** | `pitfall:{workId}:{area}:{source}` | context-index Kind=pitfall | `about` → Area |
+| **Pattern** | `pattern:{workId}:{area}:{source}` | context-index Kind=pattern | `about` → Area |
 
-Package: `com.embabel.spdd.domain` (guide fork module, scanned by `entityPackages`)
+### Relationship types (property names)
 
-```kotlin
-// Illustrative — finalize in T02
-@JsonClassDescription("A unit of SPDD work (FEAT-, SPIKE-, BUG-, REF-)")
-data class WorkId(
-    override val id: String,           // e.g. "SPIKE-001-guide-rag-context-backend"
-    override val name: String,         // slug or short title
-    override val description: String,  // one-line goal
-    val workType: String,
-    val deliveryStage: String,
-    val status: String,
-    val readiness: String,
-    @field:Semantics([With(key = Proposition.PREDICATE, value = "has canvas")])
-    val canvas: Canvas? = null,
-) : NamedEntity
+| Rel type | From → To | Meaning |
+|----------|-----------|---------|
+| `canvas` | WorkId → Canvas | Work has this REASONS canvas |
+| `area` | WorkId → Area | Work touched this code area (from index) |
+| `decision` | WorkId → Decision | Work recorded this decision (2026-07-11) |
+| `pitfall` | WorkId → Pitfall | Work recorded this pitfall (2026-07-11) |
+| `pattern` | WorkId → Pattern | Work recorded this pattern (2026-07-11) |
+| `about` | Decision/Pitfall/Pattern → Area | Lesson concerns this code area — enables **cross-run** lookup: "any prior work's lessons for area X" via incoming `about` edges (2026-07-11) |
 
-data class Canvas(
-    override val id: String,           // work id or canvas path hash
-    override val name: String,
-    override val description: String,
-    val path: String,
-    val readiness: String,
-    val updated: String,
-) : NamedEntity
+Retrieval audit rule: an included entity must cite at least one of these edges (or a
+matched lexical Work ID / Area term on leg 1). Cosine score alone is insufficient.
 
-data class Operation(
-    override val id: String,           // "{workId}:T01"
-    override val name: String,         // op id e.g. "T01"
-    override val description: String,
-    val status: String,
-    @field:Semantics([With(key = Proposition.PREDICATE, value = "in canvas")])
-    val canvas: Canvas? = null,
-) : NamedEntity
+### Edge taxonomy roadmap (from agent-context data model)
 
-data class Area(
-    override val id: String,
-    override val name: String,
-    override val description: String,
-) : NamedEntity
+Candidate edges present in the framework's artifact kinds but not yet projected:
+`Session -for→ WorkId` (session briefs), `Keyword -covers→ Area/WorkId`
+(`domain-index.md`), `Canvas -operation→ Operation` (Tnn sections),
+`WorkId -depends-on→ WorkId` (canvas metadata), `WorkId -requirement/review→ …`
+(feature workspace files). Highest-value next: **Keyword** — entry into the graph
+by domain term before areas are known.
 
-data class Decision(
-    override val id: String,
-    override val name: String,
-    override val description: String,  // decision text
-    val sourcePath: String,
-    @field:Semantics([With(key = Proposition.PREDICATE, value = "about")])
-    val area: Area? = null,
-    @field:Semantics([With(key = Proposition.PREDICATE, value = "recorded for")])
-    val workId: WorkId? = null,
-) : NamedEntity
+## Persist API (write)
 
-// Pitfall, Pattern — same shape as Decision
-```
+| Surface | Path / entry | Behavior |
+|---------|--------------|----------|
+| Config | `guide.spdd-projection.enabled=true` | Activates beans |
+| Config | `guide.spdd-projection.default-root-path` | Orchestrator or fixture root |
+| Config | `guide.spdd-projection.allowed-roots` | Extra roots a load override may target; overrides outside default root + this list → HTTP 400 (hardening 2026-07-11) |
+| HTTP | `POST /api/v1/data/spdd-projection/load` body `{"rootPath":"…"}` | Project canvases + context-index |
+| Script | `scripts/guide/project-spdd-entities.sh [root]` | curl wrapper |
 
-Neo4j relationship types follow **property names** per Embabel convention:
-`canvas`, `area`, `workId` — not `HAS_CANVAS`, `ABOUT`, `RECORDED_FOR`.
+Loader: `SpddMarkdownProjectionService` → `save` + `mergeRelationship`. Re-running load
+updates the same ids (merge-by-id). Hardening (2026-07-11): a malformed source file is
+skipped (counted in `skippedFiles`) instead of failing the whole load; canvas files are
+processed in sorted order; validation errors map to HTTP 400 (`{"error": …}`), feature
+disabled to 409.
 
-## Ingest mapping (leg 3 projection)
+## Retrieve API (read)
 
-| Source | Entities produced | Loader |
-|--------|-------------------|--------|
-| `spdd/canvas/<WorkID>.md` | WorkId, Canvas, Operation[] | Parse Metadata + Operations → `repository.save()` |
-| `agent-context/memory/context-index.md` | Area, WorkId↔Area links | Parse index → entities + `mergeRelationship()` |
-| `agent-context/memory/sessions/*.md` | Decision, Pitfall | Parse session outcomes |
-| `spdd/analysis/*.md` | Decision, Pattern | Parse findings + Work ID refs |
+| Surface | Status | Behavior |
+|---------|--------|----------|
+| `GET /api/v1/data/spdd-projection/stats` | **Implemented** | Counts by label (`WorkId`, `Canvas`, `Area`, `Decision`, `Pitfall`, `Pattern`) |
+| `GET /api/v1/data/spdd-projection/work/{workId}` | **Implemented** | WorkId subgraph via `findRelated` (`canvas`, `area`, `decision`, `pitfall`, `pattern`) |
+| `GET /api/v1/data/spdd-projection/area?name={area}` | **Implemented** (2026-07-11) | Cross-run lessons: incoming `about` + `area` edges — decisions/pitfalls/patterns from ANY Work ID for a code area |
+| MCP entity / graph tools | **Implemented** (2026-07-11) | `spdd_workSubgraph`, `spdd_projectionStats`, `spdd_findByLabel`, `spdd_areaLessons` via `McpToolExport` + `@LlmTool`; errors return `{"error": …}` JSON |
+| Chunk join by entity id | **Library exists** | `findChunksForEntity` on store; not exposed on projection API yet |
 
-Leg 2 (RAG): unchanged — `guide.directories` append.
-Leg 3: `NamedEntityDataRepository` + `NamedEntityDataRepositoryGraphRelationshipPersister`
-(or direct `mergeRelationship` calls) — **not** the proposition extraction pipeline.
+Read-side guards (2026-07-11): `findByLabel` accepts only schema labels and caps results
+(default 50, max 200); blank workId/area → 400.
 
-## DICE / guide integration (fork)
+## Ingest mapping (sources)
 
-```kotlin
-// Schema registration (Embabel convention)
-val schema = DataDictionary.fromClasses(
-    "sdlc-spdd",
-    WorkId::class.java,
-    Canvas::class.java,
-    Operation::class.java,
-    Area::class.java,
-    Decision::class.java,
-    Pitfall::class.java,
-    Pattern::class.java,
-)
-// Or: NamedEntity.dataDictionaryFromPackages("com.embabel.spdd.domain")
-```
+| Source | Entities | Relationships |
+|--------|----------|---------------|
+| `spdd/canvas/<WorkID>.md` | WorkId, Canvas | WorkId —`canvas`→ Canvas |
+| `agent-context/memory/context-index.md` | Area, Decision, Pitfall, Pattern | WorkId —`area`→ Area; WorkId —`decision`/`pitfall`/`pattern`→ lesson; lesson —`about`→ Area |
 
-- Wire `DrivineNamedEntityDataRepository` with this `DataDictionary` (already in guide stack).
-- Populate `__Entity__` via repository save — enables `entityFullTextSearch` / `queryForEntities`.
-- Fork MCP tool wrapping `SearchOperations` entity queries filtered by `WorkId` / `Area`.
-- Optional: link `Chunk` URIs to entity `uri` field for cross-leg drill-down.
+Leg 2 (RAG chunks) remains independent: `guide.directories` + append-ingest.
 
-## Spike validation (T02 / T03)
+## Spike validation
 
-- [ ] Schema reviewed against Embabel conventions (this doc §Embabel convention alignment).
-- [ ] Schema exercised against one real Work ID (e.g. SPIKE-001).
-- [ ] Projection loads ≥1 WorkId subgraph via `NamedEntityDataRepository` (not raw Cypher only).
-- [ ] `__Entity__` count > 0; domain query returns explainable subgraph.
-- [ ] Hybrid retrieval beats embedding-only on auditability.
+- [x] Schema aligned with Embabel `__Entity__` / repository conventions
+- [x] Projection load on live Neo4j → `__Entity__` > 0
+      (2026-07-11, :21337, `project-spdd-entities.sh` → 9 WorkId, 9 Canvas, 12 Area,
+      21 relationships; stats endpoint confirms `entityLabel: __Entity__`)
+- [x] Typed-edge retrieval by Work ID on live Neo4j — Cypher walk
+      `MATCH (w:WorkId)-[r]->(x)` returns `canvas` edges for all 9 WorkIds and `area`
+      edges for WorkIds whose analysis declares code areas (CHORE-001: 5, CHORE-002: 7).
+- [x] `GET …/work/SPIKE-001-guide-rag-context-backend` → HTTP 200 with WorkId + canvas
+      neighbor summaries (2026-07-11; endpoint added to the security permit list after
+      the first live call returned 403).
+- [ ] Hybrid retrieval auditability vs embedding-only (T05 — mode (a) rows captured;
+      mode (b) pending MCP spot-checks)
 
-## Open choices (resolve in T02)
+## Design verification (hardening pass, 2026-07-11)
 
-- **Implemented (guide spike):** Kotlin `NamedEntity` types in `com.embabel.guide.spdd.domain` +
-  `DataDictionary.fromClasses("sdlc-spdd", …)`. Persist still uses `SimpleNamedEntityData` with
-  `linkedDomainType` + `__Entity__` (Embabel merge-by-id path); schema is no longer `DynamicType`.
-- `Area` closed set vs free-text from index.
-- Proposition/`ContextId` layer — defer; entity projection sufficient for spike.
+Cross-check of implementation vs this contract, row by row:
+
+| Contract row | Verified |
+|--------------|----------|
+| Join key = Work ID string | ✅ `subgraphForWorkId(workId)`, `findById(workId)` — id **is** the Work ID |
+| Persist markdown → `__Entity__` | ✅ `saveEntity` sets `labels = {type, __Entity__}`; live Neo4j confirmed |
+| Merge-by-id idempotency | ✅ unit test `load is idempotent` — reload does not duplicate |
+| Retrieve = typed edge walk | ✅ `findRelated` only; no cosine in leg 3 read paths |
+| Auditability | ✅ every subgraph/area-lessons member arrives via a named edge (`canvas`/`area`/`decision`/`pitfall`/`pattern`/`about`) |
+| Not proposition pipeline | ✅ no `PropositionExtractor` usage |
+| Label naming (no `Spdd*` prefix) | ✅ labels are `WorkId`, `Canvas`, `Area`, `Decision`, `Pitfall`, `Pattern` |
+| Schema via `DataDictionary` | ✅ `SpddEntityDictionary` / `DataDictionary.fromClasses` (NamedEntity module) |
+
+Test evidence: SPDD unit tests green in guide `com.embabel.guide.spdd`.
+
+Known gaps (accepted for spike): Operation nodes not projected; Keyword/Session edges
+not projected (see roadmap above); chunk↔entity join not exposed on the operator API.
 
 ## Status
 
+**Implemented (guide spike):** Kotlin `NamedEntity` types in `com.embabel.guide.spdd.domain` +
+`DataDictionary.fromClasses("sdlc-spdd", …)`. Persist still uses `SimpleNamedEntityData` with
+`linkedDomainType` + `__Entity__` (Embabel merge-by-id path); schema is no longer `DynamicType`.
+
 T02 schema path closed on guide branch `cursor/spike-spdd-dice-projection-17f4` (NamedEntity +
-`fromClasses`). T03 projection loader + MCP `spdd_*` tools already on that branch; A/B + T06 remain.
+`fromClasses`). T03 projection loader + MCP `spdd_*` tools already on that branch; T06 go/no-go remains.
+Hardening pass 2026-07-11: root-path allowlist, per-file error isolation, HTTP status
+mapping, capped/validated reads, lesson edges (`decision`/`pitfall`/`pattern`/`about`),
+cross-run area retrieval (`/area`, `spdd_areaLessons`).
