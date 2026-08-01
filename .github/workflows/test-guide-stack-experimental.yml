@@ -1,0 +1,105 @@
+name: Test Guide Stack (Experimental)
+
+# EXPERIMENTAL — full Guide + Neo4j live stack. Not required for consumer installs.
+# Runs on workflow_dispatch and when ops-console / guide-test paths change on PRs.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'engine/src/sdlc_engine/installer/**'
+      - 'engine/tests/test_installer.py'
+      - 'tests/test-guide-stack-live.sh'
+      - '.github/workflows/test-guide-stack-experimental.yml'
+      - 'docs/guide-rag-research-and-dogfooding.md'
+  push:
+    branches: [main]
+    paths:
+      - 'engine/src/sdlc_engine/installer/**'
+      - 'tests/test-guide-stack-live.sh'
+      - '.github/workflows/test-guide-stack-experimental.yml'
+
+concurrency:
+  group: guide-stack-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  installer-unit:
+    name: Experimental console unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install engine + Flask
+        run: python3 -m pip install -e './engine[dev,viewer]'
+      - name: Unit tests (installer/console)
+        run: PYTHONPATH=engine/src python3 -m pytest -q engine/tests/test_installer.py
+
+  guide-neo4j-live:
+    name: Experimental Guide + Neo4j live stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout orchestrator
+        uses: actions/checkout@v4
+        with:
+          path: sdlc-spdd-orchestrator
+
+      # Private sibling repo: set repo secret GUIDE_CHECKOUT_TOKEN (classic PAT or
+      # fine-grained read on jmjava/guide). Falls back to GITHUB_TOKEN (works only if
+      # guide is public or same-repo access is granted).
+      - name: Checkout jmjava/guide (SPDD spike branch)
+        uses: actions/checkout@v4
+        with:
+          repository: jmjava/guide
+          ref: cursor/spike-spdd-dice-projection-17f4
+          path: guide
+          token: ${{ secrets.GUIDE_CHECKOUT_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: guide/pom.xml
+
+      - name: Install orchestrator engine
+        working-directory: sdlc-spdd-orchestrator
+        run: python3 -m pip install -e './engine[dev,viewer]'
+
+      - name: Prefetch Guide Maven deps
+        working-directory: guide
+        run: ./mvnw -q -DskipTests dependency:go-offline || ./mvnw -q -DskipTests -DskipITs validate
+
+      - name: Live Guide + Neo4j stack test
+        working-directory: sdlc-spdd-orchestrator
+        env:
+          CI: 'true'
+          SDLC_GUIDE_STACK_LIVE: '1'
+          GUIDE_HOME: ${{ github.workspace }}/guide
+          GUIDE_GIT_REF: cursor/spike-spdd-dice-projection-17f4
+          GUIDE_PORT: '21337'
+          NEO4J_BOLT_PORT: '7687'
+          NEO4J_HTTP_PORT: '7474'
+          GUIDE_START_TIMEOUT_SEC: '900'
+          GUIDE_STOP_NEO4J: '1'
+          # Placeholder so Spring Anthropic autoconfigure does not block boot.
+          ANTHROPIC_API_KEY: dummy-key
+        run: |
+          chmod +x tests/test-guide-stack-live.sh
+          ./tests/test-guide-stack-live.sh
+
+      - name: Upload Guide log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guide-stack-logs
+          path: |
+            /tmp/sdlc-guide-*.log
+          if-no-files-found: ignore

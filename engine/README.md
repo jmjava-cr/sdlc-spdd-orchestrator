@@ -63,13 +63,16 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `db` | Regenerable local SQLite index (`.sdlc/index.sqlite`) before GUIDE |
 | `commit_message` | Staged/unstaged/ahead-of-base diff report for commit-message drafts |
 | `viewer` | ADF WYSIWYG editor for checked-in `adf/*.json` (optional `[viewer]` / Flask) |
+| `installer` / `console` / `dashboard` | **EXPERIMENTAL** ops console: install/upgrade, SQLite, rollback, Guide+Neo4j (optional `[viewer]` / Flask) |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
 
 ADF viewer runbook: [docs/adf-viewer.md](../docs/adf-viewer.md).
+Ops console: [docs/installing-into-your-project.md](../docs/installing-into-your-project.md).
 
 ```bash
 python3 -m pip install -e './engine[dev,viewer]'
 ./scripts/sdlc.sh viewer --port 5050
+./scripts/sdlc.sh console --target /path/to/app --port 5051
 ```
 
 ## Compatibility

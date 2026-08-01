@@ -484,6 +484,31 @@ def cmd_viewer(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_installer(args: argparse.Namespace) -> int:
+    """Launch the ops console (install/upgrade, SQLite, rollback, Guide)."""
+    try:
+        from .installer.app import run_installer
+    except ImportError as exc:
+        print(
+            "installer/console requires Flask. Install with: "
+            "python3 -m pip install -e './engine[viewer]'",
+            file=sys.stderr,
+        )
+        print(str(exc), file=sys.stderr)
+        return 1
+    project = _project(args)
+    host = "0.0.0.0" if getattr(args, "lan", False) else args.host
+    target = getattr(args, "target", None) or str(project.root)
+    run_installer(
+        target,
+        host=host,
+        port=args.port,
+        debug=bool(args.debug),
+        open_browser=not bool(getattr(args, "no_browser", False)),
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdlc-engine",
@@ -772,6 +797,42 @@ def build_parser() -> argparse.ArgumentParser:
         help="Bind 0.0.0.0 for LAN access (opt-in)",
     )
     vw.set_defaults(func=cmd_viewer)
+
+    def _add_console_parser(name: str, help_text: str) -> None:
+        inst = sub.add_parser(name, help=help_text)
+        inst.add_argument(
+            "--target",
+            default=None,
+            help="Default target project path shown in the UI (default: --root / cwd)",
+        )
+        inst.add_argument("--host", default="127.0.0.1", help="Bind address (default 127.0.0.1)")
+        inst.add_argument("--port", type=int, default=5051)
+        inst.add_argument("--debug", action="store_true")
+        inst.add_argument(
+            "--lan",
+            action="store_true",
+            help="Bind 0.0.0.0 for LAN access (opt-in)",
+        )
+        inst.add_argument(
+            "--no-browser",
+            action="store_true",
+            help="Do not open a browser tab automatically",
+        )
+        inst.set_defaults(func=cmd_installer)
+
+    _add_console_parser(
+        "installer",
+        "EXPERIMENTAL ops console: install/upgrade, SQLite, rollback, Guide "
+        "(Flask; [viewer] extra) — not a stable consumer install path",
+    )
+    _add_console_parser(
+        "console",
+        "EXPERIMENTAL alias for installer — ops console UI",
+    )
+    _add_console_parser(
+        "dashboard",
+        "EXPERIMENTAL alias for installer — ops console UI",
+    )
     return p
 
 
