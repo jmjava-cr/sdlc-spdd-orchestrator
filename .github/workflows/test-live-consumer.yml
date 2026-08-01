@@ -48,11 +48,27 @@ jobs:
       - name: Run live consumer shell matrix
         run: ./tests/test-live-consumer-matrix.sh
 
+  # Probe secret via env (secrets cannot be used in job-level if: expressions).
+  cursor-api-key-available:
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          if [ -n "${CURSOR_API_KEY}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # Real Cursor SDK agents — requires repo secret CURSOR_API_KEY.
-  # Skips cleanly when the secret is absent (forks / local mirrors).
   test-live-consumer-cursor-sdk:
     runs-on: ubuntu-latest
-    if: ${{ secrets.CURSOR_API_KEY != '' }}
+    needs: cursor-api-key-available
+    if: needs.cursor-api-key-available.outputs.available == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +89,7 @@ jobs:
         run: npm ci --no-fund --no-audit
         working-directory: tests/live-consumer/cursor-agent
 
-      - name: Cursor SDK persistence + SQLite context (phase A–D)
+      - name: Cursor SDK persistence + SQLite context (phases A-D)
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           LIVE_CURSOR_MODEL: composer-2.5

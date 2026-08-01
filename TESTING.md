@@ -280,6 +280,9 @@ Add the key under **GitHub → Settings → Secrets and variables → Actions** 
 `CURSOR_API_KEY` (same Integrations key as local). Cursor Dashboard “runtime /
 Cloud Agents” secrets do **not** inject into GitHub Actions.
 
+Note: GitHub forbids `secrets.*` in job-level `if:` expressions (workflow fails
+to start). Availability is probed via a tiny job that sets an output from env.
+
 ```bash
 ./tests/test-live-consumer-matrix.sh
 
