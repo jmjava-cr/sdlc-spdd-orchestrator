@@ -46,20 +46,23 @@ flowchart LR
 | JDK 21 + Maven | Guide builds with `./mvnw` |
 | Docker | Neo4j runs via Guide's compose setup (or point at your own Neo4j) |
 | OpenAI API key | embeddings + chat models used by Guide |
-| Guide fork | `github.com/jmjava/guide`, branch **`cursor/spike-spdd-dice-projection-17f4`** (validated at commit `fc75c19`) |
+| Guide fork | `github.com/jmjava/guide`, tag **`sdlc-spdd-projection-v1`** (on `main` after PR #2; commit `a6e3246`) |
 | This repo | `sdlc-spdd-orchestrator` (any SDLC-SPDD project layout works) |
 
-## 1. Get the Guide branch
+## 1. Get Guide (pinned tag)
 
 ```bash
 git clone git@github.com:jmjava/guide.git
 cd guide
-git checkout cursor/spike-spdd-dice-projection-17f4
+git fetch --tags
+git checkout sdlc-spdd-projection-v1
+# or: git checkout main   # floating tip (includes the same merge)
 ```
 
-The branch tracks upstream `embabel/guide` main plus the SPDD projection package
+`main` tracks upstream `embabel/guide` plus the SPDD projection package
 (`com.embabel.guide.spdd`) — see `docs/spdd-projection-ingest.md` in that repo for the
-change summary aimed at Guide developers.
+change summary aimed at Guide developers. The orchestrator console defaults
+`guide_git_ref` to **`sdlc-spdd-projection-v1`**.
 
 ## 2. Configure Guide
 

@@ -6,10 +6,8 @@
 - **Requirement:** `requirements/milestones/SPIKE-001-guide-rag-context-backend.md`
 - **Canvas:** `spdd/canvas/SPIKE-001-guide-rag-context-backend.md`
 - **Timestamp:** 2026-07-05T15:10:00Z
-- **Branch policy:** T06 recorded as **provisional go** (2026-08-01) — land via integration
-  PR #56 for field confirmation; Guide runtime still pins
-  `jmjava/guide` `cursor/spike-spdd-dice-projection-17f4` until Guide #2 merges.
-- **Guide branch:** `jmjava/guide` → `cursor/spike-spdd-dice-projection-17f4` (NamedEntity + neo4j profiles)
+- **Branch policy:** T06 **provisional go** (2026-08-01); Guide #2 merged to `jmjava/guide` `main`.
+- **Guide pin:** tag **`sdlc-spdd-projection-v1`** (`a6e3246` on `main`) — NamedEntity + neo4j profiles
 - **PR:** #24 (spike) · #56 (integration → `main` for field dogfood)
 
 ## Domain Keywords

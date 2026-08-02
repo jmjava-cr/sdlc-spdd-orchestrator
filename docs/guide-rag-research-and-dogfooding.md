@@ -83,7 +83,8 @@ Bring up local Guide + Neo4j from the orchestrator ops console:
 The **Guide** tab drives an **Embabel-mechanics-aligned** local stack:
 
 1. Saves `.sdlc/guide-config.json` (gitignored) — ports, profile, `SPRING_PROFILES_ACTIVE=neo4j,local,<profile>`
-2. **Ensure / pull jmjava/guide** — clones/pulls the spike ref (`cursor/spike-spdd-dice-projection-17f4`)
+2. **Ensure / pull jmjava/guide** — clones/pulls the pinned tag `sdlc-spdd-projection-v1`
+   (SPDD NamedEntity projection on `main`; override with `GUIDE_GIT_REF=main` for tip)
 3. **Write Embabel SPDD profile** — generates `application-sdlc-spdd.yml` with `guide.spdd-projection.enabled=true` + RAG directories
 4. **Start Neo4j** — Guide compose (`embabel-neo4j`) with custom `NEO4J_*_PORT`
 5. **Start Guide (+ingest)** — `append-ingest.sh` (keeps the `neo4j` Spring profile) 

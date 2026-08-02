@@ -68,9 +68,10 @@ def default_config() -> dict[str, Any]:
         "guide_home": home,
         "guide_git_url": os.environ.get("GUIDE_GIT_URL", DEFAULT_GIT_URL).strip()
         or DEFAULT_GIT_URL,
-        # Prefer the SPDD DICE spike branch when present; empty = leave checkout as-is.
+        # Pin the merged SPDD NamedEntity projection on jmjava/guide (tag on main).
+        # Override with GUIDE_GIT_REF=main for floating tip, or a branch/tag of your choice.
         "guide_git_ref": os.environ.get(
-            "GUIDE_GIT_REF", "cursor/spike-spdd-dice-projection-17f4"
+            "GUIDE_GIT_REF", "sdlc-spdd-projection-v1"
         ).strip(),
         "profile": os.environ.get("GUIDE_PROFILE", "sdlc-spdd").strip() or "sdlc-spdd",
         "spring_profiles": os.environ.get("SPRING_PROFILES_ACTIVE", "").strip(),

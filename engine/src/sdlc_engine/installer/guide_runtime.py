@@ -146,18 +146,33 @@ def ensure_guide_repo(
     ref = str(cfg.get("guide_git_ref") or "").strip()
 
     if pull or ref:
-        fetch = _run(["git", "-C", str(home), "fetch", "origin"], timeout=300)
+        # Include tags so guide_git_ref can pin release tags (e.g. sdlc-spdd-projection-v1).
+        fetch = _run(
+            ["git", "-C", str(home), "fetch", "origin", "--tags", "--force"],
+            timeout=300,
+        )
         logs.append(fetch.get("log") or "")
 
     if ref:
-        # Checkout spike/release branch when configured (creates local tracking branch if needed).
+        # Checkout branch or tag when configured (creates local tracking branch if needed).
         cur = _run(["git", "-C", str(home), "rev-parse", "--abbrev-ref", "HEAD"])
         current = (cur.get("log") or "").strip().splitlines()[-1]
-        if current != ref:
+        # Detached HEAD at a tag reports HEAD; also compare the resolved object.
+        resolved = _run(["git", "-C", str(home), "rev-parse", "HEAD"])
+        want = _run(["git", "-C", str(home), "rev-parse", f"{ref}^{{commit}}"])
+        already = (
+            want.get("ok")
+            and resolved.get("ok")
+            and (resolved.get("log") or "").strip() == (want.get("log") or "").strip()
+        )
+        if not already and current != ref:
             co = _run(
                 ["git", "-C", str(home), "checkout", "-B", ref, f"origin/{ref}"],
                 timeout=120,
             )
+            if not co["ok"]:
+                # Annotated / lightweight tag, or local branch name.
+                co = _run(["git", "-C", str(home), "checkout", "--detach", ref], timeout=120)
             if not co["ok"]:
                 co = _run(["git", "-C", str(home), "checkout", ref], timeout=120)
             logs.append(co.get("log") or "")
@@ -176,16 +191,26 @@ def ensure_guide_repo(
     if pull:
         branch = _run(["git", "-C", str(home), "rev-parse", "--abbrev-ref", "HEAD"])
         br = (branch.get("log") or "main").strip().splitlines()[-1]
-        if br == "HEAD":
-            pull_res = _run(
-                ["git", "-C", str(home), "pull", "--ff-only"],
-                timeout=300,
+        # Detached checkouts (release tags) are already at the pin after checkout above.
+        if br == "HEAD" and ref:
+            head = _run(["git", "-C", str(home), "rev-parse", "--short", "HEAD"])
+            logs.append(
+                f"HEAD {(head.get('log') or '').strip()} detached at {ref} (tag/pin; skip pull)"
             )
-        else:
-            pull_res = _run(
-                ["git", "-C", str(home), "pull", "--ff-only", "origin", br],
-                timeout=300,
-            )
+            return {
+                "ok": True,
+                "action": "checkout",
+                "guide_home": str(home),
+                "git_url": url,
+                "git_ref": ref,
+                "exit_code": 0,
+                "log": "\n".join(x for x in logs if x).strip(),
+                "error": None,
+            }
+        pull_res = _run(
+            ["git", "-C", str(home), "pull", "--ff-only", "origin", br],
+            timeout=300,
+        )
         logs.append(pull_res.get("log") or "")
         head = _run(["git", "-C", str(home), "rev-parse", "--short", "HEAD"])
         logs.append(f"HEAD {(head.get('log') or '').strip()} on {br}")
