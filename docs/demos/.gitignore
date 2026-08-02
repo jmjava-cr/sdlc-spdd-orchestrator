@@ -1,0 +1,10 @@
+# Regenerable docgen outputs (never commit on main — publish via deploy-docs-pages-local.sh)
+.venv/
+audio/*.mp3
+animations/media/
+animations/timing.json
+animations/.scene-spec-drafts/
+recordings/*.mp4
+.docgen-state.json
+__pycache__/
+*.pyc

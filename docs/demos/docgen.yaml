@@ -85,7 +85,9 @@ narration_from_source:
     '02':
       hints:
       - 'Walk the adoption path: clone the orchestrator, run setup-agent-prompts.sh against a target app, verify with verify-project-install.sh,
-        then open the target in Cursor, Copilot, or Claude Code.'
+        then open the target in Cursor, Copilot, or Claude Code. Shell scripts remain the supported consumer install path.'
+      - 'Mention the experimental ops console (sdlc.sh console on port 5051) for dogfood installs, SQLite, rollback, and Guide lifecycle,
+        and the separate ADF Viewer on port 5050 for editing adf JSON and Jira sync — see docs/ops-console.md. Editing does not happen in the console.'
       - 'Cover the first-session loop from first-day-with-sdlc-spdd.md: init, analysis, plan, architect, code one operation,
         API test, review, capture memory — one small increment.'
       - 'Reference workflow.md steps 1–6: set up prompts, initialize, map milestone work, start session with Resume Prompt,
@@ -97,25 +99,31 @@ narration_from_source:
         paths:
         - docs/first-day-with-sdlc-spdd.md
         - docs/installing-into-your-project.md
+        - docs/ops-console.md
+        - docs/adf-viewer.md
         - docs/workflow.md
         - docs/initialization-and-invocation.md
+        - README.md
     '03':
       hints:
-      - Explain why this repo uses Embabel Guide + Neo4j as a local research backend during /sdlc-spdd-analysis instead of
-        pasting large external docs into every prompt.
-      - 'Summarize the layered menke profiles: menke (code repos), menke-2 (SPDD and context engineering URLs), menke-3 (framework
-        depth), menke-4 (docgen + course-builder docs) — each an append pass on the same store.'
+      - Explain why this repo uses Embabel Guide + Neo4j as an optional local research / DICE context backend during /sdlc-spdd-analysis
+        instead of pasting large external docs into every prompt. Files stay canonical; Guide is runtime-resolved.
+      - 'Note SPIKE-001 provisional go on main, Guide pin tag sdlc-spdd-projection-v1, and that the ops console Guide tab can start Neo4j + Guide for dogfood.'
+      - 'Summarize dual ingest: RAG chunks plus typed entity projection (WorkId, Area, Decision, Pitfall, Pattern) and spdd_* retrieval tools.'
       - 'Describe MCP usage: docs_vectorSearch for concepts, docs_textSearch for exact CLI flags; cite chunk URIs in spdd/analysis
         artifacts.'
       - 'Present the dogfood table: SPDD on self, docgen on self (this bundle), Guide on self, posture guard keeping templates
-        clean.'
-      - 'State clearly what does not ship to target projects: Guide YAML, Neo4j, MCP wiring, .venv, regenerable docgen outputs.'
+        clean. Clarify ADF Viewer is separate and does not talk to Guide.'
+      - 'State clearly what does not ship to target projects: Guide YAML, Neo4j, MCP wiring, .venv, regenerable docgen outputs. Opt-in is --with-guide / guide-dice harness only.'
       context:
         paths:
+        - docs/guide-flow.md
+        - docs/ops-console.md
         - docs/guide-rag-research-and-dogfooding.md
-        - spdd/analysis/SPIKE-retrieval-reference-corpus.md
+        - docs/dice-projection-runbook.md
         - spdd/canvas/SPIKE-001-guide-rag-context-backend.md
         - docs/context-loading-and-scaling.md
+        - README.md
 manim_scene_generation:
   model: gpt-4o
   temperature: 0.4

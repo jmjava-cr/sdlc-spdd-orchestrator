@@ -28,7 +28,7 @@
     <div class="container">
         <header>
             <h1>SDLC-SPDD Orchestrator</h1>
-            <p class="subtitle">Narrated demo segments — Planning, SPDD, and Guide RAG dogfooding. Generated with <code>docgen</code> (orchestrator dev tooling).</p>
+            <p class="subtitle">Narrated demo segments — Planning, SPDD, local GUIs, and Guide dogfooding. Generated with <code>docgen</code> (orchestrator dev tooling).</p>
         </header>
 
         <h2 class="section-title">Segments</h2>
@@ -36,8 +36,8 @@
             <div class="video-card" id="seg-01">
                 <p class="seg-id">#seg-01</p>
                 <h2>01 — SDLC-SPDD intro</h2>
-                <span class="duration">~1m 33s</span>
-                <p>What SDLC-SPDD is, the three-part framework, and the REASONS loop.</p>
+                <span class="duration">~1m 41s</span>
+                <p>What SDLC-SPDD is, the three-part framework, the REASONS loop, and contributor local tooling.</p>
                 <video controls preload="metadata">
                     <source src="demos/recordings/01-sdlc-spdd-intro.mp4" type="video/mp4">
                 </video>
@@ -46,8 +46,8 @@
             <div class="video-card" id="seg-02">
                 <p class="seg-id">#seg-02</p>
                 <h2>02 — Install and workflow</h2>
-                <span class="duration">~1m 49s</span>
-                <p>Installing into a target project and the daily workflow (steps 1–6).</p>
+                <span class="duration">~2m 26s</span>
+                <p>Shell install path, experimental ops console (:5051) + ADF Viewer (:5050), and the first-session workflow.</p>
                 <video controls preload="metadata">
                     <source src="demos/recordings/02-install-and-workflow.mp4" type="video/mp4">
                 </video>
@@ -56,17 +56,31 @@
             <div class="video-card" id="seg-03">
                 <p class="seg-id">#seg-03</p>
                 <h2>03 — Guide RAG and dogfooding</h2>
-                <span class="duration">~2m 5s</span>
-                <p>Embabel Guide research corpus, MCP analysis, and how this repo dogfoods SPDD + docgen.</p>
+                <span class="duration">~2m 19s</span>
+                <p>Optional Guide + Neo4j context backend, projection tag, ops console Guide tab, and what does not ship to targets.</p>
                 <video controls preload="metadata">
                     <source src="demos/recordings/03-guide-rag-dogfood.mp4" type="video/mp4">
                 </video>
             </div>
         </div>
 
+        <h2 class="section-title">Full demo</h2>
+        <div class="videos-grid">
+            <div class="video-card" id="full-demo">
+                <p class="seg-id">#full-demo</p>
+                <h2>All segments</h2>
+                <span class="duration">~6m 27s</span>
+                <p>Concatenated intro + install/workflow + Guide dogfood.</p>
+                <video controls preload="metadata">
+                    <source src="demos/recordings/full-demo.mp4" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
         <footer class="footer">
             <p>Source: <a href="https://github.com/jmjava/sdlc-spdd-orchestrator">sdlc-spdd-orchestrator</a> ·
-            Regenerate locally via <code>docs/demos/TOOLING.md</code> (manual pipeline; no CI render).</p>
+            Regenerate locally via <code>docs/demos/TOOLING.md</code> (manual pipeline; no CI render).
+            Local GUIs: <a href="https://github.com/jmjava/sdlc-spdd-orchestrator/blob/main/docs/ops-console.md">ops-console.md</a>.</p>
         </footer>
     </div>
 </body>
