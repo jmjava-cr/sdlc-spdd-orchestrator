@@ -64,10 +64,12 @@ They dogfood a full Guide + Neo4j instance; they are not a consumer install cont
 Live stack (opt-in locally; CI workflow `test-guide-stack-experimental.yml`):
 
 ```bash
-# Requires Docker, Java 21, and a jmjava/guide checkout on the SPDD spike branch
+# Requires Docker, Java 21, and jmjava/guide @ sdlc-spdd-projection-v1 (or main)
 SDLC_GUIDE_STACK_LIVE=1 GUIDE_HOME=~/github/jmjava/guide \
   ./tests/test-guide-stack-live.sh
 ```
+
+GUI map (console Guide tab vs ADF Viewer): [ops-console.md](ops-console.md).
 
 This starts Compose Neo4j, boots Guide with `SPRING_PROFILES_ACTIVE=neo4j,local,sdlc-spdd`,
 loads NamedEntity projection, probes MCP SSE, then stops Guide.

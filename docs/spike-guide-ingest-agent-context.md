@@ -1,15 +1,16 @@
 # SPIKE — Guide ingest for agent-context store
 
-> **Operator supplement** to the SPDD analysis artifact — not a substitute.  
-> **Canonical:** `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`  
-> **Branch:** `cursor/spike-guide-ingest-agent-context-17f4` only. Do not merge to `main` until T06 go/no-go.
+> **Historical T01 operator notes** (menke-5 / early spike branches).  
+> **Current on `main`:** [Guide flow](guide-flow.md), [DICE projection runbook](dice-projection-runbook.md)
+> (Guide tag `sdlc-spdd-projection-v1`), and [ops console](ops-console.md) Guide tab.  
+> **Canonical analysis:** `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md`
 
-Exploration branch for [SPIKE-001](../spdd/canvas/SPIKE-001-guide-rag-context-backend.md)
-**T01**: ingest orchestrator `agent-context/` and `spdd/` into the existing Guide/Neo4j
-store (leg 2 — RAG chunks) so MCP search can reach Work IDs, indexes, and analysis artifacts
-already indexed in markdown.
+Original exploration for [SPIKE-001](../spdd/canvas/SPIKE-001-guide-rag-context-backend.md)
+**T01**: ingest orchestrator `agent-context/` and `spdd/` into Guide/Neo4j
+(leg 2 — RAG chunks) so MCP search can reach Work IDs and analysis artifacts.
 
-This is **throwaway / local-only**. Target projects never receive Guide profiles or Neo4j data.
+Target projects still never receive Guide profiles or Neo4j data — only the optional
+`guide-dice` harness marker when installed with `--with-guide`.
 
 ## Guide branches (pair with this orchestrator spike)
 

@@ -63,16 +63,17 @@ SDLC_ENGINE=auto ./scripts/sdlc.sh next   # python if importable, else shell
 | `db` | Regenerable local SQLite index (`.sdlc/index.sqlite`) before GUIDE |
 | `commit_message` | Staged/unstaged/ahead-of-base diff report for commit-message drafts |
 | `viewer` | ADF WYSIWYG editor for checked-in `adf/*.json` (optional `[viewer]` / Flask) |
-| `installer` / `console` / `dashboard` | **EXPERIMENTAL** ops console: install/upgrade, SQLite, rollback, Guide+Neo4j (optional `[viewer]` / Flask) |
+| `installer` / `console` / `dashboard` | **EXPERIMENTAL** ops console: install/upgrade, SQLite, rollback, Guide+Neo4j, ADF viewer lifecycle (optional `[viewer]` / Flask) |
 | `cli` | `sdlc-engine` / `python -m sdlc_engine` |
 
-ADF viewer runbook: [docs/adf-viewer.md](../docs/adf-viewer.md).
-Ops console: [docs/installing-into-your-project.md](../docs/installing-into-your-project.md).
+Two local GUIs + Guide map: [docs/ops-console.md](../docs/ops-console.md)
+(Guide pin for console dogfood: tag **`sdlc-spdd-projection-v1`**).  
+ADF editor runbook: [docs/adf-viewer.md](../docs/adf-viewer.md).
 
 ```bash
 python3 -m pip install -e './engine[dev,viewer]'
-./scripts/sdlc.sh viewer --port 5050
-./scripts/sdlc.sh console --target /path/to/app --port 5051
+./scripts/sdlc.sh console --target /path/to/app --port 5051   # ops UI
+./scripts/sdlc.sh viewer --root /path/to/app --port 5050      # ADF editor
 ```
 
 ## Compatibility
@@ -94,12 +95,21 @@ Or without install (viewer tests need Flask):
 PYTHONPATH=engine/src python3 -m pytest -q engine/tests
 ```
 
-ADF viewer Playwright GUI (opt-in):
+Installer / ops-console coverage (always-on in CI):
+
+```bash
+PYTHONPATH=engine/src pytest -q engine/tests/test_installer*.py \
+  --cov=sdlc_engine.installer --cov-fail-under=90
+# includes live ADF start/stop: test_installer_adf_live.py
+```
+
+Playwright GUI (opt-in; CI sets the env flags):
 
 ```bash
 python3 -m pip install -e './engine[dev,viewer-e2e]'
 playwright install chromium
 SDLC_VIEWER_E2E=1 pytest -q engine/tests/test_viewer_playwright.py -m viewer_e2e
+SDLC_CONSOLE_E2E=1 pytest -q engine/tests/test_console_playwright.py -m console_e2e
 ```
 
 ## Design notes

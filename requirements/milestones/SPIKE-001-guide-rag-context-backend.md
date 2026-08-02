@@ -57,25 +57,26 @@ before committing. The output is a **decision**, not production code.
 
 - No production integration, no required dependency, no changes to the default
   markdown-first path.
-- **No merge to `main`** until T06 go/no-go. All spike work on `cursor/spike-*` branches.
+- Markdown-first path remains the default; Guide stays optional and runtime-resolved.
+- T06 **provisional go** (2026-08-01): optional Guide path + ops console are on `main`
+  for field confirmation ([#56](https://github.com/jmjava/sdlc-spdd-orchestrator/pull/56)).
 
 ## Branch policy
 
-All implementation, tests, and docs for this spike live on dedicated spike branches
-(for example `cursor/spike-guide-ingest-agent-context-17f4`). The markdown-first
-workflow on `main` must not gain Guide dependencies, installer changes, or command
-template changes during the experiment.
+Spike exploration lived on `cursor/spike-*` branches (draft PR #24). Product path for
+field dogfood is now `main`. Guide projection ships as tag **`sdlc-spdd-projection-v1`**
+on `jmjava/guide` (after [guide #2](https://github.com/jmjava/guide/pull/2)). Default
+installs still must not *require* Guide — only `--with-guide` / harness marker opt-in.
 
 ## Next Step
 
-Active spike branch (draft PR #24):
+Field-confirm Guide retrieval vs files on real Work IDs:
 
-    /sdlc-spdd-analysis @requirements/milestones/SPIKE-001-guide-rag-context-backend.md
-    # → spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md
+    ./scripts/sdlc.sh console --target .   # Guide tab + ADF launch — docs/ops-console.md
+    # pin: GUIDE_GIT_REF defaults to sdlc-spdd-projection-v1
 
-Integration branch `integrate/console-and-spike-001` combines SPIKE-001 with the
-experimental ops console (`./scripts/sdlc.sh console`). Continue T06 go/no-go;
-operator dogfood prefers the console over ad-hoc shell-only Guide babysitting.
+See [docs/guide-flow.md](../../docs/guide-flow.md) and
+[docs/dice-projection-runbook.md](../../docs/dice-projection-runbook.md).
 
 ## Jira
 

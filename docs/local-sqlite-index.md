@@ -14,8 +14,10 @@ stdlib `sqlite3` — no database server.
 **Multi-user sync stays git:** `work-registry.tsv`, canvases, milestone requirements.
 Each machine rebuilds its own SQLite file after pull/claim.
 
-This is the intended step **before** GUIDE (Embabel Guide + Neo4j): same questions,
-cheaper substrate; swap the backend later if SPIKE-001 goes ahead.
+This is the intended step **before** optional Guide (Embabel Guide + Neo4j): same
+questions, cheaper substrate. SPIKE-001’s Guide path is on `main` for field
+confirmation; SQLite remains the zero-install local cache either way. See
+[ops-console.md](ops-console.md) (SQLite tab) and [guide-flow.md](guide-flow.md).
 
 ## Commands
 

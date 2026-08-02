@@ -134,8 +134,29 @@ python3 -m pip install -e './engine[dev]' && pytest -q engine/tests
 ```
 
 Covers pointer, workflow, registry, archive, canvas parsing, link/issue sync,
-local/offline sessions, and CLI. `scripts/sdlc.sh` with `SDLC_ENGINE=python`
-delegates to the engine; `local*` commands always use the Python engine.
+local/offline sessions, CLI, ADF viewer (Flask), and the experimental ops console.
+`scripts/sdlc.sh` with `SDLC_ENGINE=python` delegates to the engine; `local*`
+commands always use the Python engine.
+
+Installer / ops-console gate (also in `test-sdlc-engine.yml`):
+
+```bash
+PYTHONPATH=engine/src pytest -q engine/tests/test_installer*.py \
+  --cov=sdlc_engine.installer --cov-fail-under=90
+```
+
+Includes a **live** ADF Viewer start → HTTP probe → stop via `/api/adf*`
+(`test_installer_adf_live.py`). Guide + Neo4j live stack stays opt-in
+(`SDLC_GUIDE_STACK_LIVE=1` / `test-guide-stack-experimental.yml`).
+
+Playwright (CI with Chromium):
+
+```bash
+SDLC_VIEWER_E2E=1 pytest -q engine/tests/test_viewer_playwright.py -m viewer_e2e
+SDLC_CONSOLE_E2E=1 pytest -q engine/tests/test_console_playwright.py -m console_e2e
+```
+
+GUI map: [docs/ops-console.md](docs/ops-console.md).
 
 Issue sync confidence:
 

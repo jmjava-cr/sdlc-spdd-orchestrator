@@ -21,7 +21,7 @@ flowchart LR
         MD["Markdown artifacts<br/>spdd/canvas/*.md<br/>agent-context/memory/context-index.md"]
     end
 
-    subgraph Guide["Guide (fork branch) + Neo4j"]
+    subgraph Guide["Guide (sdlc-spdd-projection-v1) + Neo4j"]
         CH["RAG chunks<br/>(legs 1-2)"]
         EN["Domain entities __Entity__<br/>WorkId, Canvas, Area,<br/>Decision, Pitfall, Pattern<br/>(leg 3)"]
     end
@@ -62,7 +62,9 @@ git checkout sdlc-spdd-projection-v1
 `main` tracks upstream `embabel/guide` plus the SPDD projection package
 (`com.embabel.guide.spdd`) — see `docs/spdd-projection-ingest.md` in that repo for the
 change summary aimed at Guide developers. The orchestrator console defaults
-`guide_git_ref` to **`sdlc-spdd-projection-v1`**.
+`guide_git_ref` to **`sdlc-spdd-projection-v1`**. Prefer
+`./scripts/sdlc.sh console --target .` ([ops-console.md](ops-console.md)) for day-to-day
+dogfood start/stop instead of babysitting the JVM by hand.
 
 ## 2. Configure Guide
 
@@ -188,7 +190,7 @@ When it reports `guide-dice`:
 | Symptom | Fix |
 |---------|-----|
 | `spdd_*` tools missing in client | Reload the MCP server entry in the client; confirm `guide.spdd-projection.enabled=true` and check Guide log for `Exposing N tools` |
-| 403 on projection endpoints | You are running a Guide build without the spike's security permits — use the fork branch |
+| 403 on projection endpoints | You are running a Guide build without SPDD projection permits — use tag `sdlc-spdd-projection-v1` (or a build that includes guide PR #2) |
 | 400 `not under an allowed root` | Add the target to `guide.spdd-projection.allowed-roots` or use the default root |
 | JVM dies during startup re-ingest | Known native ONNX crash under heavy embedding load; append mode is idempotent — restart and it resumes |
 | Stats all zero after load | Wrong root: the loader needs `spdd/canvas/` and `agent-context/memory/context-index.md` under the root you posted |
