@@ -9,9 +9,11 @@ projects via `setup-agent-prompts.sh`. See
 [Guide RAG research and dogfooding](../guide-rag-research-and-dogfooding.md) for why we
 dogfood docgen here.
 
-**Current scope:** three segments with Manim visuals, composed MP4s under
+**Current scope:** three segments with **declarative Manim scene specs**
+(`animations/specs/*.scene.yaml` → compiled `scenes.py`), composed MP4s under
 `recordings/` (gitignored on `main`), GitHub **Pages** via
 **`scripts/deploy-docs-pages-local.sh`**. Video regeneration is **manual** locally — no CI render workflow.
+Default regen: **`./generate-all.sh --retry-manim`** (auto scene-spec on first run; retime thereafter).
 
 **CI:** `docgen-lint.yml` runs narration lint on PRs only (no TTS/Manim/ffmpeg in CI).
 
@@ -45,7 +47,8 @@ docgen --config docgen.yaml lint
 
 ## Maintainer workflow
 
-After editing hint files under **`hints/`** or **`animations/scenes.py`**:
+After editing hint files under **`hints/`** or scene specs under **`animations/specs/`**
+(prefer specs — do not hand-edit generated scene classes):
 
 ```bash
 cd docs/demos
