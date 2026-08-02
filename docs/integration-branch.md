@@ -1,5 +1,9 @@
 # Integration branch: `cursor/integration-981e`
 
+> **Historical.** This branch was the mid-2026 make-it-right landing vehicle and is
+> already on `main`. Prefer root [README](../README.md) and [TESTING.md](../TESTING.md)
+> for current gates. Kept as a record of the checklist that was used.
+
 Collect planned merges off `main`, run automated gates and a manual checklist, then land everything in one merge to `main`.
 
 | | |

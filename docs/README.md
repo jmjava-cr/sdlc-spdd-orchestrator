@@ -32,6 +32,8 @@ Use roadmap, milestone, and session-note files for project planning and narrativ
 
 **Python engine (v2):** [Engine v2](engine-v2.md) — reusable `sdlc_engine` package; `SDLC_ENGINE=auto|python|shell` on `scripts/sdlc.sh`.
 
+**Local GUIs (experimental ops console + ADF Viewer) and Guide wiring:** [Ops console and ADF Viewer](ops-console.md).
+
 You can treat these six pages as the canonical onboarding path.
 
 ## If You Are Installing or Upgrading
@@ -39,6 +41,8 @@ You can treat these six pages as the canonical onboarding path.
 | Guide | Use it when |
 |-------|-------------|
 | [Installing into your project](installing-into-your-project.md) | You are adding SDLC-SPDD to a target application for the first time |
+| [Ops console and ADF Viewer](ops-console.md) | You want the experimental localhost UIs (install/Guide/viewer) and how Guide fits |
+| [ADF Viewer](adf-viewer.md) | You edit checked-in `adf/*.adf.json` or sync ticket descriptions with Jira |
 | [Framework upgrade](framework-upgrade.md) | A target app already has an older SDLC-SPDD install |
 | [Cursor usage](cursor-usage.md) | You only need Cursor command setup and invocation |
 | [GitHub Copilot usage](copilot-usage.md) | You only need Copilot instructions and prompt files |
@@ -83,17 +87,18 @@ Also useful day to day:
 | Guide | Use it when |
 |-------|-------------|
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | You are changing scripts or documentation — includes orchestrator vs target paths and a consistency checklist |
-| [Integration branch](integration-branch.md) | You are testing or landing `cursor/integration-981e` before merge to `main` |
-| [Catch-up guide](catch-up.md) | You are reconciling remote branches and open PRs after time away |
+| [Integration branch](integration-branch.md) | **Historical** checklist for `cursor/integration-981e` (already on `main`) |
+| [Catch-up guide](catch-up.md) | **Historical** mid-July branch notes — see root README for current state |
 | [Command specs](contributing-command-specs.md) | You are editing Cursor/Copilot/Claude commands via `spec/commands/` |
 | [Extension manifest](contributing-extensions.md) | You are adding phase extensions, skills, or updating `manifest.md` |
+| [Ops console and ADF Viewer](ops-console.md) | Two local GUIs (`:5051` / `:5050`), tabs, and Guide integration map |
 | [Guide RAG research and dogfooding](guide-rag-research-and-dogfooding.md) | You use Embabel Guide + MCP for `/sdlc-spdd-analysis` or want the framework self-improvement loop explained |
-| [Local SQLite index](local-sqlite-index.md) | Zero-install `.sdlc/index.sqlite` query cache before GUIDE/Neo4j; multi-user sync stays git |
+| [Local SQLite index](local-sqlite-index.md) | Zero-install `.sdlc/index.sqlite` query cache; multi-user sync stays git; optional before Guide/Neo4j |
 | [Jira ADF + requirements sync (research)](research/jira-adf-and-requirements-sync.md) | Exact Cloud ADF / Server wiki payloads; requirements as source of truth for Jira + REASONS |
 | [Engine v2 — commit-message](engine-v2.md#commit-message-diff-report) | Python engine diff report for `/sdlc-spdd-commit-message` |
-| [SPIKE guide ingest (menke-5)](spike-guide-ingest-agent-context.md) | SPIKE-001 T01 operator steps; see `spdd/analysis/SPIKE-001-guide-rag-context-backend-analysis.md` for the SPDD artifact |
+| [SPIKE guide ingest (operator notes)](spike-guide-ingest-agent-context.md) | Historical T01 operator notes; prefer [Guide flow](guide-flow.md) + [DICE runbook](dice-projection-runbook.md) on `main` |
 | [Guide flow](guide-flow.md) | End-to-end optional Guide context backend: dual ingest, runtime resolution, per-phase tools, persist loop |
-| [DICE projection runbook](dice-projection-runbook.md) | Run against Guide tag `sdlc-spdd-projection-v1` (or `main`): typed entity persist/retrieve, `spdd_*` MCP tools |
+| [DICE projection runbook](dice-projection-runbook.md) | Run against Guide tag `sdlc-spdd-projection-v1` (or `GUIDE_GIT_REF=main`): typed entity persist/retrieve, `spdd_*` MCP tools |
 | [Narrated demos bundle](demos/README.md) | You maintain or extend the docgen bundle under `docs/demos/` |
 | [TESTING.md](../TESTING.md) | You need the command-testing confidence stack (CI gates, local smoke, planning-sync verification) |
 | [Design decisions](design-decisions.md) | You need rationale for major choices (including planned-but-not-installed features) |

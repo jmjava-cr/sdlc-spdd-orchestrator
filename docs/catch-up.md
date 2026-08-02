@@ -1,8 +1,13 @@
 # Catch-up guide
 
-Use this when returning after time away or reconciling remote branches offline.
+> **Historical (2026-07).** The integration merge to `main` already landed. For current
+> product state see the root [README](../README.md), [ops-console.md](ops-console.md),
+> and [guide-flow.md](guide-flow.md). SPIKE-001 is on `main` (T06 provisional go);
+> do not treat “parked until T06” rows below as current policy.
 
-**Current path:** land work through **`cursor/merge-integration-to-main-0ab2`** (contains `cursor/integration-981e` plus archive #29 and expanded tests). Do not merge draft PRs #25/#26/#27 separately.
+Use this when reconciling **old** branch notes from mid-July offline sessions.
+
+**Then-current path (superseded):** land work through **`cursor/merge-integration-to-main-0ab2`**.
 
 ```bash
 git fetch origin cursor/merge-integration-to-main-0ab2

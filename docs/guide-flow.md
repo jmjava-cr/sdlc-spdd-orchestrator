@@ -1,12 +1,16 @@
 # Guide flow — how SPDD work feeds and retrieves the Guide context backend
 
-**Work ID:** SPIKE-001-guide-rag-context-backend (current work)
+**Work ID:** SPIKE-001-guide-rag-context-backend  
+**Status:** On `main` for field confirmation (T06 provisional go). Guide pin:
+tag **`sdlc-spdd-projection-v1`** on `jmjava/guide`. Local dogfood UI:
+[ops-console.md](ops-console.md) (**Guide** tab). ADF editing is a separate app
+([adf-viewer.md](adf-viewer.md)) and does not use Guide.
 
 This document explains how the SDLC-SPDD workflow uses an
-[Embabel Guide](https://github.com/embabel/guide) instance (fork branch) plus
-Neo4j as an **optional** context backend. Files stay canonical; Guide adds two
-retrieval legs on top of them. No step here is required — every command works
-on the file-based indexes alone.
+[Embabel Guide](https://github.com/embabel/guide) instance plus Neo4j as an
+**optional** context backend. Files stay canonical; Guide adds two retrieval legs
+on top of them. No step here is required — every command works on the file-based
+indexes alone.
 
 ## The big picture
 
@@ -19,7 +23,7 @@ flowchart LR
         MD["Markdown artifacts<br/>spdd/canvas/*.md<br/>agent-context/memory/context-index.md<br/>analysis, session notes"]
     end
 
-    subgraph Guide["Guide (fork branch) + Neo4j"]
+    subgraph Guide["Guide (sdlc-spdd-projection-v1) + Neo4j"]
         CH["RAG chunks<br/>embedding + BM25<br/>(legs 1-2)"]
         EN["Domain entities __Entity__<br/>WorkId, Canvas, Area,<br/>Decision, Pitfall, Pattern<br/>typed edges (leg 3)"]
     end
@@ -108,6 +112,7 @@ without either Work ID knowing about the other.
 | Runtime probe | `scripts/resolve-context-backend.sh` (installed as `scripts/sdlc-spdd/resolve-context-backend.sh`) |
 | Opt-in marker | `agent-context/harness/guide-dice.md` (template: `templates/agent-context/harness/guide-dice.md`) |
 | Entity/edge contract | `spdd/analysis/SPIKE-001-dice-entity-schema.md` |
-| Full setup runbook (Guide branch, Neo4j, ingest, MCP wiring) | `docs/dice-projection-runbook.md` |
+| Full setup runbook (Guide tag, Neo4j, ingest, MCP wiring) | `docs/dice-projection-runbook.md` |
+| Ops console Guide + ADF launch | `docs/ops-console.md` |
 | A/B evidence (resolver vs embedding vs domain graph) | `spdd/analysis/SPIKE-001-retrieval-ab-ledger.md` |
 | Canvas / spike status | `spdd/canvas/SPIKE-001-guide-rag-context-backend.md` |

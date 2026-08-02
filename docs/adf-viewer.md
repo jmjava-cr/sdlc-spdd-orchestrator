@@ -100,6 +100,7 @@ Skipped by default unless `SDLC_VIEWER_E2E=1` or `--run-viewer-e2e`. Live Jira s
 
 ## Related
 
+- Ops console launch + two-GUI map: [ops-console.md](ops-console.md)
 - Research notes: [`docs/research/jira-adf-and-requirements-sync.md`](research/jira-adf-and-requirements-sync.md)
 - Engine module: `engine/src/sdlc_engine/viewer/`
 - Upload path: `issues upload-adf` / `IssueSyncService.upload_adf`
