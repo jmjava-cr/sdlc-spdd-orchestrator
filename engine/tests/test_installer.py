@@ -296,6 +296,10 @@ def test_api_guide_page_has_runtime_controls(tmp_path: Path) -> None:
     assert b"Incremental ingest" in page.data
     assert b"Purge preview" in page.data
     assert b"Purge ALL RAG" in page.data
+    assert b"ADF Viewer" in page.data
+    assert b"Start viewer" in page.data
+    assert b"Open ADF Viewer" in page.data
+    assert b'data-tab="adf"' in page.data
 
 
 def test_guide_ops_helpers_and_purge_confirm(tmp_path: Path) -> None:

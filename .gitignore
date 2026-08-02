@@ -9,6 +9,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.coverage
+htmlcov/
 engine/.venv/
 
 # Local secrets (TTS / Whisper for docgen pipeline)

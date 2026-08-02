@@ -39,6 +39,14 @@ from .guide_runtime import (
 from .pages import PAGE
 from .rollback import list_backups, restore_backup
 from .runner import orchestrator_root, run_action
+from .viewer_runtime import (
+    DEFAULT_HOST as ADF_DEFAULT_HOST,
+    DEFAULT_PORT as ADF_DEFAULT_PORT,
+    restart_viewer,
+    start_viewer,
+    stop_viewer,
+    viewer_payload,
+)
 
 
 def create_app(default_target: Path | str | None = None) -> Any:
@@ -482,6 +490,58 @@ def create_app(default_target: Path | str | None = None) -> Any:
         out = _guide_payload(target, cfg)
         out["result"] = result
         out["ok"] = bool(result.get("ok"))
+        return jsonify(out), (200 if result.get("ok") else 400)
+
+    def _adf_host_port(body: dict[str, Any]) -> tuple[str, int]:
+        host = str(body.get("host") or ADF_DEFAULT_HOST).strip() or ADF_DEFAULT_HOST
+        try:
+            port = int(body.get("port") or ADF_DEFAULT_PORT)
+        except (TypeError, ValueError):
+            port = ADF_DEFAULT_PORT
+        return host, port
+
+    @app.post("/api/adf")
+    def api_adf_status() -> Any:
+        body = request.get_json(silent=True) or {}
+        target = _target_from_body(body)
+        host, port = _adf_host_port(body)
+        return jsonify(viewer_payload(target, host=host, port=port))
+
+    @app.post("/api/adf/start")
+    def api_adf_start() -> Any:
+        body = request.get_json(silent=True) or {}
+        target = _target_from_body(body)
+        host, port = _adf_host_port(body)
+        result = start_viewer(target, host=host, port=port)
+        out = viewer_payload(target, host=host, port=port)
+        out["result"] = result
+        out["ok"] = bool(result.get("ok"))
+        if result.get("error"):
+            out["error"] = result["error"]
+        return jsonify(out), (200 if result.get("ok") else 400)
+
+    @app.post("/api/adf/stop")
+    def api_adf_stop() -> Any:
+        body = request.get_json(silent=True) or {}
+        target = _target_from_body(body)
+        host, port = _adf_host_port(body)
+        result = stop_viewer(target)
+        out = viewer_payload(target, host=host, port=port)
+        out["result"] = result
+        out["ok"] = bool(result.get("ok"))
+        return jsonify(out)
+
+    @app.post("/api/adf/restart")
+    def api_adf_restart() -> Any:
+        body = request.get_json(silent=True) or {}
+        target = _target_from_body(body)
+        host, port = _adf_host_port(body)
+        result = restart_viewer(target, host=host, port=port)
+        out = viewer_payload(target, host=host, port=port)
+        out["result"] = result
+        out["ok"] = bool(result.get("ok"))
+        if result.get("error"):
+            out["error"] = result["error"]
         return jsonify(out), (200 if result.get("ok") else 400)
 
     return app

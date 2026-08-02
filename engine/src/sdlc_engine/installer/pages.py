@@ -155,7 +155,7 @@ PAGE = """<!DOCTYPE html>
   <div class="wrap">
     <header>
       <div class="brand">SDLC-SPDD Ops Console <span class="mode-pill warn">experimental</span></div>
-      <p class="tagline">Experimental local operator UI — install/upgrade, SQLite cache, upgrade rollback, and Embabel Guide + Neo4j dogfooding. Not the stable consumer install path; prefer CLI scripts for production installs.</p>
+      <p class="tagline">Experimental local operator UI — install/upgrade, SQLite cache, upgrade rollback, Embabel Guide + Neo4j, and ADF Viewer launch. Not the stable consumer install path; prefer CLI scripts for production installs.</p>
     </header>
 
     <section class="panel">
@@ -177,6 +177,7 @@ PAGE = """<!DOCTYPE html>
       <button type="button" class="tab" data-tab="sqlite">SQLite</button>
       <button type="button" class="tab" data-tab="rollback">Rollback</button>
       <button type="button" class="tab" data-tab="guide">Guide</button>
+      <button type="button" class="tab" data-tab="adf">ADF</button>
     </nav>
 
     <section class="tab-pane active" id="pane-install">
@@ -384,8 +385,38 @@ PAGE = """<!DOCTYPE html>
       </div>
     </section>
 
+    <section class="tab-pane" id="pane-adf">
+      <div class="panel">
+        <h2>ADF Viewer</h2>
+        <p class="meta">Editing and Jira sync live in the ADF Viewer. This tab only manages the process and opens the URL (default port 5050).</p>
+        <div class="row" style="margin-bottom: 0.65rem;">
+          <div style="flex: 1 1 10rem;">
+            <label class="field" for="adf-host">Host</label>
+            <input id="adf-host" type="text" spellcheck="false" value="127.0.0.1" />
+          </div>
+          <div style="flex: 1 1 6rem;">
+            <label class="field" for="adf-port">Port</label>
+            <input id="adf-port" type="number" value="5050" />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-primary" id="btn-adf-start">Start viewer</button>
+          <button type="button" class="btn-secondary" id="btn-adf-restart">Restart</button>
+          <button type="button" class="btn-ghost" id="btn-adf-stop">Stop</button>
+          <button type="button" class="btn-secondary" id="btn-adf-refresh">Refresh status</button>
+          <button type="button" class="btn-primary" id="btn-adf-open">Open ADF Viewer</button>
+        </div>
+        <div class="status-line" id="adf-status">Not loaded.</div>
+        <div class="meta" id="adf-meta">—</div>
+        <h3>Equivalent CLI</h3>
+        <pre class="cmd" id="adf-cmd">—</pre>
+        <pre class="log" id="adf-log">No action yet.</pre>
+      </div>
+    </section>
+
     <footer>
       CLI: <code>./scripts/sdlc.sh installer</code> · <code>db status</code> · <code>db rebuild</code>
+      · <code>./scripts/sdlc.sh viewer</code>
       · orchestrator: <code>{{ orchestrator_root }}</code>
     </footer>
   </div>
@@ -750,9 +781,116 @@ PAGE = """<!DOCTYPE html>
       }
     }
 
+    function adfBody(extra) {
+      return Object.assign({
+        target: target(),
+        host: $("adf-host").value.trim() || "127.0.0.1",
+        port: parseInt($("adf-port").value, 10) || 5050,
+      }, extra || {});
+    }
+
+    function fillAdf(data) {
+      const proc = data.process || {};
+      const probe = data.probe || {};
+      const url = data.url || probe.url || "";
+      $("adf-cmd").textContent = data.cli || "—";
+      const bits = [
+        proc.alive ? "process alive" : "process stopped",
+        probe.tcp_open ? "TCP open" : "TCP closed",
+        probe.http_ok ? "HTTP ok" : "HTTP down",
+        url ? ("url " + url) : "",
+        proc.log_path ? ("log " + proc.log_path) : "",
+      ].filter(Boolean);
+      $("adf-meta").textContent = bits.join(" · ") || "—";
+      if (data.ok && (proc.alive || probe.http_ok)) {
+        $("adf-status").textContent = "Viewer ready" + (url ? ": " + url : "");
+        $("adf-status").className = "status-line ok";
+      } else if (data.error) {
+        $("adf-status").textContent = data.error;
+        $("adf-status").className = "status-line bad";
+      } else {
+        $("adf-status").textContent = probe.detail || "Viewer not running.";
+        $("adf-status").className = "status-line";
+      }
+      if (data.result) {
+        $("adf-log").textContent = JSON.stringify(data.result, null, 2);
+      }
+      return url;
+    }
+
+    async function loadAdf() {
+      const res = await fetch("/api/adf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(adfBody()),
+      });
+      return fillAdf(await res.json());
+    }
+
+    async function adfAction(url, label, { openAfter } = {}) {
+      $("adf-status").textContent = label + "…";
+      $("adf-status").className = "status-line";
+      setBusy(["btn-adf-start","btn-adf-stop","btn-adf-restart","btn-adf-open","btn-adf-refresh"], true);
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(adfBody()),
+        });
+        const data = await res.json();
+        const openUrl = fillAdf(data);
+        if (!data.ok && data.error) {
+          $("adf-status").textContent = data.error;
+          $("adf-status").className = "status-line bad";
+          return;
+        }
+        $("adf-status").textContent = label + " OK";
+        $("adf-status").className = "status-line ok";
+        if (openAfter && openUrl) {
+          // Poll briefly so Flask can bind before the new tab loads.
+          for (let i = 0; i < 20; i++) {
+            await new Promise((r) => setTimeout(r, 250));
+            const probeRes = await fetch("/api/adf", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(adfBody()),
+            });
+            const probeData = await probeRes.json();
+            fillAdf(probeData);
+            if (probeData.probe && probeData.probe.http_ok) {
+              window.open(probeData.url || openUrl, "_blank", "noopener");
+              return;
+            }
+          }
+          window.open(openUrl, "_blank", "noopener");
+        }
+      } catch (err) {
+        $("adf-status").textContent = String(err);
+        $("adf-status").className = "status-line bad";
+        $("adf-log").textContent = String(err);
+      } finally {
+        setBusy(["btn-adf-start","btn-adf-stop","btn-adf-restart","btn-adf-open","btn-adf-refresh"], false);
+      }
+    }
+
+    async function openAdfViewer() {
+      const statusRes = await fetch("/api/adf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(adfBody()),
+      });
+      const status = await statusRes.json();
+      fillAdf(status);
+      if (status.probe && status.probe.http_ok && status.url) {
+        window.open(status.url, "_blank", "noopener");
+        return;
+      }
+      await adfAction("/api/adf/start", "Start viewer", { openAfter: true });
+    }
+
     async function refreshAll() {
       await detect();
-      await Promise.all([loadSqlite(), loadBackups(), loadGuide()]);
+      await Promise.all([loadSqlite(), loadBackups(), loadGuide(), loadAdf()]);
     }
 
     $("btn-detect").addEventListener("click", detect);
@@ -807,6 +945,11 @@ PAGE = """<!DOCTYPE html>
       if (!confirm("Type-confirm: really purge ALL RAG chunks?")) return;
       guideAction("/api/guide/purge-all-rag", { confirm: true }, "Purge ALL RAG");
     });
+    $("btn-adf-refresh").addEventListener("click", loadAdf);
+    $("btn-adf-start").addEventListener("click", () => adfAction("/api/adf/start", "Start viewer"));
+    $("btn-adf-stop").addEventListener("click", () => adfAction("/api/adf/stop", "Stop viewer"));
+    $("btn-adf-restart").addEventListener("click", () => adfAction("/api/adf/restart", "Restart viewer"));
+    $("btn-adf-open").addEventListener("click", openAdfViewer);
     $("as-all").addEventListener("change", () => {
       if ($("as-all").checked) {
         $("as-cursor").checked = true;
