@@ -35,6 +35,10 @@ python3 -m sdlc_engine.viewer --root . --lan --port 5050
 
 Open `http://127.0.0.1:5050/`.
 
+From the experimental ops console (`./scripts/sdlc.sh console`), the **ADF** tab can
+**Start / Stop / Restart** this viewer for the current target and open the URL — editing
+and Jira sync still happen only in the viewer UI.
+
 ## Workflow
 
 1. Add or edit an ADF file under `adf/` (seed examples: `ORCH-demo.adf.json`, `ORCH-rich.adf.json`).

@@ -13,7 +13,7 @@ authors = [{ name = "SDLC-SPDD contributors" }]
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "pytest-cov>=5.0"]
 viewer = ["flask>=3"]
 viewer-e2e = ["flask>=3", "pytest-playwright>=0.5.0"]
 
@@ -30,4 +30,5 @@ markers = [
   "github_integration: live GitHub Issues tests via gh (network + auth)",
   "viewer_integration: live Jira sync via viewer (skipped unless env set)",
   "viewer_e2e: Playwright GUI tests for the ADF viewer (needs chromium)",
+  "console_e2e: Playwright GUI tests for the ops console (needs chromium)",
 ]

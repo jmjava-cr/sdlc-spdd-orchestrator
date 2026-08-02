@@ -17,7 +17,7 @@ From the orchestrator repository (requires Flask via the engine `[viewer]` extra
     # aliases: installer · dashboard
     # or: ./scripts/visual-installer.sh --target /path/to/app
 
-Opens a localhost UI (default `http://127.0.0.1:5051/`) with four panels:
+Opens a localhost UI (default `http://127.0.0.1:5051/`) with five panels:
 
 | Panel | What it does |
 |-------|----------------|
@@ -25,6 +25,7 @@ Opens a localhost UI (default `http://127.0.0.1:5051/`) with four panels:
 | **SQLite** | Shows `.sdlc/index.sqlite` counts, registry breakdown, sample Work IDs; rebuild button |
 | **Rollback** | Lists `.sdlc-spdd-upgrade-backups/<timestamp>/` and restores (with safety snapshot) |
 | **Guide** | Pulls `jmjava/guide`, starts Neo4j + Guide on custom ports, saves `.sdlc/guide-config.json`, checklist + logs |
+| **ADF** | Starts/stops/restarts the ADF Viewer process and opens it (editing + Jira sync stay in the viewer) |
 
 Install options still include dry-run, force overwrite, skip upgrade backup, and optional Python engine install.
 
