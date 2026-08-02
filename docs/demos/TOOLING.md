@@ -39,7 +39,23 @@ set -a && source ../../.env && set +a
 
 **`docgen`** can also read **`env_file`** from **`docgen.yaml`** when set. To force keys from the file to override an already-exported shell value, set **`DOCGEN_ENV_OVERRIDES=1`**.
 
-## Segment 01 smoke (MVP proof)
+## Default Manim path (declarative scene specs)
+
+**Do this for all future regenerations.** Visuals are authored as
+**`animations/specs/*.scene.yaml`**, compiled into marker blocks in
+**`animations/scenes.py`**. Do not hand-edit generated scene classes.
+
+| Situation | Command |
+|-----------|---------|
+| Full regen (recommended) | `./generate-all.sh --retry-manim` |
+| First time / no specs yet | `generate-all` **auto-runs** `scene-spec-generate` |
+| Specs already exist | `generate-all` **retime-compiles** them against new `timing.json` |
+| Force new layouts from LLM | `./generate-all.sh --regen-scene-specs --retry-manim` |
+| Legacy hand `scenes.py` only | `./generate-all.sh --skip-scene-retime` (discouraged) |
+
+Label constraints: **`hints/manim-scene-specs.md`** (spoken phrases only, ~3 rows/page).
+
+## Typical render sequence
 
 From **`docs/demos/`** after venv + Manim deps + **`.env`**:
 
@@ -49,38 +65,22 @@ export PATH="$ROOT/.venv/bin:$PATH"
 cd "$ROOT/docs/demos"
 set -a && source ../../.env && set +a
 
-docgen --config docgen.yaml tts --segment 01
-docgen --config docgen.yaml timestamps
-docgen --config docgen.yaml manim --scene SdlcSpddIntroScene
-docgen --config docgen.yaml compose 01
-docgen --config docgen.yaml validate
+docgen --config docgen.yaml lint
+./generate-all.sh --retry-manim
+# equivalent:
+# docgen --config docgen.yaml generate-all --retry-manim
 ```
 
-Output: **`audio/01-sdlc-spdd-intro.mp3`**, **`animations/timing.json`**, **`recordings/01-sdlc-spdd-intro.mp4`**
-(gitignored until T04 policy update). Segment 01 should PASS **`av_drift`**, **`freeze_ratio`**, and **`narration_lint`**.
-
-## Typical render sequence
-
-Run from **`docs/demos/`** (required cwd — lint and config discovery expect the bundle directory):
+Smoke one segment after specs exist:
 
 ```bash
-ROOT=$(git rev-parse --show-toplevel)
-export PATH="$ROOT/.venv/bin:$PATH"
-cd "$ROOT/docs/demos"
-set -a && source ../../.env && set +a
-
-docgen --config docgen.yaml lint
 docgen --config docgen.yaml tts --segment 01
 docgen --config docgen.yaml timestamps
+docgen --config docgen.yaml scene-compile --all --retime
 docgen --config docgen.yaml manim --scene SdlcSpddIntroScene
 docgen --config docgen.yaml compose 01
 docgen --config docgen.yaml validate
 ```
-
-For all segments, repeat with `--segment 02` / `InstallWorkflowScene`, `--segment 03` /
-`GuideRagDogfoodScene`, or use **`./generate-all.sh`** locally.
-
-Adjust flags and skips per **`docgen --help`** and **`docgen.yaml`**.
 
 ## Manual publish to GitHub Pages
 
@@ -88,8 +88,8 @@ There is **no CI workflow for video generation**. Recordings stay **gitignored o
 
 After regenerating locally:
 
-1. Commit source changes only (`narration/`, `hints/`, `scenes.py`, `docs/index.html` if needed).
-2. Run **`./scripts/deploy-docs-pages-local.sh`** from the repo root — copies local **`recordings/*.mp4`** into a staging tree and force-pushes **`gh-pages`** (MP4s never land on **`main`**).
+1. Commit source changes only (`narration/`, `hints/`, `animations/specs/*.scene.yaml`, generated marker blocks in `scenes.py`, `docs/index.html` if needed).
+2. Run **`./scripts/deploy-docs-pages-local.sh`** from the repo root — copies local **`recordings/*.mp4`** into a staging tree and force-pushes **`gh-pages`** (MP4s never land on **`main`**). The deploy script force-adds recordings even though `demos/.gitignore` ignores them on `main`.
 3. One-time repo setup: **Settings → Pages → Deploy from branch → `gh-pages` / root**.
 
 Narration-only changes can merge via PR; **`docgen-lint.yml`** runs lint without OpenAI.

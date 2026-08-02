@@ -85,7 +85,9 @@ narration_from_source:
     '02':
       hints:
       - 'Walk the adoption path: clone the orchestrator, run setup-agent-prompts.sh against a target app, verify with verify-project-install.sh,
-        then open the target in Cursor, Copilot, or Claude Code.'
+        then open the target in Cursor, Copilot, or Claude Code. Shell scripts remain the supported consumer install path.'
+      - 'Mention the experimental ops console (sdlc.sh console on port 5051) for dogfood installs, SQLite, rollback, and Guide lifecycle,
+        and the separate ADF Viewer on port 5050 for editing adf JSON and Jira sync — see docs/ops-console.md. Editing does not happen in the console.'
       - 'Cover the first-session loop from first-day-with-sdlc-spdd.md: init, analysis, plan, architect, code one operation,
         API test, review, capture memory — one small increment.'
       - 'Reference workflow.md steps 1–6: set up prompts, initialize, map milestone work, start session with Resume Prompt,
@@ -97,57 +99,60 @@ narration_from_source:
         paths:
         - docs/first-day-with-sdlc-spdd.md
         - docs/installing-into-your-project.md
+        - docs/ops-console.md
+        - docs/adf-viewer.md
         - docs/workflow.md
         - docs/initialization-and-invocation.md
+        - README.md
     '03':
       hints:
-      - Explain why this repo uses Embabel Guide + Neo4j as a local research backend during /sdlc-spdd-analysis instead of
-        pasting large external docs into every prompt.
-      - 'Summarize the layered menke profiles: menke (code repos), menke-2 (SPDD and context engineering URLs), menke-3 (framework
-        depth), menke-4 (docgen + course-builder docs) — each an append pass on the same store.'
+      - Explain why this repo uses Embabel Guide + Neo4j as an optional local research / DICE context backend during /sdlc-spdd-analysis
+        instead of pasting large external docs into every prompt. Files stay canonical; Guide is runtime-resolved.
+      - 'Note SPIKE-001 provisional go on main, Guide pin tag sdlc-spdd-projection-v1, and that the ops console Guide tab can start Neo4j + Guide for dogfood.'
+      - 'Summarize dual ingest: RAG chunks plus typed entity projection (WorkId, Area, Decision, Pitfall, Pattern) and spdd_* retrieval tools.'
       - 'Describe MCP usage: docs_vectorSearch for concepts, docs_textSearch for exact CLI flags; cite chunk URIs in spdd/analysis
         artifacts.'
       - 'Present the dogfood table: SPDD on self, docgen on self (this bundle), Guide on self, posture guard keeping templates
-        clean.'
-      - 'State clearly what does not ship to target projects: Guide YAML, Neo4j, MCP wiring, .venv, regenerable docgen outputs.'
+        clean. Clarify ADF Viewer is separate and does not talk to Guide.'
+      - 'State clearly what does not ship to target projects: Guide YAML, Neo4j, MCP wiring, .venv, regenerable docgen outputs. Opt-in is --with-guide / guide-dice harness only.'
       context:
         paths:
+        - docs/guide-flow.md
+        - docs/ops-console.md
         - docs/guide-rag-research-and-dogfooding.md
-        - spdd/analysis/SPIKE-retrieval-reference-corpus.md
+        - docs/dice-projection-runbook.md
         - spdd/canvas/SPIKE-001-guide-rag-context-backend.md
         - docs/context-loading-and-scaling.md
+        - README.md
 manim_scene_generation:
   model: gpt-4o
   temperature: 0.4
   max_context_bytes: 80000
   hints:
-  - Match palette and _TimedScene timing patterns from existing scenes in animations/scenes.py.
+  - 'DEFAULT path is declarative animations/specs/*.scene.yaml (not hand-edited scenes.py).'
+  - 'Every paced box label MUST be a short phrase spoken in the narration (match timing.json words). Prefer 2-5 word clips from the script.'
+  - 'Paginate: ~3 rows per page, compact heights 0.75-0.9, palette tokens only (C_ACCENT, C_GREEN, C_BLUE, C_TEAL, C_ORANGE, C_WHITE).'
+  - 'Cover subject-topic shifts; do not invent unspoken marketing slogans.'
   context:
-    paths: []
+    paths:
+    - docs/demos/hints/manim-scene-specs.md
     globs: []
   segments:
     '01':
       class_name: SdlcSpddIntroScene
       hints:
-      - 'Open with centred title "SDLC-SPDD Orchestrator", then shrink to top edge. Reveal three horizontal boxes: Planning,
-        SPDD, SDLC Agents — one FadeIn each.'
-      - 'Below, show a REASONS Canvas label and a row of single-letter pills R-E-A-S-O-N-S. Use orchestrator palette (accent
-        #667eea, green #42b883, teal #26c6da).'
-      - One reveal per mobject; stay inside safe content width. Pace to timing.json when present.
+      - 'Title text: SDLC-SPDD Orchestrator. Pages for: context lives in chat; version-controlled files; Planning / SPDD / SDLC Agents; REASONS Canvas; ops console and ADF Viewer.'
+      - 'Use spoken phrases as labels, e.g. "context lives in chat", "version-controlled files", "Planning", "SPDD", "SDLC Agents", "REASONS Canvas", "ops console".'
     '02':
       class_name: InstallWorkflowScene
       hints:
-      - 'Title card "Install & Daily Workflow" at top. Vertical stack of five labelled boxes: Clone orchestrator, setup-agent-prompts,
-        verify install, Resume Prompt session, analysis → plan → code.'
-      - Reveal one box at a time with FadeIn. Blue/green/teal/orange palette consistent with segment 01.
-      - Pace to timing.json when present; fallback ~14s hold if no timestamps yet.
+      - 'Title: Install and workflow. Cover setup-agent-prompts.sh, verify-project-install.sh, ops console on port 5051, ADF Viewer on port 5050, first session loop, workflow steps.'
+      - 'Spoken labels only — e.g. "setup-agent-prompts.sh", "verify-project-install.sh", "ops console", "ADF Viewer", "first session", "Ready For Coding".'
     '03':
       class_name: GuideRagDogfoodScene
       hints:
-      - 'Title "Guide RAG & Dogfooding" at top. Horizontal row of four profile pills: menke, menke-2, menke-3, menke-4 (green
-        for code, blue for reference layers).'
-      - 'Below: box for MCP vector + text search, then box for SPDD + docgen + Guide dogfood on self.'
-      - One FadeIn per mobject; teal accent for title. Pace to timing.json when present.
+      - 'Title: Guide RAG and dogfooding. Cover intentional dogfooding, optional Guide backend, sdlc-spdd-projection-v1, dual ingest, MCP tools, what does not ship.'
+      - 'Spoken labels — e.g. "intentional dogfooding", "optional local backend", "sdlc-spdd-projection-v1", "RAG chunks", "typed domain entities", "does not talk to Guide".'
 manim:
   scenes:
   - SdlcSpddIntroScene

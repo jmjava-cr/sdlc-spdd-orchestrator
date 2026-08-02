@@ -55,11 +55,22 @@ else
   echo "Including ${#mp4s[@]} recording(s) from local tree (not committed on main)."
 fi
 
+# docs/demos/.gitignore ignores recordings/*.mp4 so they stay off main. For the
+# Pages staging tree we must NOT ignore them — otherwise `git add -A` drops the
+# copies above and the site serves zero-length / 404 players.
+if [[ -f "${STAGING}/demos/.gitignore" ]]; then
+  # Keep other regenerable ignores; stop ignoring published recordings.
+  grep -v -E '^[[:space:]]*recordings/\*\.mp4[[:space:]]*$|^[[:space:]]*recordings/[[:space:]]*$' \
+    "${STAGING}/demos/.gitignore" > "${STAGING}/demos/.gitignore.pages" || true
+  mv "${STAGING}/demos/.gitignore.pages" "${STAGING}/demos/.gitignore"
+fi
+
 # Skip Jekyll so static HTML/MP4 are served as-is on GitHub Pages.
 : > "${STAGING}/.nojekyll"
 
 REMOTE="$(git -C "${ROOT}" remote get-url origin)"
-echo "Staging site at ${STAGING} ($(find "${STAGING}" -type f | wc -l) files)"
+staged_mp4="$(find "${STAGING}/demos/recordings" -name '*.mp4' -type f 2>/dev/null | wc -l | tr -d ' ')"
+echo "Staging site at ${STAGING} ($(find "${STAGING}" -type f | wc -l) files; ${staged_mp4} mp4)"
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
   echo "[dry-run] would push ${STAGING} → origin gh-pages (${REMOTE})"
@@ -70,7 +81,20 @@ pushd "${STAGING}" >/dev/null
 git init -q
 git checkout -q -b gh-pages
 git add -A
+# Belt-and-suspenders: force-add MP4s even if a nested ignore reappears.
+shopt -s nullglob
+staged=("${STAGING}/demos/recordings"/*.mp4)
+shopt -u nullglob
+if ((${#staged[@]} > 0)); then
+  git add -f "${staged[@]}"
+fi
+committed_mp4="$(git ls-files 'demos/recordings/*.mp4' | wc -l | tr -d ' ')"
+if (( committed_mp4 == 0 )) && ((${#mp4s[@]} > 0)); then
+  echo "error: local MP4s exist but none were staged for gh-pages (check demos/.gitignore)" >&2
+  exit 1
+fi
 git commit -q -m "Deploy docs and local demo recordings ($(date -u +%Y-%m-%dT%H:%MZ))"
+echo "Committed ${committed_mp4} recording(s) on gh-pages tip."
 git push -f "${REMOTE}" HEAD:gh-pages
 popd >/dev/null
 
