@@ -280,7 +280,7 @@ PAGE = """<!DOCTYPE html>
         <div class="row" style="margin-bottom: 0.65rem;">
           <div style="flex: 2 1 18rem;">
             <label class="field" for="guide-ref">Git ref / branch (jmjava/guide spike)</label>
-            <input id="guide-ref" type="text" spellcheck="false" placeholder="cursor/spike-spdd-dice-projection-17f4" />
+            <input id="guide-ref" type="text" spellcheck="false" placeholder="sdlc-spdd-projection-v1 (or main)" />
           </div>
           <div style="flex: 1 1 8rem;">
             <label class="field" for="guide-profile">Profile</label>

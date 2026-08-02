@@ -30,13 +30,14 @@ echo "== Guide checkout =="
 if [[ -d "${GUIDE_ROOT}" ]]; then
   ok "guide directory exists"
   branch="$(git -C "${GUIDE_ROOT}" rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
-  if [[ "${branch}" == "cursor/spike-spdd-dice-projection-17f4" ]]; then
-    ok "guide branch cursor/spike-spdd-dice-projection-17f4 (leg 2+3)"
+  # Detached HEAD is expected when pinned to tag sdlc-spdd-projection-v1.
+  if [[ "${branch}" == "main" || "${branch}" == "HEAD" || "${branch}" == "sdlc-spdd-projection-v1" ]]; then
+    ok "guide on main or sdlc-spdd-projection-v1 pin (leg 2+3)"
   elif [[ "${branch}" == "ingest-to-hub" ]]; then
     ok "guide branch ingest-to-hub (leg 2 only)"
-    note "checkout cursor/spike-spdd-dice-projection-17f4 for leg 3 entity projection"
+    note "checkout sdlc-spdd-projection-v1 (or main) for leg 3 entity projection"
   else
-    note "guide on branch '${branch}' (spike-spdd-dice-projection or ingest-to-hub recommended)"
+    note "guide on branch '${branch}' (prefer sdlc-spdd-projection-v1 or main)"
   fi
 else
   bad "guide not found at ${GUIDE_ROOT} — set GUIDE_ROOT"
@@ -73,7 +74,7 @@ if curl -sf --max-time 3 "http://localhost:${GUIDE_PORT}/actuator/health" >/dev/
       note "run ./scripts/guide/project-spdd-entities.sh after enabling spdd-projection"
     fi
   else
-    note "spdd-projection API missing — use guide branch cursor/spike-spdd-dice-projection-17f4"
+    note "spdd-projection API missing — use guide tag sdlc-spdd-projection-v1 (or main)"
   fi
 else
   note "Guide not running on :${GUIDE_PORT} — start before ingest/MCP"
