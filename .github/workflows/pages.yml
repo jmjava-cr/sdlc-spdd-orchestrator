@@ -1,12 +1,10 @@
+# Automatic deploy on push is disabled.
+# GitHub Pages is published from the `gh-pages` branch via
+# `./scripts/deploy-docs-pages-local.sh` (see docs/demos/TOOLING.md).
+# Keep this workflow for optional manual runs only.
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
