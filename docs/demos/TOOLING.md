@@ -84,7 +84,7 @@ docgen --config docgen.yaml validate
 
 ## Manual publish to GitHub Pages
 
-There is **no CI workflow for video generation**. Recordings stay **gitignored on `main`**.
+There is **no CI workflow for video generation**, and **Deploy to GitHub Pages** is not triggered on push (manual `workflow_dispatch` only). Recordings stay **gitignored on `main`**.
 
 After regenerating locally:
 
