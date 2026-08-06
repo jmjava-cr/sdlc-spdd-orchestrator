@@ -13,6 +13,7 @@ Run::
 
 from __future__ import annotations
 
+import json
 import socket
 import threading
 import time
@@ -212,3 +213,83 @@ def test_adf_start_status_open_stop(page, live_console) -> None:  # type: ignore
         }"""
     )
     assert live_console["state"]["alive"] is False
+
+
+def test_adf_init_requires_selection(page, live_console) -> None:  # type: ignore[no-untyped-def]
+    _goto_console(page, live_console)
+    page.locator(".tab[data-tab='adf']").click()
+    page.locator("#pane-adf").wait_for(state="visible")
+    page.locator("#btn-adf-init").click()
+    page.wait_for_function(
+        """() => (document.getElementById('adf-init-status').textContent || '')
+          .includes('Select an ADF file first')"""
+    )
+
+
+def test_adf_browse_select_and_init_work(page, live_console, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("SDLC_USER", "playwright-adf")
+    target = Path(live_console["target"])
+    adf_dir = target / "adf"
+    adf_dir.mkdir(parents=True, exist_ok=True)
+    adf = adf_dir / "ORCH-77.adf.json"
+    adf.write_text(
+        json.dumps(
+            {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "heading",
+                        "attrs": {"level": 1},
+                        "content": [{"type": "text", "text": "Playwright ADF init"}],
+                    },
+                    {
+                        "type": "paragraph",
+                        "content": [{"type": "text", "text": "End-to-end from console"}],
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    _goto_console(page, live_console)
+    page.locator(".tab[data-tab='adf']").click()
+    page.locator("#pane-adf").wait_for(state="visible")
+    page.locator("#btn-adf-browse-adf").click()
+    page.wait_for_function(
+        """() => {
+          const list = document.getElementById('adf-browser-list');
+          return list && list.textContent && list.textContent.includes('ORCH-77.adf.json');
+        }"""
+    )
+    page.locator("#adf-browser-list .browser-row", has_text="ORCH-77.adf.json").click()
+    page.wait_for_function(
+        """() => (document.getElementById('adf-selected').textContent || '')
+          .includes('ORCH-77.adf.json')"""
+    )
+    page.locator("#adf-work-id").fill("FEAT-013-playwright-adf-init")
+    page.locator("#adf-work-title").fill("Playwright title")
+    page.locator("#btn-adf-init-dry").click()
+    page.wait_for_function(
+        """() => (document.getElementById('adf-init-status').textContent || '')
+          .includes('Would create FEAT-013-playwright-adf-init')"""
+    )
+    assert not (target / "spdd" / "canvas" / "FEAT-013-playwright-adf-init.md").exists()
+
+    page.locator("#btn-adf-init").click()
+    page.wait_for_function(
+        """() => (document.getElementById('adf-init-status').textContent || '')
+          .includes('Created FEAT-013-playwright-adf-init')"""
+    )
+    status = page.locator("#adf-init-status").inner_text()
+    assert "sdlc-spdd-analysis" in status
+    canvas = target / "spdd" / "canvas" / "FEAT-013-playwright-adf-init.md"
+    assert canvas.is_file()
+    text = canvas.read_text(encoding="utf-8")
+    assert "Playwright title" in text
+    assert "End-to-end from console" in text
+    assert "Source System: ADF" in text
+    assert (target / "requirements" / "milestones" / "FEAT-013-playwright-adf-init.md").is_file()
+    reg = (target / "agent-context" / "work-registry.tsv").read_text(encoding="utf-8")
+    assert "playwright-adf" in reg

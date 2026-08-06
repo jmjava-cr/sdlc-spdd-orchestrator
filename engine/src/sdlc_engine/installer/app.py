@@ -6,8 +6,10 @@ import webbrowser
 from pathlib import Path
 from typing import Any
 
+from sdlc_engine.adf_work import AdfWorkService
 from sdlc_engine.db import LocalIndex
 from sdlc_engine.project import Project
+from sdlc_engine.viewer.store import AdfStore, AdfStoreError
 
 from .detect import detect_target
 from .guide import checklist, ingest_command, load_config, probe_guide, save_config
@@ -543,6 +545,73 @@ def create_app(default_target: Path | str | None = None) -> Any:
         if result.get("error"):
             out["error"] = result["error"]
         return jsonify(out), (200 if result.get("ok") else 400)
+
+    @app.post("/api/adf/browse")
+    def api_adf_browse() -> Any:
+        body = request.get_json(silent=True) or {}
+        target = _target_from_body(body)
+        path = str(body.get("path") or "").strip()
+        store = AdfStore(target)
+        store.ensure_dir()
+        try:
+            listing = store.browse(path or str(store.adf_dir))
+        except AdfStoreError as exc:
+            return jsonify({"ok": False, "error": str(exc), "target": str(target)}), 400
+        return jsonify(
+            {
+                "ok": True,
+                "target": str(target),
+                "home": str(target),
+                "adf_dir": str(store.adf_dir),
+                **listing,
+            }
+        )
+
+    @app.post("/api/adf/init-work")
+    def api_adf_init_work() -> Any:
+        body = request.get_json(silent=True) or {}
+        target = _target_from_body(body)
+        adf_path = str(body.get("path") or "").strip()
+        if not adf_path:
+            return jsonify({"ok": False, "error": "path required"}), 400
+        work_type = str(body.get("type") or "feature").strip() or "feature"
+        title = str(body.get("title") or "").strip()
+        work_id = str(body.get("work_id") or "").strip()
+        claim = body.get("claim", True) is not False
+        dry_run = bool(body.get("dry_run"))
+        svc = AdfWorkService(Project.resolve(target))
+        try:
+            result = svc.init_from_adf(
+                adf_path,
+                work_type=work_type,
+                title=title,
+                work_id=work_id,
+                claim=claim,
+                dry_run=dry_run,
+            )
+        except (OSError, ValueError, PermissionError, FileExistsError) as exc:
+            return jsonify({"ok": False, "error": str(exc), "target": str(target)}), 400
+        return jsonify(
+            {
+                "ok": True,
+                "target": str(target),
+                "work_id": result.work_id,
+                "title": result.title,
+                "adf_path": result.adf_path,
+                "canvas_path": result.canvas_path,
+                "requirement_path": result.requirement_path,
+                "feature_dir": result.feature_dir,
+                "source_issue": result.source_issue,
+                "next_command": result.next_command,
+                "dry_run": result.dry_run,
+                "cli": (
+                    f"./scripts/sdlc.sh work init-from-adf --path {adf_path}"
+                    + (f" --title {title!r}" if title else "")
+                    + (f" --work-id {work_id}" if work_id else "")
+                    + (f" --type {work_type}" if work_type != "feature" else "")
+                ),
+            }
+        )
 
     return app
 
