@@ -74,6 +74,12 @@ case "${cmd}" in
   viewer)
     _py_only_args=("viewer" "$@")
     ;;
+  work)
+    _py_only_args=("work" "$@")
+    ;;
+  work-init-from-adf|init-from-adf)
+    _py_only_args=("work" "init-from-adf" "$@")
+    ;;
   installer|console|dashboard)
     _py_only_args=("${cmd}" "$@")
     ;;

@@ -143,6 +143,21 @@ PAGE = """<!DOCTYPE html>
     .status-line { margin-bottom: 0.55rem; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
     .status-line.ok { color: var(--ok); }
     .status-line.bad { color: var(--bad); }
+    .browser-list {
+      border: 1px solid var(--line); background: #fff; max-height: 16rem; overflow: auto;
+      margin: 0.5rem 0 0.75rem;
+    }
+    .browser-row {
+      display: flex; gap: 0.55rem; width: 100%; text-align: left;
+      border: 0; border-bottom: 1px solid var(--line); background: transparent;
+      padding: 0.45rem 0.65rem; cursor: pointer; font: 500 0.88rem var(--mono); color: var(--ink);
+    }
+    .browser-row:hover { background: #eef6f1; }
+    .browser-row.selected { background: color-mix(in srgb, var(--accent) 14%, white); }
+    .browser-row.invalid { color: var(--muted); cursor: default; }
+    .browser-row .kind {
+      flex: 0 0 2.4rem; font-size: 0.72rem; font-weight: 700; color: var(--muted);
+    }
     footer { margin-top: 1.25rem; color: var(--muted); font-size: 0.85rem; }
     footer code { font-family: var(--mono); font-size: 0.8rem; }
     @keyframes rise {
@@ -388,7 +403,7 @@ PAGE = """<!DOCTYPE html>
     <section class="tab-pane" id="pane-adf">
       <div class="panel">
         <h2>ADF Viewer</h2>
-        <p class="meta">Editing and Jira sync live in the ADF Viewer. This tab only manages the process and opens the URL (default port 5050).</p>
+        <p class="meta">Start/stop the viewer for editing and Jira sync. Below: browse a local ADF and init a draft REASONS canvas.</p>
         <div class="row" style="margin-bottom: 0.65rem;">
           <div style="flex: 1 1 10rem;">
             <label class="field" for="adf-host">Host</label>
@@ -411,6 +426,45 @@ PAGE = """<!DOCTYPE html>
         <h3>Equivalent CLI</h3>
         <pre class="cmd" id="adf-cmd">—</pre>
         <pre class="log" id="adf-log">No action yet.</pre>
+      </div>
+
+      <div class="panel">
+        <h2>Init SPDD work from ADF</h2>
+        <p class="meta">Browse to an <code>.adf.json</code>, then create a draft REASONS canvas + requirement and hand off to analysis.</p>
+        <div class="row" style="margin-bottom: 0.45rem;">
+          <input id="adf-browse-path" type="text" spellcheck="false" placeholder="Browse path (defaults to target/adf)" />
+          <button type="button" class="btn-secondary" id="btn-adf-browse">Browse</button>
+          <button type="button" class="btn-ghost" id="btn-adf-browse-home">Target root</button>
+          <button type="button" class="btn-ghost" id="btn-adf-browse-adf">adf/</button>
+        </div>
+        <div class="browser-list" id="adf-browser-list"></div>
+        <div class="meta" id="adf-selected">No ADF selected.</div>
+        <div class="row" style="margin-top: 0.75rem;">
+          <div style="flex: 1 1 8rem;">
+            <label class="field" for="adf-work-type">Type</label>
+            <select id="adf-work-type">
+              <option value="feature">feature</option>
+              <option value="spike">spike</option>
+              <option value="bug">bug</option>
+              <option value="refactor">refactor</option>
+              <option value="chore">chore</option>
+            </select>
+          </div>
+          <div style="flex: 2 1 14rem;">
+            <label class="field" for="adf-work-title">Title override (optional)</label>
+            <input id="adf-work-title" type="text" spellcheck="false" placeholder="Defaults to first heading / filename" />
+          </div>
+          <div style="flex: 2 1 14rem;">
+            <label class="field" for="adf-work-id">Work ID override (optional)</label>
+            <input id="adf-work-id" type="text" spellcheck="false" placeholder="FEAT-013-slug" />
+          </div>
+        </div>
+        <div class="actions" style="margin-top: 0.75rem;">
+          <button type="button" class="btn-secondary" id="btn-adf-init-dry">Dry run</button>
+          <button type="button" class="btn-primary" id="btn-adf-init">Init SPDD work</button>
+        </div>
+        <div class="status-line" id="adf-init-status">Ready.</div>
+        <pre class="log" id="adf-init-log">No init yet.</pre>
       </div>
     </section>
 
@@ -888,9 +942,125 @@ PAGE = """<!DOCTYPE html>
       await adfAction("/api/adf/start", "Start viewer", { openAfter: true });
     }
 
+    let adfBrowsePath = "";
+    let adfSelectedPath = "";
+    let adfHome = "";
+    let adfDir = "";
+
+    function setAdfSelected(path) {
+      adfSelectedPath = path || "";
+      $("adf-selected").textContent = adfSelectedPath
+        ? ("Selected: " + adfSelectedPath)
+        : "No ADF selected.";
+    }
+
+    async function loadAdfBrowse(path) {
+      const res = await fetch("/api/adf/browse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(adfBody({ path: path || "" })),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        $("adf-init-status").textContent = data.error || "Browse failed";
+        $("adf-init-status").className = "status-line bad";
+        $("adf-init-log").textContent = JSON.stringify(data, null, 2);
+        return;
+      }
+      adfBrowsePath = data.path || "";
+      adfHome = data.home || target();
+      adfDir = data.adf_dir || "";
+      $("adf-browse-path").value = adfBrowsePath;
+      const list = $("adf-browser-list");
+      list.innerHTML = "";
+      if (data.parent) {
+        const up = document.createElement("button");
+        up.type = "button";
+        up.className = "browser-row";
+        up.innerHTML = '<span class="kind">DIR</span><span>..</span>';
+        up.onclick = () => loadAdfBrowse(data.parent);
+        list.appendChild(up);
+      }
+      for (const d of data.dirs || []) {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "browser-row";
+        row.innerHTML = '<span class="kind">DIR</span><span></span>';
+        row.querySelector("span:last-child").textContent = d.name + "/";
+        row.onclick = () => loadAdfBrowse(d.path);
+        list.appendChild(row);
+      }
+      for (const f of data.files || []) {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "browser-row" + (f.valid ? "" : " invalid")
+          + (f.path === adfSelectedPath ? " selected" : "");
+        row.innerHTML = '<span class="kind">ADF</span><span></span>';
+        row.querySelector("span:last-child").textContent = f.name + (f.valid ? "" : " (invalid)");
+        if (f.valid) {
+          row.onclick = () => {
+            setAdfSelected(f.path);
+            loadAdfBrowse(adfBrowsePath);
+          };
+        }
+        list.appendChild(row);
+      }
+      if (!(data.dirs || []).length && !(data.files || []).length) {
+        const empty = document.createElement("div");
+        empty.className = "meta";
+        empty.style.padding = "0.65rem";
+        empty.textContent = "No ADF candidates in this folder.";
+        list.appendChild(empty);
+      }
+      $("adf-init-status").textContent = "Browsing " + adfBrowsePath;
+      $("adf-init-status").className = "status-line";
+    }
+
+    async function initFromAdf(dryRun) {
+      if (!adfSelectedPath) {
+        $("adf-init-status").textContent = "Select an ADF file first.";
+        $("adf-init-status").className = "status-line bad";
+        return;
+      }
+      const label = dryRun ? "Dry run" : "Init SPDD work";
+      $("adf-init-status").textContent = label + "…";
+      $("adf-init-status").className = "status-line";
+      setBusy(["btn-adf-init", "btn-adf-init-dry", "btn-adf-browse"], true);
+      try {
+        const res = await fetch("/api/adf/init-work", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(adfBody({
+            path: adfSelectedPath,
+            type: $("adf-work-type").value,
+            title: $("adf-work-title").value.trim(),
+            work_id: $("adf-work-id").value.trim(),
+            dry_run: !!dryRun,
+          })),
+        });
+        const data = await res.json();
+        $("adf-init-log").textContent = JSON.stringify(data, null, 2);
+        if (!data.ok) {
+          $("adf-init-status").textContent = data.error || (label + " failed");
+          $("adf-init-status").className = "status-line bad";
+          return;
+        }
+        $("adf-init-status").textContent = (dryRun ? "Would create " : "Created ")
+          + data.work_id + " — next: " + data.next_command;
+        $("adf-init-status").className = "status-line ok";
+      } catch (err) {
+        $("adf-init-status").textContent = String(err);
+        $("adf-init-status").className = "status-line bad";
+        $("adf-init-log").textContent = String(err);
+      } finally {
+        setBusy(["btn-adf-init", "btn-adf-init-dry", "btn-adf-browse"], false);
+      }
+    }
+
     async function refreshAll() {
       await detect();
       await Promise.all([loadSqlite(), loadBackups(), loadGuide(), loadAdf()]);
+      await loadAdfBrowse($("adf-browse-path").value.trim() || adfBrowsePath || "");
     }
 
     $("btn-detect").addEventListener("click", detect);
@@ -950,6 +1120,14 @@ PAGE = """<!DOCTYPE html>
     $("btn-adf-stop").addEventListener("click", () => adfAction("/api/adf/stop", "Stop viewer"));
     $("btn-adf-restart").addEventListener("click", () => adfAction("/api/adf/restart", "Restart viewer"));
     $("btn-adf-open").addEventListener("click", openAdfViewer);
+    $("btn-adf-browse").addEventListener("click", () => loadAdfBrowse($("adf-browse-path").value.trim()));
+    $("btn-adf-browse-home").addEventListener("click", () => loadAdfBrowse(adfHome || target()));
+    $("btn-adf-browse-adf").addEventListener("click", () => loadAdfBrowse(adfDir || (target() + "/adf")));
+    $("btn-adf-init-dry").addEventListener("click", () => initFromAdf(true));
+    $("btn-adf-init").addEventListener("click", () => initFromAdf(false));
+    $("adf-browse-path").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loadAdfBrowse($("adf-browse-path").value.trim());
+    });
     $("as-all").addEventListener("change", () => {
       if ($("as-all").checked) {
         $("as-cursor").checked = true;

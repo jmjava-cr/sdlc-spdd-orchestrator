@@ -13,6 +13,7 @@ from .archive import ArchiveService
 from .commit_message import CommitMessageError, CommitMessageService
 from .db import LocalIndex, format_rows
 from .issues import IssueSyncService
+from .adf_work import AdfWorkService
 from .local_sessions import LocalSessionService
 from .pointer import PointerError, PointerStore
 from .project import Project
@@ -467,6 +468,35 @@ def cmd_local(args: argparse.Namespace) -> int:
     return 2
 
 
+def cmd_work(args: argparse.Namespace) -> int:
+    """Work helpers that are engine-backed (init from ADF, etc.)."""
+    action = args.work_cmd
+    if action == "init-from-adf":
+        svc = AdfWorkService(_project(args))
+        try:
+            result = svc.init_from_adf(
+                args.path,
+                work_type=args.type,
+                title=args.title or "",
+                work_id=args.work_id or "",
+                claim=not args.no_claim,
+                dry_run=args.dry_run,
+            )
+        except (OSError, ValueError, PermissionError, FileExistsError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        prefix = "[dry-run] would create" if result.dry_run else "Created"
+        print(f"{prefix} {result.work_id} from {result.adf_path}")
+        print(f"  title: {result.title}")
+        print(f"  canvas: {result.canvas_path}")
+        print(f"  requirement: {result.requirement_path}")
+        if result.source_issue:
+            print(f"  source issue: {result.source_issue}")
+        print(f"  next: {result.next_command}")
+        return 0
+    return 2
+
+
 def cmd_viewer(args: argparse.Namespace) -> int:
     """Launch the ADF WYSIWYG viewer (binds localhost by default)."""
     try:
@@ -692,6 +722,23 @@ def build_parser() -> argparse.ArgumentParser:
     lp.add_argument("--no-claim", action="store_true", help="Create artifacts without claiming")
     lp.add_argument("--dry-run", action="store_true")
     lp.set_defaults(func=cmd_local)
+
+    work = sub.add_parser(
+        "work",
+        help="Create / bootstrap Work IDs (engine-backed helpers)",
+    )
+    work_sub = work.add_subparsers(dest="work_cmd", required=True)
+    wia = work_sub.add_parser(
+        "init-from-adf",
+        help="Create draft REASONS canvas + requirement from a local ADF file",
+    )
+    wia.add_argument("--path", required=True, help="Path to .adf.json / ADF JSON file")
+    wia.add_argument("--type", default="feature", help="feature|spike|bug|refactor|chore|...")
+    wia.add_argument("--title", help="Override title (default: first ADF heading or filename)")
+    wia.add_argument("--work-id", help="Explicit Work ID (default: auto FEAT-NNN-slug)")
+    wia.add_argument("--no-claim", action="store_true", help="Create artifacts without claiming")
+    wia.add_argument("--dry-run", action="store_true")
+    wia.set_defaults(func=cmd_work)
 
     cm = sub.add_parser(
         "commit-message",

@@ -63,6 +63,94 @@ else
   fi
 fi
 
+echo "== work init-from-adf (python engine + sdlc.sh route) =="
+mkdir -p "${tmp}/adf"
+cat > "${tmp}/adf/ORCH-8.adf.json" <<'EOF'
+{
+  "type": "doc",
+  "version": 1,
+  "content": [
+    {
+      "type": "heading",
+      "attrs": {"level": 1},
+      "content": [{"type": "text", "text": "Shim ADF init"}]
+    },
+    {
+      "type": "paragraph",
+      "content": [{"type": "text", "text": "Created by shim test"}]
+    }
+  ]
+}
+EOF
+# Isolated engine create (sdlc.sh pins --root to the orchestrator checkout).
+out="$(
+  PYTHONPATH="${REPO_ROOT}/engine/src" \
+    python3 -m sdlc_engine --root "${tmp}" work init-from-adf \
+      --path "${tmp}/adf/ORCH-8.adf.json" \
+      --work-id FEAT-013-shim-adf-init \
+      --no-claim
+)"
+if grep -Fq 'Created FEAT-013-shim-adf-init' <<< "${out}" \
+  && [[ -f "${tmp}/spdd/canvas/FEAT-013-shim-adf-init.md" ]] \
+  && [[ -f "${tmp}/requirements/milestones/FEAT-013-shim-adf-init.md" ]] \
+  && grep -Fq 'Source System: ADF' "${tmp}/spdd/canvas/FEAT-013-shim-adf-init.md"; then
+  ok "work init-from-adf creates canvas + requirement"
+else
+  bad "work init-from-adf unexpected: ${out}"
+fi
+
+# Exercise every sdlc.sh shell entrypoint for this command. Use --dry-run so the
+# wrapper's pinned --root (orchestrator checkout) does not write artifacts.
+alias_ok=1
+alias_n=0
+while IFS=$'\t' read -r alias_line wid; do
+  alias_n=$((alias_n + 1))
+  # shellcheck disable=SC2086 # intentional word-splitting of alias tokens
+  set -- ${alias_line}
+  out="$(
+    SDLC_ENGINE=shell \
+      PYTHONPATH="${REPO_ROOT}/engine/src" \
+      "${REPO_ROOT}/scripts/sdlc.sh" "$@" \
+        --path "${tmp}/adf/ORCH-8.adf.json" \
+        --work-id "${wid}" \
+        --no-claim \
+        --dry-run 2>&1
+  )" || {
+    bad "sdlc.sh alias failed: ${alias_line} (${out})"
+    alias_ok=0
+    continue
+  }
+  if grep -Fq "[dry-run] would create ${wid}" <<< "${out}"; then
+    ok "sdlc.sh alias works: ${alias_line}"
+  else
+    bad "sdlc.sh alias unexpected output (${alias_line}): ${out}"
+    alias_ok=0
+  fi
+  # Ensure dry-run did not write into the orchestrator checkout.
+  if [[ -f "${REPO_ROOT}/spdd/canvas/${wid}.md" ]]; then
+    bad "sdlc.sh dry-run wrote canvas for ${wid}"
+    alias_ok=0
+  fi
+done <<'ALIASES'
+work init-from-adf	FEAT-013-alias-spaced
+work-init-from-adf	FEAT-013-alias-hyphen
+init-from-adf	FEAT-013-alias-short
+ALIASES
+if (( alias_ok == 1 && alias_n == 3 )); then
+  ok "all 3 sdlc.sh init-from-adf aliases routed"
+fi
+
+help_out="$(
+  SDLC_ENGINE=shell \
+    PYTHONPATH="${REPO_ROOT}/engine/src" \
+    "${REPO_ROOT}/scripts/sdlc.sh" work init-from-adf --help 2>&1
+)"
+if grep -Fq -- '--path' <<< "${help_out}"; then
+  ok "sdlc.sh work init-from-adf --help available"
+else
+  bad "sdlc.sh work init-from-adf help missing: ${help_out}"
+fi
+
 echo "== db index rebuild via python engine =="
 # Seed a tiny work item so rebuild has something to index.
 mkdir -p "${tmp}/spdd/canvas" "${tmp}/requirements/milestones"
